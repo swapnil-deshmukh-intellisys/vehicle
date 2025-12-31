@@ -1,0 +1,572 @@
+<script>
+    $(document).ready(function () {
+        // Store payments in an array
+        let payments = [];
+        let editingPaymentId = null;
+
+        function updatePaymentSummary() {
+            console.log("payments>>>>>>>>>>>>>>>>>>",payments);
+            const grandTotal = parseFloat($('#grandTotal').text().replace(/[^0-9.-]+/g, "")) || 0;
+            const totalPaid = payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+            const balance = grandTotal - totalPaid;
+
+            // Update the UI
+            $('#totalPaidAmount').text(`₹${totalPaid.toFixed(2)}`);
+
+            const balanceElement = $('#balanceAmount');
+            const balanceLabel = $('#balanceLabel');
+
+            if (balance > 0) {
+                balanceElement.removeClass('text-success').addClass('text-danger');
+                balanceLabel.text('BALANCE DUE');
+                balanceElement.text(`₹${balance.toFixed(2)}`);
+            } else if (balance < 0) {
+                balanceElement.removeClass('text-danger').addClass('text-success');
+                balanceLabel.text('ADVANCE');
+                balanceElement.text(`₹${Math.abs(balance).toFixed(2)}`);
+            } else {
+                balanceElement.removeClass('text-danger text-success');
+                balanceLabel.text('PAID');
+                balanceElement.text('₹0.00');
+            }
+        }
+
+        // Function to load payments
+        function loadPayments() {
+            const jobcardId = '{{ jobcard_obj.id }}';
+            if (!jobcardId) return;
+
+            // Show loading state
+            const $paymentsList = $('#paymentsList');
+            const $noPaymentsMessage = $('#noPaymentsMessage');
+            $paymentsList.hide();
+            $noPaymentsMessage.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading payments...').show();
+
+            $.ajax({
+                url: `/api/jobcard/payments/${jobcardId}/`,
+                type: 'GET',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        payments = response.data.payments || [];
+                        renderPaymentsList(payments);
+                        // Update payment summary
+                        updatePaymentSummary();
+                    } else {
+                        toastr.error(response.message || 'Error loading payments');
+                        $noPaymentsMessage.html('Error loading payments. Please try again.').show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading payments:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        responseText: xhr.responseText,
+                        error: error
+                    });
+                    toastr.error('An error occurred while loading payments');
+                    $noPaymentsMessage.html('Error loading payments. Please try again.').show();
+                }
+            });
+        }
+
+        // Function to render payments list
+        function renderPaymentsList(payments) {
+            const $paymentsList = $('#paymentsList');
+            const $noPaymentsMessage = $('#noPaymentsMessage');
+
+            // Clear existing payments
+            $paymentsList.empty();
+
+            if (!payments || payments.length === 0) {
+                // Show "no payments" message and hide the list
+                $noPaymentsMessage.html(`
+                    <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                    <p class="mb-0 small">No Payment data found</p>
+                    <p class="mb-0 extra-small text-muted">Click "Add Payment" to get started</p>
+                `).show();
+                $paymentsList.hide();
+                return;
+            }
+
+            // Hide "no payments" message and show the list
+            $noPaymentsMessage.hide();
+            $paymentsList.show();
+
+            // Set the height and overflow based on the number of payments
+            if (payments.length <= 2) {
+                $paymentsList.css({
+                    'max-height': 'none',
+                    'overflow-y': 'hidden'
+                });
+            } else {
+                $paymentsList.css({
+                    'max-height': '200px',
+                    'overflow-y': 'auto'
+                });
+            }
+
+            try {
+                // Sort payments by date (newest first)
+                payments.sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date));
+
+                // Add each payment to the list
+                payments.forEach(payment => {
+                    if (!payment || !payment.payment_date) {
+                        console.error('Invalid payment data:', payment);
+                        return;
+                    }
+
+                    const paymentDate = new Date(payment.payment_date).toLocaleDateString('en-IN', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                        // hour: '2-digit',
+                        // minute: '2-digit'
+                    });
+                    
+                    const amount = parseFloat(payment.amount || 0).toFixed(2);
+                    let paymentDetails = '';
+                    let paymentModeIcon = 'fa-money-bill-wave';
+                    let paymentModeClass = 'bg-primary';
+
+                    // Normalize payment mode for consistent comparison
+                    const paymentMode = String(payment.payment_mode || '').toLowerCase().trim().replace(/\s+/g, '_');
+                    
+                    // Debug log
+                    console.log('Processing payment:', {
+                        id: payment.id,
+                        mode: payment.payment_mode,
+                        normalized: paymentMode,
+                        data: payment
+                    });
+
+                    // Set payment mode specific details and styling
+                    switch (paymentMode) {
+                        case 'check':
+                        case 'cheque':
+                            paymentDetails = `Check #${payment.check_number || 'N/A'}`;
+                            if (payment.bank_name) paymentDetails += ` • ${payment.bank_name}`;
+                            if (payment.check_date) {
+                                paymentDetails += ` • ${new Date(payment.check_date).toLocaleDateString()}`;
+                            }
+                            if (payment.check_status) {
+                                paymentDetails += ` • ${String(payment.check_status).charAt(0).toUpperCase() + String(payment.check_status).slice(1)}`;
+                            }
+                            if (payment.deposited_date) {
+                                paymentDetails += ` • Deposited: ${new Date(payment.deposited_date).toLocaleDateString()}`;
+                            }
+                            paymentModeIcon = 'fa-money-check-alt';
+                            paymentModeClass = 'bg-info text-dark';
+                            break;
+
+                        case 'upi':
+                            paymentDetails = `UPI: ${payment.upi_id || 'N/A'}`;
+                            if (payment.transaction_id) {
+                                paymentDetails += ` • Txn: ${payment.transaction_id}`;
+                            }
+                            if (payment.upi_reference_id) {
+                                paymentDetails += ` • Ref: ${payment.upi_reference_id}`;
+                            }
+                            if (payment.upi_status) {
+                                paymentDetails += ` • ${String(payment.upi_status).charAt(0).toUpperCase() + String(payment.upi_status).slice(1)}`;
+                            }
+                            paymentModeIcon = 'fa-mobile-alt';
+                            paymentModeClass = 'bg-success';
+                            break;
+
+                        case 'bank_transfer':
+                        case 'banktransfer':
+                        case 'bank_transfer':
+                        case 'bank-transfer':
+                        case 'bank transfer':
+                            paymentDetails = `Bank Transfer`;
+                            if (payment.account_number) {
+                                paymentDetails += ` • A/C: ••••${String(payment.account_number).slice(-4)}`;
+                            }
+                            if (payment.account_holder_name) {
+                                paymentDetails += ` • ${payment.account_holder_name}`;
+                            }
+                            if (payment.ifsc_code) {
+                                paymentDetails += ` • IFSC: ${payment.ifsc_code}`;
+                            }
+                            if (payment.transaction_reference || payment.reference_number) {
+                                paymentDetails += ` • Ref: ${payment.transaction_reference || payment.reference_number}`;
+                            }
+                            if (payment.bank_name) {
+                                paymentDetails += ` • ${payment.bank_name}`;
+                            }
+                            if (payment.branch_name) {
+                                paymentDetails += ` • ${payment.branch_name}`;
+                            }
+                            paymentModeIcon = 'fa-university';
+                            paymentModeClass = 'bg-warning text-dark';
+                            break;
+
+                        case 'card':
+                        case 'credit_card':
+                        case 'debit_card':
+                            paymentDetails = `Card Payment`;
+                            if (payment.card_type) {
+                                paymentDetails += ` • ${String(payment.card_type).charAt(0).toUpperCase() + String(payment.card_type).slice(1)}`;
+                            }
+                            if (payment.card_number) {
+                                paymentDetails += ` • ••••${String(payment.card_number).slice(-4)}`;
+                            } else if (payment.last_four) {
+                                paymentDetails += ` • ••••${payment.last_four}`;
+                            }
+                            if (payment.card_holder_name) {
+                                paymentDetails += ` • ${payment.card_holder_name}`;
+                            }
+                            if (payment.transaction_id) {
+                                paymentDetails += ` • Txn: ${payment.transaction_id}`;
+                            }
+                            if (payment.card_expiry) {
+                                paymentDetails += ` • Exp: ${payment.card_expiry}`;
+                            }
+                            if (payment.card_status) {
+                                paymentDetails += ` • ${String(payment.card_status).charAt(0).toUpperCase() + String(payment.card_status).slice(1)}`;
+                            }
+                            paymentModeIcon = 'fa-credit-card';
+                            paymentModeClass = 'bg-secondary';
+                            break;
+
+                        default: // cash
+                            paymentDetails = 'Cash Payment';
+                            if (payment.receipt_number) {
+                                paymentDetails += ` • Receipt: ${payment.receipt_number}`;
+                            }
+                            if (payment.received_by) {
+                                paymentDetails += ` • Received by: ${payment.received_by}`;
+                            }
+                            if (payment.payment_reference) {
+                                paymentDetails += ` • Ref: ${payment.payment_reference}`;
+                            }
+                            if (payment.counter_name) {
+                                paymentDetails += ` • Counter: ${payment.counter_name}`;
+                            }
+                            paymentModeIcon = 'fa-money-bill-wave';
+                            paymentModeClass = 'bg-primary';
+                    }
+
+                    const $paymentItem = $(`
+                        <div class="voice-item d-flex align-items-center justify-content-between px-25 py-25 border-bottom" 
+                            data-payment-id="${payment.id || ''}" 
+                            style="transition: background-color 0.2s; cursor: pointer;">
+                            <div class="d-flex align-items-center" style="flex: 1; min-width: 0;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="fw-bold me-2">₹${amount}</span>
+                                        <span class="badge ${paymentModeClass}">
+                                            <i class="fas ${paymentModeIcon} me-1"></i>
+                                            ${payment.payment_mode_display || payment.payment_mode || 'Cash'}
+                                        </span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="far fa-calendar-alt me-1"></i>${paymentDate}
+                                    </div>
+                                    <div class="text-muted small mt-1">
+                                        <i class="fas ${paymentModeIcon} me-1"></i>${paymentDetails}
+                                    </div>
+                                    ${payment.notes ? `
+                                    <div class="text-muted small mt-1">
+                                        <i class="far fa-sticky-note me-1"></i>${payment.notes}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                            <div class="d-flex ms-2" style="flex-shrink: 0;">
+                                <button type="button" 
+                                        class="btn btn-sm btn-link text-primary p-0 edit-payment" 
+                                        data-payment-id="${payment.id || ''}" 
+                                        style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.7;"
+                                        title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-sm btn-link text-danger p-0 remove-payment ms-1" 
+                                        data-payment-id="${payment.id || ''}" 
+                                        style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.7;"
+                                        title="Delete">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+
+                    $paymentsList.append($paymentItem);
+                });
+            } catch (error) {
+                console.error('Error rendering payments:', error);
+                toastr.error('Error displaying payment information. Please check console for details.');
+            }
+        }
+
+        // Load payments when page loads
+        loadPayments();
+
+        // Load payments when modal is shown
+        $('#paymentModal').on('shown.bs.modal', function () {
+            // Set default date to today
+            document.getElementById('paymentDate').valueAsDate = new Date();
+        });
+
+        // Reset form when modal is closed
+        $('#paymentModal').on('hidden.bs.modal', function () {
+            $('#paymentModalForm')[0].reset();
+            $('.payment-details').hide();
+            $('#paymentModalSaveBtn').html('<i class="fas fa-save me-1"></i> Save Payment');
+            $('#paymentModal .modal-title').text('Add Payment');
+            editingPaymentId = null;
+            // Remove any validation errors
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+        });
+
+        // Handle edit payment click
+        $(document).on('click', '.edit-payment', function () {
+            const paymentId = $(this).data('payment-id');
+            const payment = payments.find(p => p.id == paymentId);
+
+            if (!payment) return;
+            editingPaymentId = paymentId;
+
+            // Set modal title
+            $('#paymentModal .modal-title').text('Edit Payment');
+
+            // Fill form with payment data
+            $('#paymentDate').val(payment.payment_date.split('T')[0]);
+            
+            // First, hide all payment details
+            $('.payment-details').hide();
+            
+            // Get the payment mode and normalize it (lowercase and replace spaces with underscores)
+            let paymentMode = payment.payment_mode.toLowerCase().replace(/\s+/g, '_');
+            console.log('Normalized payment mode:', paymentMode);
+            
+            // Set the radio button state using a small delay to ensure DOM is ready
+            setTimeout(() => {
+                // Uncheck all payment modes first
+                $('input[name="payment_mode"]').prop('checked', false);
+                
+                // Find and check the correct radio button
+                const $radio = $(`input[name="payment_mode"][value="${paymentMode}"]`);
+                $radio.prop('checked', true);
+                
+                // For Bootstrap custom radio buttons, we need to update the visual state
+                $radio.closest('.btn').addClass('active').siblings().removeClass('active');
+                
+                // Show the corresponding details section based on payment mode
+                if (paymentMode === 'check') {
+                    $('#checkNumber').val(payment.check_number || '');
+                    $('#bankName').val(payment.bank_name || '');
+                    $('#checkDate').val(payment.check_date ? payment.check_date.split('T')[0] : '');
+                    $('#checkDetails').show();
+                } else if (paymentMode === 'upi') {
+                    console.log('UPI Payment Data:', {
+                        upi_id: payment.upi_id,
+                        transaction_id: payment.transaction_id,
+                        full_payment: payment
+                    });
+                    $('#upiId').val(payment.upi_id || '');
+                    $('#transactionId').val(payment.transaction_id || '');
+                    $('#upiDetails').show();
+                } else if (paymentMode === 'bank_transfer' || paymentMode === 'banktransfer' || payment.payment_mode.toLowerCase().includes('bank')) {
+                    $('#accountNumber').val(payment.account_number || '');
+                    $('#accountHolderName').val(payment.account_holder_name || '');
+                    $('#ifscCode').val(payment.ifsc_code || '');
+                    $('#transactionReference').val(payment.transaction_reference || '');
+                    $('#bankTransferDetails').show();
+                }
+            }, 10);
+            // Set amount and notes
+            $('#amount').val(payment.amount);
+            $('#notes').val(payment.notes || '');
+
+            // Fill payment mode specific fields
+            if (payment.payment_mode === 'check') {
+                $('#checkNumber').val(payment.check_number || '');
+                $('#bankName').val(payment.bank_name || '');
+                $('#checkDate').val(payment.check_date ? payment.check_date.split('T')[0] : '');
+                $('#checkDetails').show();
+            } else if (payment.payment_mode === 'upi') {
+                $('#upiId').val(payment.upi_id || '');
+                $('#transactionId').val(payment.upi_transaction_id || '');
+                $('#upiDetails').show();
+            } else if (payment.payment_mode === 'bank_transfer') {
+                $('#accountNumber').val(payment.account_number || '');
+                $('#accountHolderName').val(payment.account_holder_name || '');
+                $('#ifscCode').val(payment.ifsc_code || '');
+                $('#transactionReference').val(payment.transaction_reference || '');
+                $('#bankTransferDetails').show();
+            }
+
+            // Update button text
+            $('#paymentModalSaveBtn').html('<i class="fas fa-save me-1"></i> Update Payment');
+
+            // Show the modal
+            $('#paymentModal').modal('show');
+        });
+
+        // Handle payment mode change
+        $('input[name="payment_mode"]').on('change', function () {
+            // Hide all payment details first
+            $('.payment-details').hide();
+
+            // Show the selected payment details
+            const selectedMode = $(this).val();
+            if (selectedMode === 'check') {
+                $('#checkDetails').show();
+            } else if (selectedMode === 'upi') {
+                $('#upiDetails').show();
+            } else if (selectedMode === 'bank_transfer') {
+                $('#bankTransferDetails').show();
+            }
+        });
+
+        // Handle form submission
+        $('#paymentModalForm').on('submit', function (e) {
+            e.preventDefault();
+
+            // Validate form
+            const amount = parseFloat($('#amount').val());
+            if (isNaN(amount) || amount <= 0) {
+                toastr.error('Please enter a valid amount');
+                return;
+            }
+
+            // Collect form data
+            const formData = {
+                jobcard_id: '{{ jobcard_obj.id }}',
+                payment_date: $('#paymentDate').val(),
+                payment_mode: $('input[name="payment_mode"]:checked').val(),
+                amount: amount,
+                notes: $('#notes').val()
+            };
+
+            // Add payment mode specific data
+            const paymentMode = formData.payment_mode;
+            if (paymentMode === 'check') {
+                formData.check_number = $('#checkNumber').val();
+                formData.bank_name = $('#bankName').val();
+                formData.check_date = $('#checkDate').val();
+            } else if (paymentMode === 'upi') {
+                formData.upi_id = $('#upiId').val();
+                formData.transaction_id = $('#transactionId').val();
+            } else if (paymentMode === 'bank_transfer') {
+                formData.account_number = $('#accountNumber').val();
+                formData.account_holder_name = $('#accountHolderName').val();
+                formData.ifsc_code = $('#ifscCode').val();
+                formData.transaction_reference = $('#transactionReference').val();
+            }
+
+            // Show loading state
+            const saveBtn = $('#paymentModalSaveBtn');
+            const originalBtnText = saveBtn.html();
+            saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...');
+
+            // Determine the URL and method based on whether we're adding or updating
+            const url = editingPaymentId
+                ? `/api/jobcard/payment/update/${editingPaymentId}/`
+                : '{% url "save_jobcard_payment" %}';
+
+            const method = editingPaymentId ? 'PUT' : 'POST';
+
+            // Send AJAX request
+            $.ajax({
+                url: url,
+                type: method,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        const message = editingPaymentId ? 'updated' : 'saved';
+                        toastr.success(`Payment ${message} successfully`);
+                        loadPayments();
+                        $('#paymentModal').modal('hide');
+                    } else {
+                        toastr.error(response.message || `Error ${editingPaymentId ? 'updating' : 'saving'} payment`);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(`Error ${editingPaymentId ? 'updating' : 'saving'} payment:`, {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        responseText: xhr.responseText,
+                        error: error
+                    });
+                    let errorMsg = `An error occurred while ${editingPaymentId ? 'updating' : 'saving'} the payment`;
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        errorMsg = errorResponse.message || errorMsg;
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                    }
+                    toastr.error(errorMsg);
+                },
+                complete: function () {
+                    saveBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Handle payment removal
+        $(document).on('click', '.remove-payment', function (e) {
+            e.stopPropagation(); // Prevent triggering edit when clicking delete button
+            const paymentId = $(this).data('payment-id');
+            if (!paymentId) return;
+
+            if (confirm('Are you sure you want to delete this payment? This action cannot be undone.')) {
+                const $paymentItem = $(`[data-payment-id="${paymentId}"]`);
+                const $deleteBtn = $(this);
+                const originalBtnText = $deleteBtn.html();
+
+                // Show loading state on the delete button
+                $deleteBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+
+                $.ajax({
+                    url: `/api/jobcard/payment/delete/${paymentId}/`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            $paymentItem.fadeOut(300, function () {
+                                $(this).remove();
+                                // Remove from local payments array
+                                payments = payments.filter(p => p.id != paymentId);
+                                // Update payment summary
+                                updatePaymentSummary();
+                                // If no payments left, show the "no payments" message
+                                if (payments.length === 0) {
+                                    $('#noPaymentsMessage').html(`
+                                        <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                                        <p class="mb-0 small">No Payment data found</p>
+                                        <p class="mb-0 extra-small text-muted">Click "Add Payment" to get started</p>
+                                    `).show();
+                                    $('#paymentsList').hide();
+                                }
+                            });
+                            toastr.success('Payment deleted successfully');
+                        } else {
+                            toastr.error(response.message || 'Error deleting payment');
+                            $deleteBtn.prop('disabled', false).html(originalBtnText);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error deleting payment:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText,
+                            error: error
+                        });
+                        toastr.error('An error occurred while deleting the payment');
+                        $deleteBtn.prop('disabled', false).html(originalBtnText);
+                    }
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,311 @@
+{% extends "index.html" %}
+
+{% block title %}Job Sheets Vehicle Type{% endblock %}
+
+{% block style %}
+<style>
+  /* General Card Styling */
+  .vehicle-type-card {
+    border: 1px solid #e5e7eb; /* light border */
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    text-align: center;
+  }
+
+  .vehicle-type-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .vehicle-type-card .card-body {
+    padding: 1.5rem 1rem;
+  }
+
+  .vehicle-type-card i {
+    font-size: 2rem;
+    color: #3b82f6; /* Indigo-500 */
+    margin-bottom: 0.5rem;
+  }
+
+  .vehicle-type-card h5 {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .vehicle-type-card p {
+    font-size: 0.85rem;
+    color: #6b7280; /* neutral gray */
+    margin: 0;
+  }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 767px) {
+    .vehicle-type-card {
+      margin-bottom: 12px;
+      background: #f8fafc; /* light professional bg */
+      border-radius: 10px;
+    }
+    .vehicle-type-card .card-body {
+      padding: 1.2rem;
+    }
+    
+    #job-sheets-vehicletype .card-body {
+       margin: 0px 0px 0px 0px !important; 
+   
+    }
+  }
+</style>
+
+
+<style>
+    .vehicle-type-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid #e0e0e0;
+        height: 100%;
+    }
+    .vehicle-type-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px 0 rgba(34, 41, 47, 0.15);
+        border-color: #3b82f6;
+    }
+    .vehicle-type-card.active {
+        border-color: #3b82f6;
+        background-color: rgba(115, 103, 240, 0.05);
+    }
+    .vehicle-type-card .card-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .vehicle-type-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #3b82f6;
+    }
+    .vehicle-type-card h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .vehicle-type-card p {
+        color: #6e6b7b;
+        margin-bottom: 0;
+    }
+    .hidden-radio {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% load static %}
+
+{% block content %}
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Job Card</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'r-txn-job-sheets' %}">List Job Cards</a>
+                                </li>
+                                <li class="breadcrumb-item active">Select Vehicle Type</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="job-sheets-vehicletype">
+                <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0 fw-600">Select Vehicle Type</h4>
+                                <p class="mb-0">Choose the appropriate vehicle type for the job card</p>
+                            </div>
+                            <div class="card-body">
+                                <!-- <form id="vehicleTypeForm" action="{% url 'job-sheets-vehicletype' %}" method="post">
+                                    {% csrf_token %}                                    
+                                    <div class="row g-2">
+                                        <div class="col-12 col-sm-6 col-md-3">
+                                            <label class="w-100">
+                                                <input type="radio" name="vehicle_type_radio" value="2" class="hidden-radio" onclick="selectVehicleType('2')">
+                                                <div class="card vehicle-type-card" id="vehicleType2">
+                                                    <div class="card-body">
+                                                        <i class="fas fa-motorcycle"></i>
+                                                        <h5>2 Wheeler</h5>
+                                                        <p>Bikes, Scooters, etc.</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>                                        
+                                        <div class="col-12 col-sm-6 col-md-3">
+                                            <label class="w-100">
+                                                <input type="radio" name="vehicle_type_radio" value="3" class="hidden-radio" onclick="selectVehicleType('3')">
+                                                <div class="card vehicle-type-card" id="vehicleType3">
+                                                    <div class="card-body">
+                                                        <i class="fas fa-truck-pickup"></i>
+                                                        <h5>3 Wheeler</h5>
+                                                        <p>Auto Rickshaws, etc.</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>                                        
+                                        <div class="col-12 col-sm-6 col-md-3">
+                                            <label class="w-100">
+                                                <input type="radio" name="vehicle_type_radio" value="4" class="hidden-radio" onclick="selectVehicleType('4')">
+                                                <div class="card vehicle-type-card" id="vehicleType4">
+                                                    <div class="card-body">
+                                                        <i class="fas fa-car"></i>
+                                                        <h5>4 Wheeler</h5>
+                                                        <p>Cars, SUVs, etc.</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>                                        
+                                        <div class="col-12 col-sm-6 col-md-3">
+                                            <label class="w-100">
+                                                <input type="radio" name="vehicle_type_radio" value="6" class="hidden-radio" onclick="selectVehicleType('6')">
+                                                <div class="card vehicle-type-card" id="vehicleType6">
+                                                    <div class="card-body">
+                                                        <i class="fas fa-truck-moving"></i>
+                                                        <h5>6 Wheeler</h5>
+                                                        <p>Van, etc.</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-center">
+                                       
+                                        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                                            <i class="fas fa-arrow-right me-25"></i> Continue
+                                        </button>
+                                    </div>
+                                </form> -->
+                                
+                                <form id="vehicleTypeForm" action="{% url 'job-sheets-vehicletype' %}" method="post">
+    {% csrf_token %}                                    
+    <div class="row g-2">
+        <div class="col-12 col-sm-6 col-md-3">
+            <label class="w-100">
+                <input type="radio" name="vehicle_type_radio" value="2" class="hidden-radio" onclick="submitVehicleType('2')">
+                <div class="card vehicle-type-card" id="vehicleType2">
+                    <div class="card-body">
+                        <!-- <i class="fas fa-motorcycle" ></i> -->
+                         <i class="fas fa-motorcycle" style="color: #fb923c"></i>
+                        <h5>2 Wheeler</h5>
+                        <p>Bikes, Scooters, etc.</p>
+                    </div>
+                </div>
+            </label>
+        </div>                                        
+        <div class="col-12 col-sm-6 col-md-3">
+            <label class="w-100">
+                <input type="radio" name="vehicle_type_radio" value="3" class="hidden-radio" onclick="submitVehicleType('3')">
+                <div class="card vehicle-type-card" id="vehicleType3">
+                    <div class="card-body">
+                        <i class="fas fa-truck-pickup" style="color: #16a34a"></i>
+                        <h5>3 Wheeler</h5>
+                        <p>Auto Rickshaws, etc.</p>
+                    </div>
+                </div>
+            </label>
+        </div>                                        
+        <div class="col-12 col-sm-6 col-md-3">
+            <label class="w-100">
+                <input type="radio" name="vehicle_type_radio" value="4" class="hidden-radio" onclick="submitVehicleType('4')">
+                <div class="card vehicle-type-card" id="vehicleType4">
+                    <div class="card-body">
+                        <i class="fas fa-car" style="color: #a855f7"></i>
+                        <h5>4 Wheeler</h5>
+                        <p>Cars, SUVs, etc.</p>
+                    </div>
+                </div>
+            </label>
+        </div>                                        
+        <div class="col-12 col-sm-6 col-md-3">
+            <label class="w-100">
+                <input type="radio" name="vehicle_type_radio" value="6" class="hidden-radio" onclick="submitVehicleType('6')">
+                <div class="card vehicle-type-card" id="vehicleType6">
+                    <div class="card-body">
+                        <i class="fas fa-truck-moving" style="color:#3b82f6"></i>
+                        <h5>6 Wheeler</h5>
+                        <p>Van, etc.</p>
+                    </div>
+                </div>
+            </label>
+        </div>
+    </div>
+</form>
+
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+
+<script>
+function submitVehicleType(type) {
+    // Highlight selected card
+    document.querySelectorAll('.vehicle-type-card').forEach(card => {
+        card.classList.remove('active');
+    });
+    document.getElementById('vehicleType' + type).classList.add('active');
+
+    // Select the radio
+    document.querySelector(`input[name="vehicle_type_radio"][value="${type}"]`).checked = true;
+
+    // Submit the form
+    document.getElementById('vehicleTypeForm').submit();
+}
+</script>
+
+
+<!-- <script>
+    function selectVehicleType(type) {        
+        // Remove active class from all cards
+        document.querySelectorAll('.vehicle-type-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        
+        // Add active class to selected card
+        document.getElementById('vehicleType' + type).classList.add('active');
+        
+        // Enable submit button
+        document.getElementById('submitBtn').disabled = false;
+    }
+    
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace({
+                width: 24,
+                height: 24
+            });
+        }
+    });
+</script> -->
+{% endblock %}

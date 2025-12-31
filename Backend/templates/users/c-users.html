@@ -1,0 +1,444 @@
+{% extends "index.html" %}
+
+{% block title %}c-users{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">Roles & Permission</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-users' %}">Users</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Create User
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Basic Inputs start -->
+            <section id="basic-input">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-9">
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="post" action="{% url 'c-users' %}">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-12 col-md-6 mb-1">
+                                            <label class="form-label" for="email">Email <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">@</span>                                                
+                                                <input type="email" class="form-control trimwhitespace" name="email" autofocus required />
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3 mb-1">
+                                            <label class="form-label" for="name">Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="name" required />
+                                        </div>                                        
+                                        <div class="col-12 col-md-3 mb-1">
+                                            <label class="form-label" for="mobile">Mobile</label>
+                                            <input type="text" class="form-control" name="mobile" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" />
+                                        </div>                                                                               
+                                        <div class="col-12 col-md-6 mb-1">
+                                            <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
+                                            <div class="input-group form-password-toggle">
+                                                <input type="password" name="password" id="password" class="form-control" required />
+                                                <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 mb-1">
+                                            <label class="form-label" for="cpassword">Confirm Password <span class="text-danger">*</span></label>
+                                            <div class="input-group form-password-toggle">
+                                                <input type="password" name="cpassword" id="cpassword" class="form-control" required />
+                                                <span class="input-group-text cursor-pointer"><i data-feather="eye"></i></span>
+                                            </div>
+                                            <small id="check-cpassword-msg" class="error-message"></small>
+                                        </div>                                        
+                                        <div class="col-12 col-md-6 mb-1">
+                                            <label class="form-label" for="role_id">Role <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="role_id" required>                                                
+                                                <option value="" hidden selected>Select an option</option>
+                                                {% for roles_obj in roles_objs %}  
+                                                <option value="{{roles_obj.id}}">{{roles_obj.name}}</option>                                                
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-6 mb-1">
+                                            <label class="form-label" for="status">Status <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="status" required>                                                
+                                                <option value="" hidden selected>Select an option</option>
+                                                <option value="active">Active</option>                                           
+                                                <option value="inactive">Inactive</option>                                                                                            
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <label class="form-label" for="usertype">User Type <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="usertype" id="usertype" required onchange="toggleUserTypeFields()">                                                 
+                                                <option value="" hidden selected>Select an option</option>
+                                                {% if usertype == 'admin' or usertype == 'business' %}
+                                                    <option value="admin">Admin</option>
+                                                {% endif %}
+                                                <option value="garage">Garage</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-1 garage-fields" style="display: none;">
+                                            <label class="form-label" for="garagegroup_id">Assign Garage Group <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="garagegroup_id" id="garagegroup_id">                                         
+                                                <option value="" hidden selected>Select an option</option>                                                
+                                                {% for garagegroup_obj in garagegroup_objs %}
+                                                    <option value="{{garagegroup_obj.id}}">{{garagegroup_obj.name}}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        {% if garagegroup_id %}
+                                        <input type="hidden" name="garagegroup_id" id="garagegroup_id" value="{{ garagegroup_id }}">
+                                        {% endif %}
+                                        <div class="col-12 col-md-4 mb-1 garage-fields" style="display: none;">
+                                            <label class="form-label" for="garage_id">Assign Garage <span class="text-danger">*</span></label>
+                                            <select id="garage_id" name="garage_id" class="select2 form-select" multiple="multiple">
+                                            </select>
+                                        </div>
+                                                                               
+                                        <div class="col-12 col-md-8 mb-1 admin-fields" style="display: none;">
+                                            <label class="form-label" for="city_id">
+                                                <i data-feather="map-pin" class="font-medium-2 me-50"></i>
+                                                Assign Location <span class="text-danger">*</span>
+                                            </label>
+                                            <select class="select2 form-select" id="city_id" name="city_id" multiple="multiple">
+                                                {% for city in city_objs %}
+                                                    <option value="{{ city.id }}">{{ city.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <label class="form-label" for="expiry">Expiry <span class="text-danger">*</span></label>
+                                            <input type="datetime-local" name="expiry" class="form-control" required/>
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <label class="form-label" for="pri">Password Reset Interval <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="pri" required pattern="^[1-9]\d*$" title="Please enter a positive integer" />
+                                        </div>
+                                        <div class="col-12 mb-1">
+                                            <div class="form-check form-check-success form-switch">
+                                                <input type="checkbox" class="form-check-input" id="customSwitch1" name="prf"/>
+                                                <label class="form-label" for="prf">Password Reset Flag</label>
+                                            </div>
+                                        </div>
+                                        <!-- <div class="col-12 col-md-3 mb-1">
+                                            <div class="form-check form-check-success form-switch">
+                                                <input type="checkbox" class="form-check-input" id="setasemployee" name="setasemployee"/>
+                                                <label class="form-label" for="setasemployee">Set as employee</label>
+                                            </div>
+                                        </div> -->
+                                        <div class="col-12 text-center">
+                                            <button type="submit" class="btn btn-success me-1 waves-effect waves-float waves-light">Submit</button>
+                                            <button type="reset" class="btn btn-outline-secondary waves-effect">Reset</button>
+                                        </div>
+                                    </div>
+                                </form> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Basic Inputs end -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+function toggleUserTypeFields() {
+    var userType = $('#usertype').val();
+    
+    // Hide all fields first
+    $('.admin-fields, .garage-fields').hide();
+    $('.admin-fields select, .garage-fields select').prop('required', false);
+    
+    if (userType === 'admin') {
+        // Show location field for admin
+        $('.admin-fields').show();
+        $('.admin-fields select').prop('required', true);
+    } else if (userType === 'garage' || userType === 'partner') {
+        // Show garage group and garage fields for garage/partner
+        $('.garage-fields').show();
+        $('.garage-fields select').prop('required', true);
+    }
+    
+    // Initialize select2 for visible selects
+    $('.select2').select2({
+        width: '100%',
+        placeholder: 'Select options'
+    });
+}
+
+// Initialize fields on page load
+$(document).ready(function() {
+    // Call toggle on page load to set initial state
+    toggleUserTypeFields();
+    
+    // Function to initialize garage select
+    function initializeGarageSelect($select, selectedIds) {
+        // Initialize select2 if not already
+        if ($.fn.select2 && !$select.hasClass('select2-hidden-accessible')) {
+            $select.select2({
+                placeholder: 'Select garages',
+                allowClear: true,
+                width: '100%'
+            });
+        }
+        
+        // If selectedIds is provided, select those options
+        if (selectedIds && selectedIds.length > 0) {
+            $select.val(selectedIds).trigger('change');
+        }
+    }
+
+    // Handle garage group change event
+    $('select[name="garagegroup_id"]').on('change', function() {
+        var garageGroupId = $(this).val();
+        var $garageSelect = $('#garage_id');
+        
+        // Clear previous options
+        $garageSelect.empty();
+        
+        if (!garageGroupId) {
+            // If no garage group is selected, show empty state
+            $garageSelect.append($('<option>', {
+                value: '',
+                text: 'Select a garage group first',
+                disabled: true,
+                selected: true
+            }));
+            
+            // Initialize select2
+            if ($.fn.select2) {
+                $garageSelect.select2({
+                    placeholder: 'Select a garage group first',
+                    allowClear: false,
+                    width: '100%'
+                });
+            }
+            return;
+        }
+        
+        // Show loading state
+        $garageSelect.append($('<option>', {
+            value: '',
+            text: 'Loading garages...',
+            disabled: true,
+            selected: true
+        }));
+        
+        // Initialize select2 if not already
+        if ($.fn.select2 && !$garageSelect.hasClass('select2-hidden-accessible')) {
+            $garageSelect.select2({
+                placeholder: 'Loading garages...',
+                allowClear: false,
+                width: '100%',
+                disabled: true
+            });
+        }
+        
+        // Fetch related garages
+        $.ajax({
+            url: '{% url "get_garages_by_group" %}',
+            method: 'GET',
+            data: {
+                'garagegroup_id': garageGroupId
+            },
+            success: function(response) {
+                // Clear existing options
+                $garageSelect.empty();
+                
+                if (response.status === 'success' && response.garages && response.garages.length > 0) {
+                    // Add options to select
+                    $.each(response.garages, function(index, garage) {
+                        $garageSelect.append($('<option>', {
+                            value: garage.id,
+                            text: garage.name
+                        }));
+                    });
+                    
+                    // Initialize or update select2 with 'Select garage' placeholder
+                    if ($.fn.select2) {
+                        $garageSelect.select2({
+                            placeholder: 'Select garage',
+                            allowClear: true,
+                            width: '100%'
+                        });
+                    }
+                } else {
+                    // Add a disabled option when no garages are found
+                    $garageSelect.append($('<option>', {
+                        value: '',
+                        text: 'No garages found',
+                        disabled: true,
+                        selected: true
+                    }));
+                    
+                    // Re-initialize select2 with 'No garage found' message
+                    if ($.fn.select2) {
+                        $garageSelect.select2({
+                            placeholder: 'No garage found',
+                            allowClear: false,
+                            width: '100%'
+                        });
+                    }
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error:', error);
+                
+                // Add error message
+                $garageSelect.empty().append($('<option>', {
+                    value: '',
+                    text: 'Error loading garages',
+                    disabled: true,
+                    selected: true
+                }));
+                
+                // Re-initialize select2
+                if ($.fn.select2) {
+                    $garageSelect.select2({
+                        placeholder: 'Error loading garages',
+                        allowClear: false,
+                        width: '100%'
+                    });
+                }
+            }
+        });
+    });
+    
+    // Initialize the garage select on page load
+    var $garageGroupSelect = $('#garagegroup_id');
+    
+    // Set initial required state based on user type
+    var initialUserType = $('#usertype').val();
+    if (initialUserType === 'admin') {
+        $('.admin-fields select').prop('required', true);
+    } else if (initialUserType === 'garage' || initialUserType === 'partner') {
+        $('.garage-fields select').prop('required', true);
+    }
+    var $garageSelect = $('#garage_id');
+    
+    // Show initial state
+    $garageSelect.empty().append($('<option>', {
+        value: '',
+        text: 'Select a garage group first',
+        disabled: true,
+        selected: true
+    }));
+    
+    // Initialize select2
+    if ($.fn.select2) {
+        $garageSelect.select2({
+            placeholder: 'Select a garage group first',
+            allowClear: false,
+            width: '100%'
+        });
+    }
+    
+    // Function to load garages for a given garage group ID
+    function loadGarages(garageGroupId) {
+        var $garageSelect = $('#garage_id');
+        
+        // Show loading state
+        $garageSelect.empty().append($('<option>', {
+            value: '',
+            text: 'Loading garages...',
+            disabled: true,
+            selected: true
+        }));
+        
+        // Initialize select2 if not already
+        if ($.fn.select2 && !$garageSelect.hasClass('select2-hidden-accessible')) {
+            $garageSelect.select2({
+                placeholder: 'Select garages',
+                allowClear: true,
+                width: '100%'
+            });
+        }
+        
+        // Fetch garages for the selected group
+        $.ajax({
+            url: '{% url "get_garages_by_group" %}',
+            method: 'GET',
+            data: { 'garagegroup_id': garageGroupId },
+            success: function(response) {
+                $garageSelect.empty();
+                
+                if (response.status === 'success' && response.garages && response.garages.length > 0) {
+                    // Add garages to the select
+                    $.each(response.garages, function(index, garage) {
+                        $garageSelect.append($('<option>', {
+                            value: garage.id,
+                            text: garage.name
+                        }));
+                    });
+                    
+                    // Reinitialize select2 with the new options
+                    if ($.fn.select2) {
+                        $garageSelect.select2({
+                            placeholder: 'Select garages',
+                            allowClear: true,
+                            width: '100%'
+                        });
+                    }
+                } else {
+                    // No garages found
+                    $garageSelect.append($('<option>', {
+                        value: '',
+                        text: 'No garages found',
+                        disabled: true,
+                        selected: true
+                    }));
+                }
+            },
+            error: function() {
+                $garageSelect.empty().append($('<option>', {
+                    value: '',
+                    text: 'Error loading garages',
+                    disabled: true,
+                    selected: true
+                }));
+            }
+        });
+    }
+    
+    // Check if we need to load garages based on context
+    var garageGroupId = '{{ garagegroup_id|default:""|escapejs }}';
+    var userType = '{{ usertype|default:""|escapejs }}';
+    
+    if (garageGroupId) {
+        loadGarages(garageGroupId);
+    } else if ($garageGroupSelect.val()) {
+        // Trigger change event if garage group is already selected
+        $garageGroupSelect.trigger('change');
+    }
+});
+</script>
+{% endblock %}

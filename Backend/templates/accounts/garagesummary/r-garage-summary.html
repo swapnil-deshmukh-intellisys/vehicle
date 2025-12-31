@@ -1,0 +1,442 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}Garage Summary{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="{% static 'app-assets/fonts/inter/inter.css' %}">{# Local Inter font #}
+<style>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f9fafb;
+    }
+    
+    .dashboard-header {
+        padding: 10px 0;
+        margin-bottom: 16px;
+    }
+    
+    .dashboard-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+    
+    .dashboard-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 400;
+    }
+    
+    .feature-card {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+        height: 100%;
+        overflow: hidden;
+        background-color: white;
+    }
+    
+    .feature-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    .feature-card .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f3f4f6;
+        background-color: white;
+    }
+    
+    .feature-card .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    
+    .feature-card .card-body {
+        padding: 20px 24px;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .feature-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    
+    .feature-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .feature-item:hover {
+        transform: translateX(4px);
+    }
+    
+    .feature-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        color: #4f46e5;
+    }
+    
+    .feature-link {
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        flex-grow: 1;
+        transition: color 0.2s ease;
+    }
+    
+    .feature-link:hover {
+        color: #4f46e5;
+    }
+    
+    .stats-row {
+        margin-bottom: 16px;
+    }
+    
+    .stat-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+        height: 100%;
+    }
+    
+    .stat-title {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    
+    .stat-change {
+        font-size: 12px;
+        margin-top: 4px;
+    }
+    
+    .stat-change.positive {
+        color: #10b981;
+    }
+    
+    .stat-change.negative {
+        color: #ef4444;
+    }
+    
+    .quick-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
+        background-color: white;
+        color: #4b5563;
+    }
+    
+    .quick-action-btn:hover {
+        background-color: #f9fafb;
+        color: #111827;
+        border-color: #d1d5db;
+    }
+    
+    .quick-action-btn i {
+        margin-right: 6px;
+    }
+    
+    .primary-btn {
+        background-color: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+    }
+    
+    .primary-btn:hover {
+        background-color: #4338ca;
+        color: white;
+        border-color: #4338ca;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h4 class="content-header-title mb-0">Accounts</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <!-- <div class="dashboard-header" style="padding-top: 0; margin-top: 0;">
+                <h1 class="dashboard-title" style="margin-top: 0;">Welcome back, {{username|title}}</h1>
+                <p class="dashboard-subtitle" style="margin-bottom: 10px;">Here's what's happening with your business today.</p>
+            </div> -->
+            
+            <!-- Quick Stats Row -->
+            <div class="row stats-row">
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Garages</div>
+                        <div class="stat-value">{{garage_count}}</div>
+                        <!-- <div class="stat-change positive">+12% from last month</div> -->
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Active Bookings</div>
+                        <div class="stat-value">{{booking_count}}</div>
+                        <!-- <div class="stat-change positive">+2 new this week</div> -->
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Customers</div>
+                        <div class="stat-value">{{customer_count}}</div>
+                        <!-- <div class="stat-change positive">+3.2% from last month</div> -->
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Vehicles</div>
+                        <div class="stat-value">{{vehicle_model_count}}/{{vehicle_count}}</div>
+                        <!-- <div class="stat-change positive">+5 points this week</div> -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <a href="{% url 'r-accounts-garage' %}" class="quick-action-btn primary-btn">
+                                <i data-feather="home" style="width: 16px; height: 16px; margin-right: 6px;"></i> Garage
+                            </a>
+                            <a href="{% url 'r-accounts-garagegroup' %}" class="quick-action-btn">
+                                <i data-feather="layers" style="width: 16px; height: 16px; margin-right: 6px;"></i> Garage Group
+                            </a>
+                            <a href="{% url 'r-accounts-bookings' %}" class="quick-action-btn">
+                                <i data-feather="calendar" style="width: 16px; height: 16px; margin-right: 6px;"></i> Bookings
+                            </a>
+                            <a href="{% url 'r-prf-summary'  %}" class="quick-action-btn">
+                                <i data-feather="users" style="width: 16px; height: 16px; margin-right: 6px;"></i> Customers
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Feature Cards -->
+            <div class="row match-height">
+                <div class="col-md-4 col-sm-12 mb-2">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Accounts</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                {% if 'Garage' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="home" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-garage' %}" class="feature-link">Garage</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Garage_Group' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="layers" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-garagegroup' %}" class="feature-link">Garage Group</a>
+                                </li>
+                                {% endif %}
+            
+                                {% if 'Bookings' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="calendar" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-bookings' %}" class="feature-link">Bookings</a>
+                                </li>
+                                {% endif %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="users" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-prf-summary'  %}" class="feature-link">Customers</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 col-sm-12 mb-2">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Vehicle Management</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="truck" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'u-garage-summary'  %}" class="feature-link">Vehicles</a>
+                                </li>
+                                {% if 'Brands' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="tag" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-brand' %}" class="feature-link">Brands</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Models' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="layers" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-model' %}" class="feature-link">Models</a>
+                                </li>
+                                {% endif %}
+                                {% if 'CC' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="cpu" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-cc' %}" class="feature-link">Engine CC</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Accessories' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="tool" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-accessories' %}" class="feature-link">Accessories</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 col-sm-12 mb-2">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Service Configuration</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                {% if 'Service_Categories' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="bar-chart" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-servicecategory' %}" class="feature-link">Service Categories</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Service_Types' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="activity" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-servicetype' %}" class="feature-link">Service Types</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Services' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="tool" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-service' %}" class="feature-link">Services</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 col-sm-12 mb-2">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Location & UI</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                {% if 'Cities' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="map-pin" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-city' %}" class="feature-link">Cities</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Banners' in useruiacl.Accounts %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="image" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-accounts-banner' %}" class="feature-link">Banners</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize feather icons
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+</script>
+{% endblock %}

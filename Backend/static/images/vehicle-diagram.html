@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vehicle Diagram</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: white;
+        }
+        .vehicle-container {
+            width: 400px;
+            height: 200px;
+            position: relative;
+            border: 1px solid #ddd;
+        }
+        .car-body {
+            position: absolute;
+            top: 80px;
+            left: 100px;
+            width: 200px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        .car-top {
+            position: absolute;
+            top: 50px;
+            left: 140px;
+            width: 120px;
+            height: 30px;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+        .car-line-left {
+            position: absolute;
+            top: 50px;
+            left: 140px;
+            width: 2px;
+            height: 30px;
+            background-color: #333;
+        }
+        .car-line-right {
+            position: absolute;
+            top: 50px;
+            left: 260px;
+            width: 2px;
+            height: 30px;
+            background-color: #333;
+        }
+        .wheel-left {
+            position: absolute;
+            top: 120px;
+            left: 130px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+        .wheel-right {
+            position: absolute;
+            top: 120px;
+            left: 270px;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #333;
+            border-radius: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+        .window-1, .window-2, .window-3 {
+            position: absolute;
+            top: 50px;
+            width: 1px;
+            height: 30px;
+            background-color: #333;
+        }
+        .window-1 {
+            left: 160px;
+        }
+        .window-2 {
+            left: 200px;
+        }
+        .window-3 {
+            left: 240px;
+        }
+        .headlight {
+            position: absolute;
+            top: 85px;
+            left: 100px;
+            width: 10px;
+            height: 10px;
+            border: 1px solid #333;
+            border-radius: 2px;
+        }
+        .taillight {
+            position: absolute;
+            top: 85px;
+            left: 290px;
+            width: 10px;
+            height: 10px;
+            border: 1px solid #333;
+            border-radius: 2px;
+        }
+        .label-front {
+            position: absolute;
+            top: 25px;
+            left: 200px;
+            font-family: Arial;
+            font-size: 14px;
+            transform: translateX(-50%);
+            color: #333;
+        }
+        .label-left {
+            position: absolute;
+            top: 170px;
+            left: 100px;
+            font-family: Arial;
+            font-size: 12px;
+            transform: translateX(-50%);
+            color: #333;
+        }
+        .label-right {
+            position: absolute;
+            top: 170px;
+            left: 300px;
+            font-family: Arial;
+            font-size: 12px;
+            transform: translateX(-50%);
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="vehicle-container">
+        <div class="car-body"></div>
+        <div class="car-top"></div>
+        <div class="car-line-left"></div>
+        <div class="car-line-right"></div>
+        <div class="wheel-left"></div>
+        <div class="wheel-right"></div>
+        <div class="window-1"></div>
+        <div class="window-2"></div>
+        <div class="window-3"></div>
+        <div class="headlight"></div>
+        <div class="taillight"></div>
+        <div class="label-front">Front View</div>
+        <div class="label-left">Left</div>
+        <div class="label-right">Right</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-inv-model{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-1">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0"><a href="{% url 'r-inventory' %}">Inventory</a></h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item active">List Model
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Responsive tables start -->
+                <div class="row" id="r-inv-model">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">  
+                                <div>   
+                                    {% if 'add' in useruiacl.Inventory.Model %}
+                                    <a href="{% url 'c-inv-model' %}" class="btn btn-icon btn-outline-success waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Add">
+                                        <i data-feather='plus-square'></i>
+                                    </a>  
+                                    {% endif %}
+                                    
+                                    {% if 'delete' in useruiacl.Inventory.Model %}
+                                        {% if product_model_objs %} 
+                                        <button type="button"  id="delModel" class="btn btn-icon btn-outline-danger waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete">
+                                            <i data-feather='trash-2'></i>
+                                        </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>                                
+                                {% if product_model_objs %} 
+                                <div>
+                                    <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputModel" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputModel', 'tableModel')"/>
+                                    </div>
+                                </div>  
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if product_model_objs %} 
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-sm table-striped table-hover" id="tableModel">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="text-nowrap form-check-success">
+                                                    {% if 'delete' in useruiacl.Inventory.Model %}
+                                                    <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all"> 
+                                                    {% endif %}
+                                                    Name
+                                                </th>
+                                                <th scope="col" class="text-nowrap">Brand</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for productmodel in product_model_objs %}
+                                            <tr>
+                                                <td class="text-nowrap d-flex">
+                                                    {% if 'delete' in useruiacl.Inventory.Model %}
+                                                    <form method="post" class="form-check-success">
+                                                        {% csrf_token %}
+                                                        <input  class="form-check-input me-1" type="checkbox" name="checkedModel" value="{{productmodel.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select">  
+                                                    </form> 
+                                                    {% endif %}
+
+                                                    {% if 'edit' in useruiacl.Inventory.Model %}
+                                                        <a href="{% url 'u-inv-model' productmodel.id %}">{{productmodel.name}}</a> 
+                                                    {% else %}
+                                                        {{productmodel.name}}
+                                                    {% endif %}                                                  
+                                                </td>      
+                                                <td class="text-nowrap">{{productmodel.brand.name}}</td>             
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <div class="card-header">
+                                        <div>                                    
+                                            Showing {{ product_model_objs.start_index }} to {{ product_model_objs.end_index }} of {{ product_model_objs.paginator.count }} entries
+                                        </div>
+                                        <div> 
+                                            {% if product_model_objs.has_other_pages %}
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-success">  
+    
+                                                        <!-- First Page Link -->
+                                                        {% if product_model_objs.number > 1 %}
+                                                        <li class="page-item first">
+                                                            <a href="?page=1" class="page-link">First</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item first disabled">
+                                                            <span class="page-link">First</span>
+                                                        </li>
+                                                        {% endif %}   
+    
+                                                        <!-- Previous Page Link -->
+                                                        {% if product_model_objs.has_previous %}
+                                                        <li class="page-item prev">
+                                                            <a href="?page={{ product_model_objs.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item prev disabled">
+                                                            <span class="page-link" aria-label="Previous"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                        {% for page in product_model_objs.paginator.page_range %}
+                                                            {% if page >= product_model_objs.number|add:'-1' and page <= product_model_objs.number|add:'1' %}
+                                                                {% if page == product_model_objs.number %}
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ page }}</span>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="page-item">
+                                                                    <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                                </li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+    
+                                                        <!-- Next Page Link -->
+                                                        {% if product_model_objs.has_next %}
+                                                        <li class="page-item next">
+                                                            <a href="?page={{ product_model_objs.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item next disabled">
+                                                            <span class="page-link" aria-label="Next"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Last Page Link -->
+                                                        {% if product_model_objs.number < product_model_objs.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ product_model_objs.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                    </ul>
+                                                </nav>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="avatar bg-light-danger avatar-xl">
+                                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                    </div>
+                                    <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to add model.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive tables end -->  
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const delModelButton = document.getElementById("delModel");
+
+        delModelButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            document.querySelectorAll('input[name="checkedModel"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-inv-model' %}";
+
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+    });
+</script>
+{% endblock %}

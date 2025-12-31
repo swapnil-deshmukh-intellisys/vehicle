@@ -1,0 +1,1138 @@
+{% load static %}
+<!-- {% load invoice_estimate_filters %} -->
+{% load custom_filters %}
+<!DOCTYPE html>
+<html class="loading" lang="en" data-textdirection="ltr">
+<!-- BEGIN: Head-->
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0,minimal-ui">
+    <meta name="description" content="Bikeboot">
+    <meta name="keywords" content="Bikeboot, web app">
+    <meta name="author" content="Bikeboot">
+    <title>Bikeboot-Job Card Invoice Customer</title>
+    <link rel="apple-touch-icon" href="{% static 'app-assets/images/ico/apple-icon-120.png' %}">
+    <link rel="shortcut icon" type="image/x-icon" href="../../../static/custom-assets/images/bikedoot/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600" rel="stylesheet">
+
+    <!-- BEGIN: Vendor CSS-->
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/vendors.min.css' %}">
+    <!-- END: Vendor CSS-->
+
+    <!-- BEGIN: Theme CSS-->
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/bootstrap.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/bootstrap-extended.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/colors.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/components.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/themes/dark-layout.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/themes/bordered-layout.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/themes/semi-dark-layout.css' %}">
+
+    <!-- BEGIN: Page CSS-->
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/core/menu/menu-types/horizontal-menu.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'app-assets/css/pages/page-misc.css' %}">
+    <!-- END: Page CSS-->
+
+    <style>
+        /* Modern Job Card Styles */
+        :root {
+            --primary: #3b82f6;
+            --primary-light: #93c5fd;
+            --primary-dark: #1d4ed8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --border: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+            --transition: all 0.15s ease-in-out;
+            --border-radius: 0.5rem;
+        }
+    
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            color: var(--dark);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+    
+        .job-card-v2 {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 1rem;
+            background-color: #f8fafc;
+            font-size: 0.875rem;
+            line-height: 1.35;
+        }
+    
+        /* Card Header */
+        .jc-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+            border: none !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+            padding: 0.75rem 1rem !important;
+            border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+            box-shadow: var(--shadow) !important;
+            color: white !important;
+            font-size: 0.9375rem;
+        }
+    
+        .jc-info {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 5px !important;
+        }
+    
+        .jc-status {
+            padding: 7px 7px !important;
+            border-radius: 10px !important;
+            font-size: 12px !important;
+            font-weight: 400 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            border: 2px solid !important;
+            width: 125px !important;
+            height: 30px !important;
+        }
+    
+        .status-progress {
+            /*background: #ffeecc !important;*/
+            color: #ff9900 !important;
+            border-color: #ff9900 !important;
+        }
+    
+        /* Responsive Grid Layout */
+        .jc-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+            gap: 1.25rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+    
+        @media (max-width: 1024px) {
+            .jc-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+    
+        @media (max-width: 640px) {
+            .jc-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    
+        /* Card Styles */
+        .jc-card {
+            background: white !important;
+            border: 1px solid var(--gray-200) !important;
+            border-radius: var(--border-radius) !important;
+            padding: 0 !important;
+            box-shadow: var(--shadow) !important;
+            overflow: hidden !important;
+            transition: var(--transition) !important;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+    
+        .jc-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+        }
+    
+        .jc-card-header {
+            font-size: 0.9375rem !important;
+            font-weight: 600 !important;
+            color: white !important;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+            margin: 0 !important;
+            padding: 0.875rem 1.25rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            text-transform: none !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: var(--border-radius) !important;
+        }
+    
+        .jc-card-title {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            color: white !important;
+            font-size: 0.9375rem !important;
+            font-weight: 600 !important;
+            margin: 0 !important;
+            letter-spacing: 0.3px;
+        }
+    
+        .jc-card-title i {
+            font-size: 1.1em !important;
+            opacity: 0.9;
+        }
+    
+        .jc-card-title i {
+            font-size: 20px !important;
+        }
+    
+        .jc-card-body {
+            padding: 1.25rem;
+            flex: 1;
+        }
+    
+        .jc-card-link,
+        .jc-red-btn,
+        .jc-green-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 0.5rem !important;
+            padding: 0.5rem 0.875rem !important;
+            border-radius: 0.5rem !important;
+            font-size: 0.8125rem !important;
+            font-weight: 500 !important;
+            text-decoration: none !important;
+            cursor: pointer !important;
+            transition: var(--transition) !important;
+            border: 1px solid transparent !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+    
+        .jc-card-link {
+            background: white !important;
+            color: var(--primary) !important;
+            border-color: var(--primary) !important;
+        }
+    
+        .jc-card-link:hover {
+            background: var(--primary) !important;
+            color: white !important;
+            transform: translateY(-1px);
+        }
+    
+        .jc-red-btn {
+            background: white !important;
+            color: var(--danger) !important;
+            border-color: var(--danger) !important;
+        }
+    
+        .jc-red-btn:hover {
+            background: var(--danger) !important;
+            color: white !important;
+            transform: translateY(-1px);
+        }
+    
+        .jc-green-btn {
+            background: white !important;
+            color: var(--success) !important;
+            border-color: var(--success) !important;
+        }
+    
+        .jc-green-btn:hover {
+            background: var(--success) !important;
+            color: white !important;
+            transform: translateY(-1px);
+        }
+    
+        /* Info Rows */
+        .jc-info-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 0.25rem 0 !important;
+            border-bottom: 1px solid var(--gray-200) !important;
+            font-size: 0.8125rem;
+        }
+    
+        .jc-info-row:last-child {
+            border-bottom: none !important;
+        }
+    
+        .jc-info-label {
+            color: var(--gray-600) !important;
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+            white-space: nowrap;
+            padding-right: 0.5rem;
+        }
+    
+        .jc-info-value {
+            color: var(--dark) !important;
+            font-size: 0.8125rem !important;
+            font-weight: 500 !important;
+            text-align: right !important;
+            max-width: 65%;
+            word-break: break-word;
+        }
+    
+        /* Status Badges */
+        .jc-status {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center;
+            padding: 0.25rem 0.6rem !important;
+            border-radius: 9999px !important;
+            font-size: 0.6875rem !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+            border: 1px solid !important;
+            transition: var(--transition) !important;
+            line-height: 1.2;
+        }
+    
+        .status-progress {
+            background: rgba(245, 158, 11, 0.1) !important;
+            color: var(--warning) !important;
+            border-color: var(--warning) !important;
+        }
+    
+        .status-completed {
+            background: rgba(16, 185, 129, 0.1) !important;
+            color: var(--success) !important;
+            border-color: var(--success) !important;
+        }
+    
+        .status-pending {
+            background: rgba(156, 163, 175, 0.1) !important;
+            color: var(--gray-500) !important;
+            border-color: var(--gray-400) !important;
+        }
+    
+        /* Grid Spans */
+        .jc-full-width {
+            grid-column: 1 / -1 !important;
+        }
+    
+        .jc-two-thirds {
+            grid-column: span 2 !important;
+        }
+    
+        @media (max-width: 1024px) {
+            .jc-two-thirds {
+                grid-column: 1 / -1 !important;
+            }
+        }
+    
+        /* Tags - Extra Large */
+        .jc-tags {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+            margin-top: 10px !important;
+        }
+    
+    
+        .reported-issue {
+            padding: 7px 5px !important;
+            border-radius: 12px !important;
+            font-size: 12px !important;
+    
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            text-transform: uppercase !important;
+            height: 30px !important;
+        }
+    
+        .jc-tag {
+            padding: 7px 5px !important;
+            border-radius: 24px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            border: 1px solid !important;
+            text-transform: uppercase !important;
+        }
+    
+        .tag-danger {
+            background: #ffcccc !important;
+            color: #ff0000 !important;
+            border-color: #ff0000 !important;
+        }
+    
+        .service-required {
+            background: #f0f7ff !important;
+            color: black !important;
+            border-color: lightsteelblue !important;
+        }
+    
+        .tag-warning {
+            background: #ffeecc !important;
+            color: #ff9900 !important;
+            border-color: #ff9900 !important;
+        }
+    
+        .tag-success {
+            background: #ccffcc !important;
+            color: #00aa00 !important;
+            border-color: #00aa00 !important;
+        }
+    
+        .tag-info {
+            background: #ccddff !important;
+            color: #0066cc !important;
+            border-color: #0066cc !important;
+        }
+    
+        /* Service Grid - Large Items */
+        .jc-service-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 3px !important;
+            margin-top: 10px !important;
+        }
+    
+        .jc-service-item {
+            background: #f5f5f5 !important;
+            padding: 7px !important;
+            border-radius: 8px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 13px !important;
+            border: 2px solid #999 !important;
+        }
+    
+        .jc-service-item i {
+            color: #0066cc !important;
+            font-size: 22px !important;
+        }
+    
+        /* Table Styles */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 10px 0;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+    
+        .jc-table {
+            width: 100%;
+            min-width: 800px;
+            border: 2px solid #000;
+            border-collapse: collapse;
+            margin: 0;
+            font-size: 12px;
+        }
+    
+        .jc-table th {
+            background: #3b82f6;
+            color: white;
+            padding: 6px 8px;
+            text-align: left;
+            font-weight: 900;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+    
+        .jc-table td {
+            padding: 4px 8px;
+            border-bottom: 1px solid #999;
+            font-weight: 700;
+            font-size: 11px;
+            vertical-align: top;
+        }
+    
+        .jc-table tr:last-child td {
+            border-bottom: none;
+        }
+    
+        @media (max-width: 992px) {
+    
+            .jc-table th,
+            .jc-table td {
+                padding: 4px 6px;
+                font-size: 11px;
+            }
+        }
+    
+        .jc-section-header {
+            background: #e0e0e0 !important;
+        }
+    
+        .jc-section-header td {
+            font-weight: 900 !important;
+            font-size: 13px !important;
+            color: #000 !important;
+        }
+    
+        .jc-total-row {
+            background: #97a4b8 !important;
+        }
+    
+        .jc-total-row td {
+            font-weight: 900 !important;
+            font-size: 13px !important;
+            color: #000 !important;
+            border-top: 3px solid #000 !important;
+        }
+    
+        /* Payment Stats - Extra Large */
+        .jc-payment-stats {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+            margin-top: 12px !important;
+        }
+    
+        .jc-stat-box {
+            background: #f5f5f5 !important;
+            padding: 10px !important;
+            border-radius: 8px !important;
+            text-align: center !important;
+            border: 3px solid #999 !important;
+        }
+    
+        .jc-stat-value {
+            font-size: 14px !important;
+            font-weight: 900 !important;
+            color: #000 !important;
+        }
+    
+        .jc-stat-label {
+            font-size: 12px !important;
+            color: var(--primary) !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            opacity: 0.8;
+        }
+    
+        .stat-success {
+            color: #00aa00 !important;
+        }
+    
+        .stat-danger {
+            color: #ff0000 !important;
+        }
+    
+        /* Progress Bar - Extra Large */
+        .jc-progress-section {
+            margin-top: 12px !important;
+        }
+    
+        .jc-progress-label {
+            font-size: 13px !important;
+            color: #555 !important;
+            margin-bottom: 6px !important;
+            color: #3b82f6 !important;
+        }
+    
+        .jc-progress-bar {
+            background: #f5f5f5 !important;
+    
+            border-radius: 10px !important;
+            height: 36px !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+    
+        .jc-progress-fill {
+            height: 100% !important;
+            background: linear-gradient(90deg, #00aa00, #00dd00) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: white !important;
+            font-size: 14px !important;
+            font-weight: 900 !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5) !important;
+        }
+    
+        /* Timeline - Extra Large */
+        .jc-timeline {
+            display: flex !important;
+            justify-content: space-between !important;
+            margin-top: 12px !important;
+            padding: 12px !important;
+            background: #f5f5f5 !important;
+            border-radius: 8px !important;
+            border: 2px solid #999 !important;
+        }
+    
+        .jc-timeline-item {
+            text-align: center !important;
+            flex: 1 !important;
+        }
+    
+        .jc-timeline-icon {
+            width: 36px !important;
+            height: 36px !important;
+            background: white !important;
+            border: 2px solid #0066cc !important;
+            border-radius: 50% !important;
+            margin: 0 auto 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 8px !important;
+            font-weight: 900 !important;
+        }
+    
+        .jc-timeline-icon.done {
+            background: #00aa00 !important;
+            border-color: #00aa00 !important;
+            color: white !important;
+        }
+    
+        .jc-timeline-icon.current {
+            background: #ff9900 !important;
+            border-color: #ff9900 !important;
+            color: white !important;
+            animation: pulse 1.5s infinite !important;
+        }
+    
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+    
+            50% {
+                transform: scale(1.15);
+            }
+    
+            100% {
+                transform: scale(1);
+            }
+        }
+    
+        .jc-timeline-text {
+            font-size: 12px !important;
+    
+            color: #000 !important;
+            text-transform: uppercase !important;
+        }
+    
+        /* Notes - Extra Large */
+        .jc-notes {
+            background: purple !important;
+            border: 4px solid #97a4b8 !important;
+            padding: 1px !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+            font-weight: 800 !important;
+            color: white !important;
+            line-height: 1.5 !important;
+        }
+    
+        .jc-notes li {
+            margin-bottom: 8px !important;
+            font-size: 17px !important;
+        }
+    
+        .big-number {
+            font-size: 12px !important;
+            font-weight: 900 !important;
+            color: #ff0000 !important;
+        }
+    
+        /* Update Links - Large */
+        .jc-update-link {
+            display: inline-block !important;
+            background: #0066cc !important;
+            color: white !important;
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+            text-decoration: none !important;
+            margin: 5px !important;
+            cursor: pointer !important;
+            border: 2px solid #0066cc !important;
+        }
+    
+        .jc-update-link:hover {
+            background: white !important;
+            color: #0066cc !important;
+        }
+    
+        .jc-update-link.success {
+            background: #00aa00 !important;
+            border-color: #00aa00 !important;
+        }
+    
+        .jc-update-link.warning {
+            background: #ff9900 !important;
+            border-color: #ff9900 !important;
+        }
+    
+        /* Quick Summary */
+        .jc-quick-info {
+            display: grid !important;
+            grid-template-columns: repeat(6, 1fr) !important;
+            gap: 8px !important;
+            margin-top: 10px !important;
+        }
+    
+        .jc-quick-box {
+            background: #f5f5f5 !important;
+            padding: 8px !important;
+            border-radius: 8px !important;
+            text-align: center !important;
+            border: 2px solid #999 !important;
+        }
+    
+        .jc-quick-icon {
+            font-size: 15px !important;
+            color: #0066cc !important;
+            margin-bottom: 0px !important;
+            font-weight: 900 !important;
+        }
+    
+        .jc-quick-text {
+            font-size: 14px !important;
+            font-weight: 800 !important;
+            color: #000 !important;
+            text-transform: uppercase !important;
+        }
+    
+        @media (max-width: 768px) {
+    
+            .jc-status-section {
+                margin-top: 10px !important;
+            }
+    
+            .jc-status {
+                margin-left: -65px !important;
+            }
+    
+    
+    
+        }
+    
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .jc-grid {
+                grid-template-columns: 1fr !important;
+            }
+    
+            .jc-full-width,
+            .jc-two-thirds {
+                grid-column: span 1 !important;
+            }
+    
+            .jc-service-grid {
+                grid-template-columns: 1fr !important;
+            }
+    
+            .jc-quick-info {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+    
+            .jc-header {
+                flex-direction: column !important;
+            }
+        }
+    </style>
+    
+    <style>
+        .jc-status-section {
+            margin-top: -15px !important;
+        }
+    
+        .jc-header {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            padding-top: 20px !important;
+            padding-bottom: 20px !important;
+            background-color: white !important;
+        }
+    
+        .jc-card {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            padding-top: 10px !important;
+            padding-bottom: 20px !important;
+        }
+    
+        .btn-outline-history {
+            border: 1px solid #3b82f6;
+            /* outline color */
+            color: #3b82f6;
+            /* text color */
+            background-color: transparent;
+        }
+    
+        .btn-outline-danger {
+            border: 1px solid red !important;
+            /* outline color */
+            color: red !important;
+            /* text color */
+            background-color: transparent !important;
+        }
+    </style>
+
+</head>
+<!-- END: Head-->
+
+<!-- BEGIN: Body-->
+
+<body class="horizontal-layout horizontal-menu blank-page navbar-floating footer-static  " data-open="hover" data-menu="horizontal-menu" data-col="blank-page">
+    <!-- BEGIN: Content-->
+    <div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper">
+            <div class="content-header row">
+            </div>
+            <div class="content-body">
+                <!-- Error page-->
+                <div class="misc-wrapper">
+                    <!-- <a class="brand-logo" href="#">
+                        <img src="../../../static/custom-assets/images/bikedoot/logo.png" alt="logo">
+                        <h2 class="brand-text text-primary ms-1">Bikeboot</h2>
+                    </a> -->
+                    <div class="misc-inner my-1" style="max-width: 100% !important;">
+                        <div class="w-100 text-center">
+                            <!-- Action Buttons  -->
+                            <div class="row mb-1">
+                                <div class="d-flex justify-content-center align-items-center gap-25">
+                                    <button class="btn btn-primary" id="printInvoiceBtn">
+                                        <i data-feather="printer" class="me-25"></i>
+                                        Print
+                                    </button>
+                                    <button class="btn btn-outline-primary" id="downloadPdfBtn">
+                                        <i data-feather="download" class="me-25"></i>
+                                        Download
+                                    </button>
+                                    <!-- <button class="btn btn-outline-primary" id="shareInvoiceBtn">
+                                        <i data-feather="share-2" class="me-25"></i>
+                                        Share
+                                    </button> -->
+                                </div>
+                            </div>
+                        </div>
+                        <section id="v-txn-job-sheets-customer" class="invoice-preview-wrapper">
+                            <div class="container-fluid p-1 bg-white shadow-sm rounded" id="invoiceContent" style="max-width: 900px; margin: 0 auto;">                                
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card mb-25">
+                                            <div class="card-header d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h4 class="card-title mb-0">Job Card #{{ jobcard_obj.jobcard_number|default:'' }}</h4>
+                                                    <small class="text-muted">Created on {{ jobcard_obj.current_date|date:"d M, Y" }}</small>  
+                                                    <div>                                
+                                                        <small class="badge status-badge rounded-pill bg-success">
+                                                            <i class="fas fa-check-circle me-25"></i>
+                                                            Type: {{ jobcard_obj.jobtype.name|title }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="jc-grid mt-1">
+                                            <!-- Delivery Details -->
+                                            <div class="jc-card">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">                                
+                                                        DELIVERY
+                                                    </div>
+                                                </div>
+                                                <!-- Light horizontal line -->
+                                                                
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Date:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.delivery_timeline|date:"d M, Y" }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Time:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.delivery_timeline|date:"h:i A" }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Supervisor:</span>
+                                                    <span class="jc-info-value">
+                                                        {% with supervisor=jobcard_obj.supervisor %}
+                                                            {% if supervisor %}
+                                                                {{ supervisor.firstname|default:'' }} 
+                                                                {{ supervisor.middlename|default:'' }} 
+                                                                {{ supervisor.lastname|default:'' }}
+                                                            {% else %}
+                                                                Not Assigned
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    </span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Mechanic:</span>
+                                                    <span class="jc-info-value">
+                                                        {% with mechanics=jobcard_obj.jobcard_mechanic.all %}
+                                                            {% for mechanic in mechanics %}
+                                                                {% if mechanic.mechanic %}
+                                                                    {{ mechanic.mechanic.firstname|default:'' }} {{ mechanic.mechanic.middlename|default:'' }} {{ mechanic.mechanic.lastname|default:'' }}{% if not forloop.last %}, {% endif %}
+                                                                {% endif %}
+                                                            {% empty %}
+                                                                Not Assigned
+                                                            {% endfor %}
+                                                        {% endwith %}
+                                                    </span>
+                                                </div>
+                                            </div>                           
+                                            <!-- Customer Info -->
+                                            <div class="jc-card">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">                                
+                                                        CUSTOMER
+                                                    </div>
+                                                </div>
+                                                <!-- Light horizontal line -->
+                                                                
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Name:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.customer.name|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Mobile:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.customer.phone|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Alt Mobile:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.customer.alt_phone|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Email:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.customer.email|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Address:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.customer.address|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Pincode:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.customer.pincode|default:'-' }}</span>
+                                                </div>
+                                            </div>
+                                            <!-- Vehicle Info -->
+                                            <div class="jc-card">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">                                
+                                                        VEHICLE
+                                                    </div>
+                                                </div>
+                                                <!-- Light horizontal line -->
+                                                                    
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Number:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.license_plate_no|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Make:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.make|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Model:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.model|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">KM:</span>
+                                                    <span class="jc-info-value">{{jobcard_obj.km_reading|default:'0'}} KM</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Fuel:</span>
+                                                    <span class="jc-info-value">⛽ {{jobcard_obj.fuel_level|default:'0'}}%</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Year:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.year_of_manufacture|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Color:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.color|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Engine Number:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.engine_number|default:'-' }}</span>
+                                                </div>
+                                                <div class="jc-info-row">
+                                                    <span class="jc-info-label">Chassis Number:</span>
+                                                    <span class="jc-info-value">{{ jobcard_obj.vehicle.chassis_number|default:'-' }}</span>
+                                                </div>
+                                            </div>  
+                                            <!-- Vehicle Issues -->
+                                            <div class="jc-card">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">                                
+                                                        VEHICLE ISSUES
+                                                    </div>
+                                                </div>
+                                                <!-- Light horizontal line -->
+                                                    
+                                                <div class="jc-service-grid d-flex flex-wrap gap-4">
+                                                    {% with vehicleissues=jobcard_obj.jobcard_vehicle_issue.all %}
+                                                        {% for vehicleissue in vehicleissues %}
+                                                            {% if vehicleissue %}
+                                                                <div class="reported-issue service-required"><i class="fa fa-check text-primary"></i> {{ vehicleissue.vehicleissue.vehicle_issue|default:'' }}{% if not forloop.last %}{% endif %}</div>
+                                                            {% endif %}
+                                                        {% empty %}
+                                                            <span class="text-muted">
+                                                                <i class="fa fa-exclamation-triangle"></i>
+                                                                Data Not Available.
+                                                            </span>
+                                                        {% endfor %}
+                                                    {% endwith %}
+                                                </div>             
+                                            </div>    
+                                            <!-- Vehicle Damage -->
+                                            <div class="jc-card">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">                                
+                                                        VEHICLE DAMAGES
+                                                    </div>
+                                                </div>
+                                                <!-- Light horizontal line -->
+                                                    
+                                                <div class="jc-service-grid d-flex flex-wrap gap-4">
+                                                    {% with vehicledamages=jobcard_obj.jobcard_vehicle_damage.all %}
+                                                        {% for vehicledamage in vehicledamages %}
+                                                            {% if vehicledamage %}
+                                                                <div class="reported-issue service-required"><i class="fa fa-check text-primary"></i> {{ vehicledamage.vehicledamage.vehicle_damage|default:'' }}{% if not forloop.last %}{% endif %}</div>
+                                                            {% endif %}
+                                                        {% empty %}
+                                                            <span class="text-muted">
+                                                                <i class="fa fa-exclamation-triangle"></i>
+                                                                Data Not Available.
+                                                            </span>
+                                                        {% endfor %}
+                                                    {% endwith %}
+                                                </div>             
+                                            </div> 
+                                            <!-- Vehicle Accessories -->
+                                            <div class="jc-card">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">                                
+                                                        VEHICLE ACCESSORIES
+                                                    </div>
+                                                </div>
+                                                <!-- Light horizontal line -->
+                                                    
+                                                <div class="jc-service-grid d-flex flex-wrap gap-4">
+                                                    {% with vehicleaccessories=jobcard_obj.jobcard_vehicle_accessory.all %}
+                                                        {% for vehicleaccessory in vehicleaccessories %}
+                                                            {% if vehicleaccessory %}
+                                                                <div class="reported-issue service-required"><i class="fa fa-check text-primary"></i> {{ vehicleaccessory.vehicleaccessory.vehicle_accessory|default:'' }}{% if not forloop.last %}{% endif %}</div>
+                                                            {% endif %}
+                                                        {% empty %}
+                                                            <span class="text-muted">
+                                                                <i class="fa fa-exclamation-triangle"></i>
+                                                                Data Not Available.
+                                                            </span>
+                                                        {% endfor %}
+                                                    {% endwith %}
+                                                </div>             
+                                            </div> 
+                                            
+                                            <!-- Customer Voice -->
+                                            <div class="jc-card jc-full-width">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">
+                                                        CUSTOMER VOICE
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="jc-tags">
+                                                    {% with customervoices=jobcard_obj.jobcard_customer_voice.all %}
+                                                        {% for customervoice in customervoices %}
+                                                            {% if customervoice %}
+                                                                <div class="reported-issue service-required"><i class="fa fa-volume-up text-primary"></i> {{ customervoice.customer_voice|default:'' }}{% if not forloop.last %}{% endif %}</div>
+                                                            {% endif %}
+                                                        {% empty %}
+                                                            <span class="text-muted">
+                                                                <i class="fa fa-exclamation-triangle"></i>
+                                                                Data Not Available.
+                                                            </span>
+                                                        {% endfor %}
+                                                    {% endwith %}                                    
+                                                </div>
+                                            </div>
+                                            <!-- Cost Table with Separated Parts & Service -->
+                                            <div class="jc-card jc-full-width">
+                                                <div class="jc-card-header">
+                                                    <div class="jc-card-title">
+                                                        OFFERED ESTIMATE
+                                                    </div>
+                                                </div>
+                                                                
+                                                <div class="table-responsive">
+                                                    <table class="jc-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>ITEM</th>
+                                                                <th>QTY</th>
+                                                                <th>RATE</th>
+                                                                <th>TAX(%)</th>
+                                                                <th>DISCOUNT(%)</th>
+                                                                <th>AMOUNT</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <!-- Will be populated by JavaScript -->
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+                <!-- / Error page-->
+            </div>
+        </div>
+    </div>
+    <!-- END: Content-->
+
+
+    <!-- BEGIN: Vendor JS-->
+    <script src="{% static 'app-assets/vendors/js/vendors.min.js' %}"></script>
+    <!-- BEGIN Vendor JS-->
+
+    <!-- BEGIN: Page Vendor JS-->
+    <script src="{% static 'app-assets/vendors/js/ui/jquery.sticky.js' %}"></script>
+    <!-- END: Page Vendor JS-->
+
+    <!-- BEGIN: Theme JS-->
+    <script src="{% static 'app-assets/js/core/app-menu.js' %}"></script>
+    <script src="{% static 'app-assets/js/core/app.js' %}?v=0.1"></script>
+    <!-- END: Theme JS-->
+
+    <!-- BEGIN: Page JS-->
+    <!-- END: Page JS-->
+
+    <script>
+        $(window).on('load', function() {
+            if (feather) {
+                feather.replace({
+                    width: 14,
+                    height: 14
+                });
+            }
+        })
+    </script>
+    {% include 'transactions/jobsheets/invoice/customer/js-load-service-part.html' %}
+    {% include 'transactions/jobsheets/invoice/js-download-print-share.html' %}
+</body>
+<!-- END: Body-->
+
+</html>

@@ -1,0 +1,174 @@
+<div class="form-group-row">
+  <div class="form-group">
+    <label class="form-label">Price (₹) <span class="text-danger">*</span></label>
+    <div class="input-group">
+      <input type="number" class="form-control" name="{{ base }}value" step="0.01" min="0" placeholder="0.00" {% if price_value is not none %}value="{{ price_value }}"{% else %}value="0.00"{% endif %} required>
+      {% if 'user' in base %}
+      <div class="input-group-text">
+        <input class="form-check-input" type="checkbox" id="{{ base }}price_includes_gst" name="{{ base }}price_includes_gst" {% if price_includes_gst %}checked{% endif %}>
+        <label class="form-check-label ms-1" for="{{ base }}price_includes_gst">Inc. GST</label>
+      </div>
+      {% endif %}
+    </div>
+    <div class="invalid-feedback">Please enter a valid price</div>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Quantity <span class="text-danger">*</span></label>
+    <input type="number" class="form-control" name="{{ base }}quantity" {% if quantity_value is not none %}value="{{ quantity_value }}"{% else %}value="1"{% endif %} required>
+    <div class="invalid-feedback">Please enter quantity</div>
+  </div>
+</div>
+
+<div class="form-group-row">
+  <div class="form-group">
+    <label class="form-label">Tax (%)</label>
+    <input type="number" class="form-control" name="{{ base }}tax" step="0.01" min="0" value="18" placeholder="0.00">
+  </div>
+</div>
+
+{% if 'user' in base %}
+<div class="form-group-row mt-2">
+  <div class="form-group">
+    <div class="row g-1">
+      <div class="col-6">
+        <label class="form-label small">Discount Amount</label>
+        <input type="number" class="form-control" name="{{ base }}discount_amount" step="0.01" min="0" value="0.00">
+      </div>
+      <div class="col-6">
+        <label class="form-label small">Discount %</label>
+        <input type="number" class="form-control" name="{{ base }}discount" step="0.01" min="0" max="100" value="0">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="form-group-row mt-2">
+  <div class="form-group">
+    <label class="form-label">Purchase Price (₹)</label>
+    <input type="number" class="form-control" name="{{ base }}purchase_price" step="0.01" min="0" value="0.00">
+  </div>
+</div>
+{% else %}
+<!-- For existing selections, price is readonly already above; hide discount/purchase/purchase fields -->
+{% endif %}
+
+<!-- Style readonly fields with a slightly grey background -->
+<style>
+  /* Slightly grey background for readonly form controls (keep opacity 1 so text is clear) */
+  .form-control[readonly] {
+    background-color: #f7f7f9;
+    opacity: 1;
+  }
+</style>
+
+<script>
+(function () {
+  if (window._priceQtyTaxFieldsInit) return;
+  window._priceQtyTaxFieldsInit = true;
+
+  const num = v => isFinite(parseFloat(v)) ? parseFloat(v) : 0;
+  const getBase = (n, s) => n?.endsWith(s) ? n.slice(0, -s.length) : null;
+  const el = n => document.querySelector(`input[name="${n}"]`);
+
+  function getQty(base) {
+    const q = Math.max(num(el(base + 'quantity')?.value), 1);
+    return q;
+  }
+
+  function updatePurchasePrice(base) {
+    const priceEl = el(base + 'value');
+    const purchaseEl = el(base + 'purchase_price');
+    if (!priceEl || !purchaseEl) return;
+
+    const qty = getQty(base);
+    const tax = num(el(base + 'tax')?.value);
+    const discountPct = num(el(base + 'discount')?.value);
+    const incGst = el(base + 'price_includes_gst')?.checked;
+
+    const unitPrice = num(priceEl.dataset.unitPrice) || num(priceEl.value) / qty;
+    const baseUnit = incGst ? unitPrice / (1 + tax / 100) : unitPrice;
+    const discountedUnit = baseUnit * (1 - discountPct / 100);
+
+    purchaseEl.value = discountedUnit.toFixed(2);
+    purchaseEl.toggleAttribute('readonly', discountPct > 0);
+  }
+
+  function syncDiscountAmount(base) {
+    const priceEl = el(base + 'value');
+    const amtEl = el(base + 'discount_amount');
+    const pctEl = el(base + 'discount');
+    if (!priceEl || !amtEl || !pctEl) return;
+
+    const qty = getQty(base);
+    const unitPrice = num(priceEl.dataset.unitPrice) || num(priceEl.value) / qty;
+    const pct = num(pctEl.value);
+
+    const unitDiscount = (unitPrice * pct) / 100;
+    priceEl.dataset.unitDiscount = unitDiscount.toFixed(6);
+    amtEl.value = (unitDiscount * qty).toFixed(2);
+
+    updatePurchasePrice(base);
+  }
+
+  function syncDiscountPercent(base) {
+    const priceEl = el(base + 'value');
+    const amtEl = el(base + 'discount_amount');
+    const pctEl = el(base + 'discount');
+    if (!priceEl || !amtEl || !pctEl) return;
+
+    const qty = getQty(base);
+    const unitPrice = num(priceEl.dataset.unitPrice) || num(priceEl.value) / qty;
+    let totalDiscount = num(amtEl.value);
+
+    const unitDiscount = Math.min(totalDiscount / qty, unitPrice);
+    const pct = unitPrice ? (unitDiscount / unitPrice) * 100 : 0;
+
+    priceEl.dataset.unitDiscount = unitDiscount.toFixed(6);
+    pctEl.value = pct.toFixed(2);
+
+    updatePurchasePrice(base);
+  }
+
+  function updateTotalPrice(base) {
+    const priceEl = el(base + 'value');
+    if (!priceEl) return;
+
+    const qty = getQty(base);
+    let unitPrice = num(priceEl.dataset.unitPrice);
+
+    if (!unitPrice) {
+      unitPrice = num(priceEl.value) / qty;
+      priceEl.dataset.unitPrice = unitPrice.toFixed(6);
+    }
+
+    // If user manually edited the price, don't overwrite it from JS
+    const newVal = (unitPrice * qty).toFixed(2);
+    priceEl.value = newVal;
+
+    syncDiscountAmount(base);
+  }
+
+  document.addEventListener('input', e => {
+    const n = e.target.name;
+    if (!n) return;
+
+    if (n.endsWith('value')) {
+      const base = getBase(n, 'value');
+      const qty = getQty(base);
+      e.target.dataset.unitPrice = (num(e.target.value) / qty).toFixed(6);
+      syncDiscountAmount(base);
+    }
+
+    if (n.endsWith('quantity')) updateTotalPrice(getBase(n, 'quantity'));
+    if (n.endsWith('discount')) syncDiscountAmount(getBase(n, 'discount'));
+    if (n.endsWith('discount_amount')) syncDiscountPercent(getBase(n, 'discount_amount'));
+    if (n.endsWith('tax')) updatePurchasePrice(getBase(n, 'tax'));
+  });
+
+  document.addEventListener('change', e => {
+    if (e.target.name?.endsWith('price_includes_gst')) {
+      updatePurchasePrice(getBase(e.target.name, 'price_includes_gst'));
+    }
+  });
+})();
+</script>

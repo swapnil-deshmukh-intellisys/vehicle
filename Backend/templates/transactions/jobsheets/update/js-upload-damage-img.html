@@ -1,0 +1,249 @@
+<script>
+    $(document).ready(function() {        
+        // Store the current files, existing photos, and removed photos
+        let currentFiles = [];
+        let existingPhotos = [];
+        let removedPhotos = [];
+        
+        // Function to generate a unique ID for each file
+        function generateFileId(file) {
+            return file.name + file.size + file.lastModified;
+        }
+        
+        // Function to update the file input and photo count
+        function updatePhotoCount() {
+            // Only count existing photos that aren't marked for removal
+            const validExistingPhotos = existingPhotos.filter(p => !removedPhotos.includes(p));
+            const totalPhotos = validExistingPhotos.length + currentFiles.length;
+            $('#photoCount').text(`${totalPhotos}/10`);
+            
+            // Toggle upload area visibility
+            if (totalPhotos >= 10) {
+                $('#uploadArea').hide();
+            } else {
+                $('#uploadArea').show();
+            }
+        }
+        
+        // Initialize with existing photos
+        function initializeExistingPhotos() {
+            existingPhotos = [];
+            $('.photo-item[data-photo-path]').each(function() {
+                const photoPath = $(this).data('photo-path');
+                if (photoPath && !existingPhotos.includes(photoPath) && !removedPhotos.includes(photoPath)) {
+                    existingPhotos.push(photoPath);
+                }
+            });
+            // Initialize removedPhotos from hidden input if it exists
+            const removedPhotosInput = $('#removedPhotos').val();
+            if (removedPhotosInput) {
+                removedPhotos = JSON.parse(removedPhotosInput);
+            }
+            updatePhotoCount();
+        }
+        
+        // Function to update the file input
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            currentFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            $('#damagePhotos')[0].files = dataTransfer.files;
+            updatePhotoCount();
+        }
+        
+        // Function to create preview element
+        function createPreviewElement(file, fileId, isExisting = false, photoPath = '') {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const preview = `
+                    <div class="photo-item position-relative" ${isExisting ? `data-photo-path="${photoPath}"` : `data-file-id="${fileId}"`}>
+                        <img src="${e.target.result}" class="img-thumbnail rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                        <div class="photo-remove position-absolute top-0 end-0 m-1" style="cursor: pointer; background: rgba(255, 255, 255, 0.8); border-radius: 50%;" 
+                             ${isExisting ? `data-photo-path="${photoPath}"` : `data-file-id="${fileId}"`}>
+                            <i data-feather="x" class="text-danger" width="16" height="16"></i>
+                        </div>
+                    </div>
+                `;
+                
+                if (isExisting) {
+                    const existingPreview = $(`#photoPreview .photo-item[data-photo-path="${photoPath}"]`);
+                    if (existingPreview.length) {
+                        existingPreview.replaceWith(preview);
+                    } else {
+                        $('#photoPreview').append(preview);
+                    }
+                } else {
+                    const existingPreview = $(`#photoPreview .photo-item[data-file-id="${fileId}"]`);
+                    if (existingPreview.length) {
+                        existingPreview.replaceWith(preview);
+                    } else {
+                        $('#photoPreview').append(preview);
+                    }
+                }
+                
+                feather.replace();
+            };
+            
+            if (isExisting) {
+                // For existing photos, use the actual image URL
+                const img = new Image();
+                img.src = `/static/${photoPath}`;
+                reader.readAsDataURL(new Blob([], { type: 'image/jpeg' }));
+            } else {
+                // For new files, read the file data
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Initialize existing photos when document is ready
+        $(document).ready(function() {
+            initializeExistingPhotos();
+        });
+
+        // Photo upload preview with append functionality
+        $('#damagePhotos').on('change', function() {
+            let newFiles = Array.from(this.files);
+            const totalPhotos = existingPhotos.length + currentFiles.length;
+            const remainingSlots = 10 - totalPhotos;
+            
+            if (newFiles.length > remainingSlots) {
+                // Only take as many files as we have slots for
+                newFiles = newFiles.slice(0, remainingSlots);
+                toastr.warning(`Only ${remainingSlots} photo(s) added (10 photo limit)`, 'Limit Reached');
+            }
+            
+            // Process new files
+            for (const file of newFiles) {
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    toastr.error('File size should not exceed 5MB', 'Error');
+                    continue;
+                }
+                
+                // Check file type
+                if (!file.type.match('image.*')) {
+                    toastr.error('Only image files are allowed', 'Error');
+                    continue;
+                }
+                
+                // Generate unique ID for the file
+                const fileId = generateFileId(file);
+                
+                // Check if file already exists to avoid duplicates
+                const fileExists = currentFiles.some(f => generateFileId(f) === fileId);
+                
+                if (!fileExists) {
+                    // Store the file with its ID
+                    file.uniqueId = fileId;
+                    currentFiles.push(file);
+                    createPreviewElement(file, fileId, false);
+                } else {
+                    toastr.info('This photo has already been added', 'Duplicate');
+                }
+            }
+            
+            // Reset the file input to allow selecting the same file again
+            $(this).val('');
+            
+            updateFileInput();
+        });
+        
+        // Function to handle file selection
+        function triggerFileInput() {
+            const totalPhotos = existingPhotos.length + currentFiles.length;
+            const remainingSlots = 10 - totalPhotos;
+            
+            if (remainingSlots > 0) {
+                // Clear previous selection to allow selecting the same files again
+                $('#damagePhotos').val('');
+                $('#damagePhotos').click();
+            } else {
+                toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+            }
+        }
+        
+        // Handle photo removal - optimized for speed
+        $(document).on('click', '.photo-remove', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            const $removeBtn = $(this);
+            const fileId = $removeBtn.data('file-id');
+            const photoPath = $removeBtn.data('photo-path');
+            const $photoItem = $removeBtn.closest('.photo-item');
+            
+            // Immediate visual feedback
+            $photoItem.css('opacity', '0.5');
+            
+            if (fileId) {
+                // Remove newly added file (faster removal)
+                currentFiles = currentFiles.filter(file => file.uniqueId !== fileId);
+                $photoItem.remove();
+                updatePhotoCount();
+                updateFileInput();
+            } else if (photoPath) {
+                // Mark existing photo for removal (faster removal)
+                if (!removedPhotos.includes(photoPath)) {
+                    removedPhotos.push(photoPath);
+                    $('#removedPhotos').val(JSON.stringify(removedPhotos));
+                    
+                    // Remove from existing photos and DOM immediately
+                    existingPhotos = existingPhotos.filter(p => p !== photoPath);
+                    $photoItem.remove();
+                    updatePhotoCount();
+                }
+            }
+        });
+        
+        // Make upload area clickable
+        $('#uploadArea').on('click', triggerFileInput);
+        
+        // Handle drag and drop
+        const uploadArea = $('#uploadArea');
+        
+        uploadArea.on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const totalPhotos = existingPhotos.length + currentFiles.length;
+            if (totalPhotos < 10) {
+                $(this).addClass('border-primary bg-light');
+            }
+        });
+        
+        uploadArea.on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('border-primary bg-light');
+        });
+        
+        uploadArea.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('border-primary bg-light');
+            
+            const totalPhotos = existingPhotos.length + currentFiles.length;
+            if (totalPhotos >= 10) {
+                toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+                return;
+            }
+            
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                const remainingSlots = 10 - totalPhotos;
+                const filesToAdd = Array.from(files).slice(0, remainingSlots);
+                
+                if (files.length > remainingSlots) {
+                    toastr.warning(`Only ${remainingSlots} photo(s) added (10 photo limit)`, 'Limit Reached');
+                }
+                
+                const dataTransfer = new DataTransfer();
+                filesToAdd.forEach(file => dataTransfer.items.add(file));
+                
+                $('#damagePhotos')[0].files = dataTransfer.files;
+                $('#damagePhotos').trigger('change');
+            }
+        });
+    });
+</script>

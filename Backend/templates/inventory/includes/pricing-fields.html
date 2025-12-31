@@ -1,0 +1,42 @@
+<!-- Pricing Fields Template -->
+<div class="col-12 col-md-6">
+    <div class="mb-1">
+        <label class="form-label" for="{{ price_field_id|default:'price' }}">MRP<span class="text-danger">*</span></label>
+        <div class="input-group">
+            <input type="number" class="form-control" id="{{ price_field_id|default:'price' }}" name="{{ price_field_name|default:'price' }}" step="0.01" min="0" value="{{ price_value|default:'' }}" required>
+            {% if show_gst_checkbox %}
+            <div class="input-group-text">
+                <input class="form-check-input" type="checkbox" id="price_includes_gst" name="price_includes_gst" {% if price_includes_gst %}checked{% endif %}>
+                <label class="form-check-label ms-1" for="price_includes_gst">Inc. GST</label>
+            </div>
+            {% endif %}
+        </div>
+        <div class="text-danger small" id="price-error" style="display: none;"></div>
+    </div>
+</div>
+<div class="col-12 col-md-6">
+    <div class="mb-1">
+        <label class="form-label" for="gst">GST (%)</label>
+        <input type="number" class="form-control" id="gst" name="gst" step="0.01" min="0" value="{{ gst_value|default:'18' }}">
+    </div>
+</div>
+<div class="col-12 col-md-6">
+    <div class="mb-1">
+        <div class="row g-1">
+            <div class="col-6">
+                <label class="form-label small">Discount Amount</label>
+                <input type="number" class="form-control" id="discount_amount" step="0.01" min="0">
+            </div>
+            <div class="col-6">
+                <label class="form-label small">Discount %</label>
+                <input type="number" class="form-control" id="discount_percent" name="discount" step="0.01" min="0" max="100" value="{{ discount_value|default:'' }}">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-12 col-md-6">
+    <div class="mb-1">
+        <label class="form-label" for="purchase_price">Purchase Price<span class="text-danger">*</span></label>
+        <input type="number" class="form-control" id="purchase_price" name="purchase_price" step="0.01" min="0" value="{{ purchase_price_value|default:'' }}" required>
+    </div>
+</div>

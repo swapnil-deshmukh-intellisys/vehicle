@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Card #JC-2024-001 - Garage Management System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-bg: #f8fafc;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
+            color: var(--dark);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .container-fluid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        /* Compact Header */
+        .job-header {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .job-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .job-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+        }
+
+        .job-date {
+            color: var(--gray);
+            font-size: 11px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: #fee2e2; color: var(--danger); }
+        .status-progress { background: #fed7aa; color: var(--warning); }
+        .status-completed { background: #d1fae5; color: var(--success); }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-sm:hover {
+            background: var(--light-bg);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        /* Main Grid Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-title i {
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        /* Compact Info Rows */
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 11px;
+        }
+
+        .info-label {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-weight: 600;
+            text-align: right;
+        }
+
+        /* Full Width Cards */
+        .full-width {
+            grid-column: span 3;
+        }
+
+        .half-width {
+            grid-column: span 2;
+        }
+
+        /* Issues Tags */
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tag {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .tag i {
+            font-size: 9px;
+        }
+
+        .tag-danger { background: #fee2e2; color: var(--danger); }
+        .tag-warning { background: #fed7aa; color: var(--warning); }
+        .tag-success { background: #d1fae5; color: var(--success); }
+        .tag-info { background: #dbeafe; color: var(--primary); }
+
+        /* Services Grid */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .service-item {
+            background: var(--light-bg);
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .service-item i {
+            color: var(--primary);
+            font-size: 10px;
+        }
+
+        /* Compact Table */
+        .compact-table {
+            width: 100%;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .compact-table th {
+            background: var(--light-bg);
+            padding: 4px 6px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .compact-table td {
+            padding: 3px 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compact-table .total-row {
+            font-weight: 700;
+            background: var(--light-bg);
+        }
+
+        /* Timeline Compact */
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: var(--border);
+            z-index: 0;
+        }
+
+        .timeline-item {
+            text-align: center;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-dot {
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-dot.completed {
+            background: var(--primary);
+            color: white;
+        }
+
+        .timeline-dot i {
+            font-size: 10px;
+        }
+
+        .timeline-text {
+            font-size: 9px;
+            color: var(--gray);
+        }
+
+        /* Payment Progress */
+        .progress-bar-container {
+            background: var(--light-bg);
+            border-radius: 4px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 8px;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Damage Photos */
+        .damage-photos {
+            display: flex;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .damage-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+        }
+
+        /* Notes */
+        .notes-box {
+            background: var(--light-bg);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            line-height: 1.4;
+            color: var(--gray);
+        }
+
+        /* Two Column Layout for Some Sections */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                font-size: 11px;
+            }
+
+            .container-fluid {
+                max-width: 100%;
+                padding: 5px;
+            }
+
+            .btn-sm {
+                display: none !important;
+            }
+
+            .card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+
+            .main-grid {
+                gap: 8px;
+            }
+
+            .job-header {
+                border: 1px solid #ccc;
+                box-shadow: none;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width, .half-width {
+                grid-column: span 1;
+            }
+
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .timeline::before {
+                display: none;
+            }
+        }
+
+        /* Summary Stats */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 6px;
+            background: var(--light-bg);
+            border-radius: 4px;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 9px;
+            color: var(--gray);
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Compact Header -->
+        <div class="job-header">
+            <div class="job-title">
+                <div>
+                    <h1 class="job-number">Job Card #JC-2024-001</h1>
+                    <div class="job-date">Created: Dec 15, 2024 | 10:30 AM</div>
+                </div>
+                <span class="status-badge status-progress">In Progress</span>
+            </div>
+            <div class="actions">
+                <button class="btn-sm btn-primary" onclick="window.print()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button class="btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="btn-sm">
+                    <i class="fas fa-download"></i> PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Customer Info -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-user"></i> Customer
+                </h3>
+                <div class="info-row">
+                    <span class="info-label">Name:</span>
+                    <span class="info-value">John Davidson</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Mobile:</span>
+                    <span class="info-value">+91 98765 43210</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">john@email.com</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Type:</span>
+                    <span class="info-value">Premium</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address:</span>
+                    <span class="info-value">123 Main St</span>
+                </div>
+            </div>
+
+            <!-- Vehicle Info -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-car"></i> Vehicle
+                </h3>
+                <div class="info-row">
+                    <span class="info-label">Reg No:</span>
+                    <span class="info-value">MH 12 AB 1234</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Model:</span>
+                    <span class="info-value">Honda City VX</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Year:</span>
+                    <span class="info-value">2021</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ODO:</span>
+                    <span class="info-value">45,678 km</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fuel:</span>
+                    <span class="info-value">75%</span>
+                </div>
+            </div>
+
+            <!-- Delivery Info -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-clock"></i> Delivery
+                </h3>
+                <div class="info-row">
+                    <span class="info-label">Date:</span>
+                    <span class="info-value">Dec 18, 2024</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time:</span>
+                    <span class="info-value">5:00 PM</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Advisor:</span>
+                    <span class="info-value">Mike Wilson</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tech:</span>
+                    <span class="info-value">Robert Brown</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bay:</span>
+                    <span class="info-value">Bay 3</span>
+                </div>
+            </div>
+
+            <!-- Issues & Services Row -->
+            <div class="card full-width">
+                <div class="two-column">
+                    <div>
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-triangle"></i> Reported Issues
+                        </h3>
+                        <div class="tags-container">
+                            <span class="tag tag-danger">
+                                <i class="fas fa-bolt"></i> Engine Noise
+                            </span>
+                            <span class="tag tag-danger">
+                                <i class="fas fa-snowflake"></i> AC Not Cooling
+                            </span>
+                            <span class="tag tag-warning">
+                                <i class="fas fa-oil-can"></i> Oil Leak
+                            </span>
+                            <span class="tag tag-warning">
+                                <i class="fas fa-battery-half"></i> Battery Weak
+                            </span>
+                            <span class="tag tag-info">
+                                <i class="fas fa-compact-disc"></i> Brake Noise
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="card-title">
+                            <i class="fas fa-wrench"></i> Services Required
+                        </h3>
+                        <div class="services-grid">
+                            <div class="service-item">
+                                <i class="fas fa-oil-can"></i> Oil Change
+                            </div>
+                            <div class="service-item">
+                                <i class="fas fa-filter"></i> Air Filter
+                            </div>
+                            <div class="service-item">
+                                <i class="fas fa-battery-full"></i> Battery
+                            </div>
+                            <div class="service-item">
+                                <i class="fas fa-snowflake"></i> AC Service
+                            </div>
+                            <div class="service-item">
+                                <i class="fas fa-compact-disc"></i> Brake Pads
+                            </div>
+                            <div class="service-item">
+                                <i class="fas fa-cog"></i> Alignment
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Estimate & Payment -->
+            <div class="card half-width">
+                <h3 class="card-title">
+                    <i class="fas fa-calculator"></i> Cost Estimate & Payment
+                </h3>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Engine Oil</td>
+                            <td>4L</td>
+                            <td>₹500</td>
+                            <td>₹2,000</td>
+                        </tr>
+                        <tr>
+                            <td>Oil Filter</td>
+                            <td>1</td>
+                            <td>₹350</td>
+                            <td>₹350</td>
+                        </tr>
+                        <tr>
+                            <td>Air Filter</td>
+                            <td>1</td>
+                            <td>₹450</td>
+                            <td>₹450</td>
+                        </tr>
+                        <tr>
+                            <td>Brake Pads</td>
+                            <td>1 Set</td>
+                            <td>₹2,800</td>
+                            <td>₹2,800</td>
+                        </tr>
+                        <tr>
+                            <td>AC Service</td>
+                            <td>1</td>
+                            <td>₹1,500</td>
+                            <td>₹1,500</td>
+                        </tr>
+                        <tr>
+                            <td>Labour</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>₹2,500</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td colspan="3">Total</td>
+                            <td>₹9,600</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value">₹9,600</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹3,000</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹6,600</div>
+                        <div class="stat-label">Due</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">31%</div>
+                        <div class="stat-label">Paid</div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 31%;">
+                        31% Paid
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline & Damage -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-history"></i> Service Progress
+                </h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-dot completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-text">Received<br>Dec 15</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-text">Inspected<br>Dec 15</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot completed">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="timeline-text">Started<br>Dec 16</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot">
+                            <i class="fas fa-wrench"></i>
+                        </div>
+                        <div class="timeline-text">In Work<br>65%</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-dot">
+                            <i class="fas fa-flag"></i>
+                        </div>
+                        <div class="timeline-text">Ready<br>Dec 18</div>
+                    </div>
+                </div>
+
+                <h3 class="card-title" style="margin-top: 12px;">
+                    <i class="fas fa-camera"></i> Damage Assessment
+                </h3>
+                <div style="font-size: 10px; color: var(--gray); margin-bottom: 5px;">
+                    Front bumper scratches, left mirror adjustment needed, rear door dent
+                </div>
+                <div class="damage-photos">
+                    <img src="https://via.placeholder.com/50x50/2563eb/ffffff?text=F1" alt="Front" class="damage-photo">
+                    <img src="https://via.placeholder.com/50x50/6366f1/ffffff?text=S1" alt="Side" class="damage-photo">
+                    <img src="https://via.placeholder.com/50x50/8b5cf6/ffffff?text=R1" alt="Rear" class="damage-photo">
+                    <img src="https://via.placeholder.com/50x50/a855f7/ffffff?text=D1" alt="Damage" class="damage-photo">
+                </div>
+            </div>
+
+            <!-- Accessories & Checklist -->
+            <div class="card full-width">
+                <div class="two-column">
+                    <div>
+                        <h3 class="card-title">
+                            <i class="fas fa-tools"></i> Vehicle Accessories
+                        </h3>
+                        <div class="tags-container">
+                            <span class="tag tag-info">
+                                <i class="fas fa-key"></i> Spare Key
+                            </span>
+                            <span class="tag tag-info">
+                                <i class="fas fa-book"></i> Service Book
+                            </span>
+                            <span class="tag tag-info">
+                                <i class="fas fa-compact-disc"></i> Spare Wheel
+                            </span>
+                            <span class="tag tag-info">
+                                <i class="fas fa-toolbox"></i> Tool Kit
+                            </span>
+                            <span class="tag tag-info">
+                                <i class="fas fa-music"></i> Music System
+                            </span>
+                            <span class="tag tag-info">
+                                <i class="fas fa-fire-extinguisher"></i> Fire Ext.
+                            </span>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="card-title">
+                            <i class="fas fa-clipboard-check"></i> Service Checklist
+                        </h3>
+                        <div class="tags-container">
+                            <span class="tag tag-success">
+                                <i class="fas fa-check"></i> Engine Check
+                            </span>
+                            <span class="tag tag-success">
+                                <i class="fas fa-check"></i> Brake Test
+                            </span>
+                            <span class="tag tag-success">
+                                <i class="fas fa-check"></i> Fluid Levels
+                            </span>
+                            <span class="tag tag-success">
+                                <i class="fas fa-check"></i> Tire Pressure
+                            </span>
+                            <span class="tag tag-warning">
+                                <i class="fas fa-clock"></i> Battery Test
+                            </span>
+                            <span class="tag tag-warning">
+                                <i class="fas fa-clock"></i> AC Check
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service History -->
+            <div class="card half-width">
+                <h3 class="card-title">
+                    <i class="fas fa-clock-rotate-left"></i> Service History
+                </h3>
+                <table class="compact-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>ODO</th>
+                            <th>Service</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Oct 15, 2024</td>
+                            <td>42,000 km</td>
+                            <td>General Service</td>
+                            <td>₹4,500</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 20, 2024</td>
+                            <td>38,500 km</td>
+                            <td>Oil Change</td>
+                            <td>₹2,800</td>
+                        </tr>
+                        <tr>
+                            <td>Apr 10, 2024</td>
+                            <td>35,000 km</td>
+                            <td>Major Service</td>
+                            <td>₹12,000</td>
+                        </tr>
+                        <tr>
+                            <td>Jan 5, 2024</td>
+                            <td>31,000 km</td>
+                            <td>Brake Service</td>
+                            <td>₹3,200</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Notes -->
+            <div class="card">
+                <h3 class="card-title">
+                    <i class="fas fa-sticky-note"></i> Notes & Comments
+                </h3>
+                <div class="notes-box">
+                    • Customer requested priority service - upcoming trip<br>
+                    • Warranty check: Brake pads covered<br>
+                    • AC service approved after diagnosis<br>
+                    • Next service: 50,000 km / 6 months<br>
+                    • Special instruction: Call before delivery
+                </div>
+            </div>
+
+            <!-- Quick Summary Stats -->
+            <div class="card full-width">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-bar"></i> Quick Summary
+                </h3>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value">6</div>
+                        <div class="stat-label">Services</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Issues</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Days Est.</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">65%</div>
+                        <div class="stat-label">Progress</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹9,600</div>
+                        <div class="stat-label">Total Cost</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹3,000</div>
+                        <div class="stat-label">Advance</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">₹6,600</div>
+                        <div class="stat-label">Balance</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">Dec 18</div>
+                        <div class="stat-label">Delivery</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 10px; padding: 10px; background: white; border-radius: 8px; font-size: 10px; color: var(--gray);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>Generated on: Dec 16, 2024 | 2:30 PM</div>
+                <div>Garage Management System v2.0</div>
+                <div>Authorized by: Mike Wilson</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Print functionality
+        function printJobCard() {
+            window.print();
+        }
+
+        // Auto-refresh for real-time updates (optional)
+        // setInterval(() => {
+        //     location.reload();
+        // }, 60000); // Refresh every minute
+    </script>
+</body>
+</html>

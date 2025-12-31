@@ -1,0 +1,1466 @@
+{% extends 'index.html' %}
+{% load static %}
+
+{% block title %}Jobcard details{% endblock %}
+
+
+<!--start call summary only -->
+{% block navlink %}
+<li class="nav-item me-2 subsection-group" data-menu="createjobsheet" style="display: none;">
+                        <a class="nav-link" href="" style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+                            <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+                            <span>JobCard</span>
+                        </a>
+                    </li>
+{% endblock %}
+<!--end call summary only -->
+
+{% block style %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
+<style>
+    /* Override default styles for this page */
+    .content-wrapper {
+        background: #dddddd !important;
+    }
+
+    /* Job Card V2 Styles */
+    .job-card-v2 * {
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 500 !important;
+        color: var(--primary) !important;
+    }
+
+    .job-card-v2 {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    /* Variables */
+    .job-card-v2 {
+        /*--primary: #0066cc;*/
+        --success: #00aa00;
+        --warning: #ff9900;
+        --danger: #ff0000;
+        --dark: #000000;
+        --gray: #555555;
+        --light: #f5f5f5;
+        --border: #999999;
+    }
+
+    /* Job Header - Extra Large */
+    .jc-header {
+        background: var(--primary) !important;
+        border: none !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 15px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .jc-info {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 5px !important;
+    }
+
+    .jc-number {
+        font-size: 18px !important;
+        /*font-weight: 700 !important;*/
+        color: #3b82f6 !important;
+        margin: 0 !important;
+        letter-spacing: -0.3px !important;
+        line-height: 1.3 !important;
+        margin-top: -55px !important;
+    }
+
+    .jc-date {
+        color: black!important;
+        font-size: 14px !important;
+        font-weight: 400 !important;
+        opacity: 0.9;
+    }
+
+    .jc-type {
+        display: inline-block !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: black !important;
+        padding: 0px 0px !important;
+        border-radius: 15px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        margin-top: 5px !important;
+        backdrop-filter: blur(4px);
+    }
+
+    .header-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: 15px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .jc-status {
+        padding: 7px 7px !important;
+        border-radius: 10px !important;
+        font-size: 12px !important;
+        font-weight: 400 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        border: 2px solid !important;
+        width: 125px !important;
+        height: 30px !important;
+    }
+
+    .status-progress {
+        /*background: #ffeecc !important;*/
+        color: #ff9900 !important;
+        border-color: #ff9900 !important;
+    }
+
+    .jc-actions {
+        display: flex !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .jc-btn {
+        padding: 8px 16px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        border-radius: 6px !important;
+        border: 1px solid var(--primary) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        background-color: white !important;
+        color: var(--primary) !important;
+    }
+
+    .jc-btn-primary {
+        
+        color: white !important;
+        border-color: var(--primary) !important;
+        background: #0055aa !important;
+        border-color: #0055aa !important;
+    }
+
+    .jc-btn-primary:hover {
+        background: #0055aa !important;
+        border-color: #0055aa !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .jc-btn-whatsapp {
+        background: #25d366 !important;
+        color: white !important;
+        border-color: #25d366 !important;
+    }
+
+    .jc-btn-whatsapp:hover {
+        background: #1ebe57 !important;
+    }
+
+    .jc-btn-secondary {
+        background: white !important;
+        color: var(--primary) !important;
+        border-color: #d0d0d0 !important;
+    }
+    
+    .jc-btn-secondary:hover {
+        background: #f5f5f5 !important;
+        transform: translateY(-1px);
+    }
+
+    .jc-btn-pdf {
+        background: orange !important;
+        color: #ff0000 !important;
+        border-color: #ff0000 !important;
+    }
+
+    /* Grid Layout */
+    .jc-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        margin-bottom: 6px !important;
+    }
+
+    /* Card Styles - Extra Bold */
+    .jc-card {
+        background: white !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 10px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05) !important;
+        overflow: hidden !important;
+    }
+
+    .jc-card-header {
+        font-size: 16px !important;
+        font-weight: 600 !important;
+        color: white !important;
+        background: var(--primary) !important;
+        margin: -8px -8px 10px -8px !important;
+        padding: 12px 16px !important;
+        border-radius: 8px 8px 0 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        text-transform: none !important;
+    }
+
+    .jc-card-title {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        color: #3b82f6!important;
+        font-size: 13px !important;
+        margin: 0 !important;
+    }
+
+    .jc-card-title i {
+        font-size: 20px !important;
+    }
+
+    .jc-card-link {
+        background: white !important;
+        color: #0066cc !important;
+        padding: 6px 8px !important;
+        border-radius: 5px !important;
+        font-size: 13px !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+        
+    }
+
+   .jc-red-btn {
+        background: white !important;
+        color: red !important;
+        padding: 6px 8px !important;
+        border-radius: 5px !important;
+        font-size: 13px !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+        
+    }
+
+    .jc-green-btn {
+        background: white !important;
+        color: green!important;
+        padding: 6px 8px !important;
+        border-radius: 5px !important;
+        font-size: 13px !important;
+        text-decoration: none !important;
+        cursor: pointer !important;
+        
+    }
+
+    .jc-card-link:hover {
+        background: #3b82f6 !important;
+        color: white !important;
+    }
+    .jc-red-btn:hover {
+        background: red !important;
+        color: white !important;
+    }
+
+    .jc-green-btn:hover {
+        background: green !important;
+        color: white !important;
+    }
+
+    /* Info Rows - Extra Large */
+    .jc-info-row {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 3px 0 !important;
+        /*border-bottom: 2px dotted #999 !important;*/
+    }
+
+    .jc-info-label {
+        color: #555 !important;
+        font-size: 13px !important;
+        
+    }
+
+    .jc-info-value {
+        color: #000 !important;
+        font-size: 12px !important;
+        text-align: left !important;
+    }
+
+    /* Grid Spans */
+    .jc-full-width {
+        grid-column: span 3 !important;
+    }
+
+    .jc-two-thirds {
+        grid-column: span 2 !important;
+    }
+
+    /* Tags - Extra Large */
+    .jc-tags {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+    }
+
+
+    .reported-issue{
+       padding: 7px 5px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    text-transform: uppercase !important;
+    height:30px !important;
+    }
+
+    .jc-tag {
+    padding: 7px 5px !important;
+    border-radius: 24px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    border: 1px solid !important;
+    text-transform: uppercase !important;
+}
+
+    .tag-danger {
+        background: #ffcccc !important;
+        color: #ff0000 !important;
+        border-color: #ff0000 !important;
+    }
+
+     .service-required {
+        background: #f0f7ff !important;
+        color: black !important;
+        border-color: lightsteelblue !important;
+    }
+
+    .tag-warning {
+        background: #ffeecc !important;
+        color: #ff9900 !important;
+        border-color: #ff9900 !important;
+    }
+
+    .tag-success {
+        background: #ccffcc !important;
+        color: #00aa00 !important;
+        border-color: #00aa00 !important;
+    }
+
+    .tag-info {
+        background: #ccddff !important;
+        color: #0066cc !important;
+        border-color: #0066cc !important;
+    }
+
+    /* Service Grid - Large Items */
+    .jc-service-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 3px !important;
+        margin-top: 10px !important;
+    }
+
+    .jc-service-item {
+    background: #f5f5f5 !important;
+    padding: 7px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    display: flex !important
+;
+    align-items: center !important;
+    gap: 13px !important;
+    border: 2px solid #999 !important;
+}
+
+    .jc-service-item i {
+        color: #0066cc !important;
+        font-size: 22px !important;
+    }
+
+    /* Table - Extra Large */
+    .jc-table {
+        width: 100% !important;
+        font-size: 17px !important;
+        margin-top: 10px !important;
+        border: 2px solid #000 !important;
+        border-collapse: collapse !important;
+    }
+
+    .jc-table th {
+        background: #3b82f6 !important;
+        color: white !important;
+        padding: 4px !important;
+        text-align: left !important;
+        font-weight: 900 !important;
+        font-size: 13px !important;
+    }
+
+    .jc-table td {
+        padding: 2px 6px !important;
+        border-bottom: 1px solid #999 !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+    }
+
+    .jc-section-header {
+        background: #e0e0e0 !important;
+    }
+
+    .jc-section-header td {
+        font-weight: 900 !important;
+        font-size: 13px !important;
+        color: #000 !important;
+    }
+
+    .jc-total-row {
+        background: #97a4b8!important;
+    }
+
+    .jc-total-row td {
+        font-weight: 900 !important;
+        font-size: 13px !important;
+        color: #000 !important;
+        border-top: 3px solid #000 !important;
+    }
+
+    /* Payment Stats - Extra Large */
+    .jc-payment-stats {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 10px !important;
+        margin-top: 12px !important;
+    }
+
+    .jc-stat-box {
+        background: #f5f5f5 !important;
+        padding: 10px !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        border: 3px solid #999 !important;
+    }
+
+    .jc-stat-value {
+        font-size: 14px !important;
+        font-weight: 900 !important;
+        color: #000 !important;
+    }
+
+    .jc-stat-label {
+        font-size: 12px !important;
+        color: var(--primary) !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        opacity: 0.8;
+    }
+
+    .stat-success { 
+        color: #00aa00 !important; 
+    }
+    
+    .stat-danger { 
+        color: #ff0000 !important; 
+    }
+
+    /* Progress Bar - Extra Large */
+    .jc-progress-section {
+        margin-top: 12px !important;
+    }
+
+    .jc-progress-label {
+        font-size: 13px !important;
+        color: #555 !important;
+        margin-bottom: 6px !important;
+        color: #3b82f6 !important;
+    }
+
+    .jc-progress-bar {
+        background: #f5f5f5 !important;
+        
+        border-radius: 10px !important;
+        height: 36px !important;
+        overflow: hidden !important;
+        position: relative !important;
+    }
+
+    .jc-progress-fill {
+        height: 100% !important;
+        background: linear-gradient(90deg, #00aa00, #00dd00) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: white !important;
+        font-size: 14px !important;
+        font-weight: 900 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
+    }
+
+    /* Timeline - Extra Large */
+    .jc-timeline {
+        display: flex !important;
+        justify-content: space-between !important;
+        margin-top: 12px !important;
+        padding: 12px !important;
+        background: #f5f5f5 !important;
+        border-radius: 8px !important;
+        border: 2px solid #999 !important;
+    }
+
+    .jc-timeline-item {
+        text-align: center !important;
+        flex: 1 !important;
+    }
+
+    .jc-timeline-icon {
+    width: 36px !important;
+    height: 36px !important;
+    background: white !important;
+    border: 2px solid #0066cc !important;
+    border-radius: 50% !important;
+    margin: 0 auto 8px !important;
+    display: flex !important
+;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 8px !important;
+    font-weight: 900 !important;
+}
+
+    .jc-timeline-icon.done {
+        background: #00aa00 !important;
+        border-color: #00aa00 !important;
+        color: white !important;
+    }
+
+    .jc-timeline-icon.current {
+        background: #ff9900 !important;
+        border-color: #ff9900 !important;
+        color: white !important;
+        animation: pulse 1.5s infinite !important;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+
+    .jc-timeline-text {
+        font-size: 12px !important;
+       
+        color: #000 !important;
+        text-transform: uppercase !important;
+    }
+
+    /* Notes - Extra Large */
+    .jc-notes {
+        background: purple !important;
+        border: 4px solid #97a4b8 !important;
+        padding: 1px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        color: white !important;
+        line-height: 1.5 !important;
+    }
+
+    .jc-notes li {
+        margin-bottom: 8px !important;
+        font-size: 17px !important;
+    }
+
+    .big-number {
+        font-size: 12px !important;
+        font-weight: 900 !important;
+        color: #ff0000 !important;
+    }
+
+    /* Update Links - Large */
+    .jc-update-link {
+        display: inline-block !important;
+        background: #0066cc !important;
+        color: white !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-size: 12px !important;
+        font-weight: 800 !important;
+        text-decoration: none !important;
+        margin: 5px !important;
+        cursor: pointer !important;
+        border: 2px solid #0066cc !important;
+    }
+
+    .jc-update-link:hover {
+        background: white !important;
+        color: #0066cc !important;
+    }
+
+    .jc-update-link.success {
+        background: #00aa00 !important;
+        border-color: #00aa00 !important;
+    }
+
+    .jc-update-link.warning {
+        background: #ff9900 !important;
+        border-color: #ff9900 !important;
+    }
+
+    /* Quick Summary */
+    .jc-quick-info {
+        display: grid !important;
+        grid-template-columns: repeat(6, 1fr) !important;
+        gap: 8px !important;
+        margin-top: 10px !important;
+    }
+
+    .jc-quick-box {
+        background: #f5f5f5 !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        border: 2px solid #999 !important;
+    }
+
+    .jc-quick-icon {
+        font-size: 15px !important;
+        color: #0066cc !important;
+        margin-bottom: 0px !important;
+        font-weight: 900 !important;
+    }
+
+    .jc-quick-text {
+        font-size: 14px !important;
+        font-weight: 800 !important;
+        color: #000 !important;
+        text-transform: uppercase !important;
+    }
+
+    @media (max-width: 768px) {
+
+        .jc-number {
+            margin-top: 0px!important;
+            margin-left: -68px !important;
+            font-size:13px !important;
+        }
+        .jc-date {
+            margin-left: -65px !important;
+        }
+
+        .jc-type {
+            margin-left: -65px !important;
+        }
+
+        .jc-status-section{
+            margin-top: 10px !important;
+        }
+
+        .jc-status{
+            margin-left: -65px !important;
+        }
+
+        
+        
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .jc-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .jc-full-width,
+        .jc-two-thirds {
+            grid-column: span 1 !important;
+        }
+
+        .jc-service-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .jc-quick-info {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+
+        .jc-header {
+            flex-direction: column !important;
+        }
+
+        .jc-actions {
+            width: 100% !important;
+        }
+
+        .jc-btn {
+            flex: 1 !important;
+        }
+    }
+
+    @media print {
+        .sidebar,
+        .header-navbar,
+        .content-header,
+        .jc-btn,
+        .jc-card-link,
+        .jc-update-link {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+
+        .jc-card {
+            page-break-inside: avoid !important;
+        }
+    }
+</style>
+
+<style>
+.jc-status-section {
+     margin-top: -15px !important;
+    }
+
+.jc-header {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    background-color: white !important;
+}
+.jc-card {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+    padding-top: 10px !important;
+    padding-bottom: 20px !important;
+}
+.btn-outline-history {
+  border: 1px solid #3b82f6;   /* outline color */
+  color: #3b82f6;              /* text color */
+  background-color: transparent;
+}
+.btn-outline-danger{
+border: 1px solid red !important;   /* outline color */
+color: red !important;              /* text color */
+background-color: transparent!important;
+}
+
+ 
+
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <!-- <div class="content-wrapper container-xxl p-0"> -->
+        <!-- <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Job Card</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'r-home' %}">Home</a></li>
+                                <li class="breadcrumb-item"><a href="#">Job Cards</a></li>
+                                <li class="breadcrumb-item active">JC-2024-001</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+        
+        <div class="content-header row">
+    <!-- Left side: Page title + breadcrumbs -->
+    <div class="content-header-left col-md-9 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+            <div class="col-12">
+                <h2 class="content-header-title float-start mb-0">Job Card</h2>
+                <div class="breadcrumb-wrapper">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'r-home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="#">Job Cards</a></li>
+                        <li class="breadcrumb-item active">JC-2024-001</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right side: Action buttons -->
+    <div class="content-header-right col-md-3 col-12 d-flex align-items-center justify-content-end">
+        <div class="jc-actions d-flex gap-1">
+            <button class="jc-btn jc-btn-primary" onclick="window.print()">
+                🖨️ 
+            </button>
+            <button class="jc-btn jc-btn-whatsapp" onclick="shareWhatsApp()">
+                <i class="fab fa-whatsapp"></i> 
+            </button>
+           
+            <button class="jc-btn jc-btn-pdf">
+                📄 
+            </button>
+        </div>
+    </div>
+</div>
+
+
+        <div class="content-body">
+            <div class="job-card-v2">
+                <!-- Header -->
+                <div class="jc-header">
+                    <div class="jc-info" >
+                        <div class="jc-number" >JOB CARD #JC-2024-001</div>
+                        <div class="jc-date">Created: December 15, 2024</div>
+                        <div class="jc-type">TYPE: MAJOR SERVICE</div>
+                         <span class="jc-status status-progress">
+                            ⚙️ IN PROGRESS
+                        </span>
+                    </div>
+                                    <!-- STATUS (without outer card and without buttons) -->
+<div class="jc-status-section" >
+     <div class="jc-progress-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+        <div class="jc-progress-label">WORK PROGRESS</div>
+        <!-- <a href="#" class="jc-card-link btn btn-outline-history" onclick="viewHistory('customer')">Update</a> -->
+    </div>
+    <!-- <div class="jc-card-header">
+        <div class="jc-card-title">STATUS</div>
+    </div> -->
+    <!-- <hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;"> -->
+    
+    <div class="jc-timeline" style="display: flex; gap: 10px;height:81px;">
+        <div class="jc-timeline-item">
+            <div class="jc-timeline-icon done">✓</div>
+            <div class="jc-timeline-text">RECEIVED</div>
+        </div>
+        <div class="jc-timeline-item">
+            <div class="jc-timeline-icon done">✓</div>
+            <div class="jc-timeline-text">CHECKED</div>
+        </div>
+        <div class="jc-timeline-item">
+            <div class="jc-timeline-icon current">⚙️</div>
+            <div class="jc-timeline-text">WORKING</div>
+        </div>
+        <div class="jc-timeline-item">
+            <div class="jc-timeline-icon"></div>
+            <div class="jc-timeline-text">READY</div>
+        </div>
+    </div>
+
+    <!-- <div class="jc-progress-section">
+        <div class="jc-progress-label">WORK PROGRESS:</div>
+         <a href="#" class="jc-card-link btn btn-outline-history" onclick="viewHistory('customer')">Update</a>
+        <div class="jc-progress-bar">
+            <div class="jc-progress-fill" style="width: 65%;">65% DONE</div>
+        </div>
+    </div> -->
+
+    <div class="jc-progress-section">
+   
+    <div class="jc-progress-bar">
+        <div class="jc-progress-fill" style="width: 65%;">65% DONE</div>
+    </div>
+</div>
+
+    <!-- <center style="margin-top: 10px;">
+        <a href="#" class="jc-update-link warning" onclick="updateProgress()">
+            📊 UPDATE PROGRESS
+        </a>
+    </center> -->
+</div>
+                    <!-- <div class="header-right ">
+                       
+                        <div class="jc-actions">
+                           
+                         <button class="jc-btn jc-btn-primary" onclick="window.print()">
+                                🖨️ PRINT
+                            </button>
+                            <button class="jc-btn jc-btn-whatsapp" onclick="shareWhatsApp()">
+                                <i class="fab fa-whatsapp"></i> SHARE
+                            </button>
+                            <button class="jc-btn jc-btn-secondary">
+                                ✏️ EDIT
+                            </button>
+                            <button class="jc-btn jc-btn-pdf">
+                                📄 PDF
+                            </button> 
+
+
+                        </div>
+                    </div> -->
+                </div>
+
+
+
+
+                <!-- Main Grid -->
+                <div class="jc-grid mt-1">
+                    <!-- Customer Info -->
+                    <div class="jc-card">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                
+                                CUSTOMER
+                            </div>
+                            <a href="#" class="jc-card-link btn btn-outline-history" onclick="viewHistory('customer')">Update</a>
+                        </div>
+                    <!-- Light horizontal line -->
+<hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Name:</span>
+                            <span class="jc-info-value">JOHN DAVIDSON</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Mobile:</span>
+                            <span class="jc-info-value">98765-43210</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Type:</span>
+                            <span class="jc-info-value">⭐ PREMIUM</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">City:</span>
+                            <span class="jc-info-value">PUNE</span>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Info -->
+                    <div class="jc-card">
+                         <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                
+                                VEHICLE
+                            </div>
+                            <a href="#" class="jc-card-link btn btn-outline-history" onclick="viewHistory('customer')">Update</a>
+                        </div>
+                    <!-- Light horizontal line -->
+<hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Number:</span>
+                            <span class="jc-info-value">MH-12-AB-1234</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Model:</span>
+                            <span class="jc-info-value">HONDA CITY</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">KM:</span>
+                            <span class="jc-info-value">45,678 KM</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Fuel:</span>
+                            <span class="jc-info-value">⛽ 75%</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Info -->
+                    <div class="jc-card">
+                        <!-- <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                <i class="fas fa-clock"></i> DELIVERY
+                            </div>
+                            <a href="#" class="jc-card-link" onclick="sendNotification()">NOTIFY</a>
+                        </div> -->
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                               DELIVERY
+                            </div>
+                            <a href="#" class="jc-card-link btn btn-outline-history" onclick="viewHistory('customer')">Update</a>
+                        </div>
+                    <!-- Light horizontal line -->
+<hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Date:</span>
+                            <span class="jc-info-value">DEC 18, 2024</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Time:</span>
+                            <span class="jc-info-value">5:00 PM</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Mechanic:</span>
+                            <span class="jc-info-value">ROBERT</span>
+                        </div>
+                        <div class="jc-info-row">
+                            <span class="jc-info-label">Bay:</span>
+                            <span class="jc-info-value">BAY-3</span>
+                        </div>
+                    </div>
+
+
+                    <!-- pc start -->
+                    <!-- Single Card containing both Problems Found and Work To Do -->
+                    
+                    <div class="jc-card jc-full-width">
+
+    <!-- Card Header with two columns -->
+    <div class="jc-card-header d-flex gap-4">
+        <!-- Left: Reported Issues heading -->
+        <div class="d-flex flex-column" style="flex: 1;">
+            <div class="jc-card-title text-uppercase fw-bold">Reported Issues</div>
+        </div>
+
+        <!-- Right: Service Required heading -->
+        <div class="d-flex flex-column" style="flex: 1; margin-left: 40px;">
+            <div class="jc-card-title text-uppercase fw-bold">Service Required</div>
+        </div>
+    </div>
+
+    <hr style="margin-top:-12px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+
+    <div class="d-flex w-100 gap-4" style="margin-top: -10px;">
+        <!-- Left: Reported Issues tags -->
+        <div class="jc-tags d-flex flex-wrap gap-2" style="flex:1;">
+            <span class="reported-issue tag-danger">🔊 ENGINE NOISE</span>
+            <span class="reported-issue tag-danger">❄️ AC NOT COLD</span>
+            <span class="reported-issue tag-warning">🛢️ OIL LEAK</span>
+            <span class="reported-issue tag-warning">🔋 BATTERY WEAK</span>
+            <span class="reported-issue tag-warning">🛑 BRAKE NOISE</span>
+        </div>
+
+        <!-- Right: Service Required list -->
+          <div class="jc-service-grid d-flex flex-wrap gap-4" style="flex:1; margin-left:40px;">
+            <div class="reported-issue service-required "><i data-feather="droplet" style="color: #3b82f6 !important;"></i> OIL CHANGE</div>
+            <div class="reported-issue service-required" >    <i data-feather="wind" style="color: #3b82f6 !important;"></i> AIR FILTER</div>
+            <div class="reported-issue service-required" ><i data-feather="battery" style="color: #3b82f6 !important;"></i> BATTERY CHECK</div>
+            <div class="reported-issue service-required" ><i data-feather="cloud-snow" style="color: #3b82f6 !important;"></i> AC GAS FILL</div>
+            <div class="reported-issue service-required" ><i data-feather="truck" style="color: #3b82f6 !important;"></i> BRAKE PAD</div>
+            <div class="reported-issue service-required" ><i data-feather="sliders" style="color: #3b82f6 !important;"></i> ALIGNMENT</div>
+        </div> 
+
+
+        <!-- <div class="jc-service-grid d-flex flex-wrap" style="flex:1; gap:16px; margin-left:40px;">
+    <div class="reported-issue service-required" style="flex: 0 0 calc(50% - 8px); background-color:#e6f0ff; padding:10px;">
+        OIL CHANGE
+    </div>
+    <div class="reported-issue service-required" style="flex: 0 0 calc(50% - 8px); background-color:#e6f0ff; padding:10px;">
+        AIR FILTER
+    </div>
+    <div class="reported-issue service-required" style="flex: 0 0 calc(50% - 8px); background-color:#e6f0ff; padding:10px;">
+        BATTERY CHECK
+    </div>
+    <div class="reported-issue service-required" style="flex: 0 0 calc(50% - 8px); background-color:#e6f0ff; padding:10px;">
+        AC GAS FILL
+    </div>
+    <div class="reported-issue service-required" style="flex: 0 0 calc(50% - 8px); background-color:#e6f0ff; padding:10px;">
+        BRAKE PAD
+    </div>
+    <div class="reported-issue service-required" style="flex: 0 0 calc(50% - 8px); background-color:#e6f0ff; padding:10px;">
+        ALIGNMENT
+    </div>
+</div> -->
+
+
+    </div>
+
+</div>
+
+                    <!-- end pc -->
+
+                    <!-- Problems Found -->
+                    <div class="jc-card jc-full-width">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                PROBLEMS FOUND
+                            </div>
+                        </div>
+
+                        <hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        
+                        <div class="jc-tags">
+                            <span class="jc-tag tag-danger">
+                                🔊 ENGINE NOISE
+                            </span>
+                            <span class="jc-tag tag-danger">
+                                ❄️ AC NOT COLD
+                            </span>
+                            <span class="jc-tag tag-warning">
+                                🛢️ OIL LEAK
+                            </span>
+                            <span class="jc-tag tag-warning">
+                                🔋 BATTERY WEAK
+                            </span>
+                            <span class="jc-tag tag-warning">
+                                🛑 BRAKE NOISE
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Services to Do -->
+                    <div class="jc-card jc-two-thirds">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                 WORK TO DO
+                            </div>
+                            <a href="#" class="jc-card-link btn-outline-history" onclick="updateProgress()">UPDATE</a>
+                        </div>
+
+                        <hr style="margin-top:-12px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <!-- <div class="jc-service-grid">
+                            <div class="jc-service-item">
+                                <i class="fas fa-oil-can"></i> OIL CHANGE
+                            </div>
+                            <div class="jc-service-item">
+                                <i class="fas fa-filter"></i> AIR FILTER
+                            </div>
+                            <div class="jc-service-item">
+                                <i class="fas fa-battery-full"></i> BATTERY CHECK
+                            </div>
+                            <div class="jc-service-item">
+                                <i class="fas fa-snowflake"></i> AC GAS FILL
+                            </div>
+                            <div class="jc-service-item">
+                                <i class="fas fa-compact-disc"></i> BRAKE PAD
+                            </div>
+                            <div class="jc-service-item">
+                                <i class="fas fa-cog"></i> ALIGNMENT
+                            </div>
+                        </div> -->
+                        
+                         <div class="jc-service-grid">
+                            <div class="">
+                               OIL CHANGE
+                            </div>
+                            <div class="">
+                                 AIR FILTER
+                            </div>
+                            <div class="">
+                                 BATTERY CHECK
+                            </div>
+                            <div class="">
+                                 AC GAS FILL
+                            </div>
+                            <div class="">
+                                BRAKE PAD
+                            </div>
+                            <div class="">
+                                 ALIGNMENT
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <!-- Status -->
+                    <div class="jc-card">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                               STATUS
+                            </div>
+                        </div>
+                        <hr style="margin-top:-12px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <div class="jc-timeline">
+                            <div class="jc-timeline-item">
+                                <div class="jc-timeline-icon done">✓</div>
+                                <div class="jc-timeline-text">RECEIVED</div>
+                            </div>
+                            <div class="jc-timeline-item">
+                                <div class="jc-timeline-icon done">✓</div>
+                                <div class="jc-timeline-text">CHECKED</div>
+                            </div>
+                            <div class="jc-timeline-item">
+                                <div class="jc-timeline-icon current">⚙️</div>
+                                <div class="jc-timeline-text">WORKING</div>
+                            </div>
+                            <div class="jc-timeline-item">
+                                <div class="jc-timeline-icon"></div>
+                                <div class="jc-timeline-text">READY</div>
+                            </div>
+                        </div>
+                        <div class="jc-progress-section">
+                            <div class="jc-progress-label">WORK PROGRESS:</div>
+                            
+                            <div class="jc-progress-bar">
+                                <div class="jc-progress-fill" style="width: 65%;">
+                                    65% DONE
+                                </div>
+                            </div>
+                        </div>
+                        <center style="margin-top: 10px;">
+                            <a href="#" class="jc-update-link warning" onclick="updateProgress()">
+                                📊 UPDATE PROGRESS
+                            </a>
+                        </center>
+                    </div>
+
+                    <!-- Cost Table with Separated Parts & Service -->
+                    <div class="jc-card jc-two-thirds">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                 BILL DETAILS
+                            </div>
+                            <div class="">
+            <a href="#" class="jc-red-btn btn-outline-danger" >🔧ADD PARTS</a>
+            <a href="#" class="jc-green-btn btn-outline-success" style="margin-left:8px;" >⚙️ADD SERVICE</a>
+        </div>
+                            <!-- <a href="#" class="jc-card-link btn-outline-history" onclick="updatePayment()">UPDATE</a> -->
+                        </div>
+                        <hr style="margin-top:-12px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <table class="jc-table">
+                            <thead>
+                                <tr>
+                                    <th>ITEM</th>
+                                    <th>QTY</th>
+                                    <th>RATE</th>
+                                    <th>AMOUNT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="jc-section-header">
+                                    <td colspan="4">⚙️ PARTS</td>
+                                </tr>
+                                <tr>
+                                    <td>Engine Oil</td>
+                                    <td>4 L</td>
+                                    <td>₹500</td>
+                                    <td>₹2,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Oil Filter</td>
+                                    <td>1</td>
+                                    <td>₹350</td>
+                                    <td>₹350</td>
+                                </tr>
+                                <tr>
+                                    <td>Air Filter</td>
+                                    <td>1</td>
+                                    <td>₹450</td>
+                                    <td>₹450</td>
+                                </tr>
+                                <tr>
+                                    <td>Brake Pads</td>
+                                    <td>1 Set</td>
+                                    <td>₹2,800</td>
+                                    <td>₹2,800</td>
+                                </tr>
+                                <tr class="jc-section-header">
+                                    <td colspan="3">PARTS TOTAL</td>
+                                    <td>₹5,600</td>
+                                </tr>
+                                <tr class="jc-section-header">
+                                    <td colspan="4">🔧 SERVICE</td>
+                                </tr>
+                                <tr>
+                                    <td>AC Service</td>
+                                    <td>1</td>
+                                    <td>₹1,500</td>
+                                    <td>₹1,500</td>
+                                </tr>
+                                <tr>
+                                    <td>Labour Charge</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>₹2,500</td>
+                                </tr>
+                                <tr class="jc-section-header">
+                                    <td colspan="3">SERVICE TOTAL</td>
+                                    <td>₹4,000</td>
+                                </tr>
+                                <tr class="jc-total-row">
+                                    <td colspan="3">GRAND TOTAL</td>
+                                    <td>₹9,600</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Payment Info -->
+                    <div class="jc-card">
+                        <!-- <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                PAYMENT
+                            </div>
+                        </div>
+                        <hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;"> -->
+                        
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                 Payment
+                            </div>
+                            <a href="#" class="jc-card-link btn-outline-history" onclick="updateProgress()">UPDATE</a>
+                        </div>
+
+                        <hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+
+                        <div class="jc-payment-stats">
+                            <div class="jc-stat-box">
+                                <div class="jc-stat-value">₹9,600</div>
+                                <div class="jc-stat-label">TOTAL</div>
+                            </div>
+                            <div class="jc-stat-box">
+                                <div class="jc-stat-value stat-success">₹3,000</div>
+                                <div class="jc-stat-label">PAID</div>
+                            </div>
+                            <div class="jc-stat-box">
+                                <div class="jc-stat-value stat-danger">₹6,600</div>
+                                <div class="jc-stat-label">BALANCE</div>
+                            </div>
+                        </div>
+
+                          <!-- Payment Table -->
+    <!-- Payment Table -->
+<div class="jc-payment-table" style="margin-top:30px;">
+    <table class="table table-sm" style="width:100%; border-collapse: collapse; font-size:14px;">
+        <thead style="background: #f8f8f8; text-align:left;">
+            <tr>
+                <th style="padding:4px 9px;background-color:#3b82f6;color: white !important;">Name</th>
+                <th style="padding:4px 9px; border:1px solid #e5e5e5;background-color:#3b82f6;color: white !important;">Mode</th>
+                <th style="padding:4px 9px; border:1px solid #e5e5e5;background-color:#3b82f6;color: white !important;">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding:4px; border:1px solid #e5e5e5;">Rahul</td>
+                <td style="padding:4px; border:1px solid #e5e5e5;">Cash</td>
+                <td style="padding:4px; border:1px solid #e5e5e5;">₹3000</td>
+            </tr>
+           
+        </tbody>
+    </table>
+</div>
+
+                        <!-- <center style="margin-top: 10px;">
+                            <a href="#" class="jc-update-link success" onclick="updatePayment()">
+                                💰 UPDATE PAYMENT
+                            </a>
+                        </center> -->
+                    </div>
+
+                    <!-- Important Notes -->
+                    <div class="jc-card jc-full-width">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                             ⚠️ IMPORTANT NOTES ⚠️
+                            </div>
+                            <a href="#" class="jc-card-link btn-outline-history" onclick="sendNotification()">SEND SMS</a>
+                        </div>
+                        <hr style="margin-top:-12px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <div class="jc-notes">
+                            <ul style="margin: 0; padding-left: 25px;">
+                                <li>🔴 <span class="big-number">URGENT!</span> Customer going OUT OF TOWN</li>
+                                <li>✅ Brake pads in WARRANTY - NO CHARGE</li>
+                                <li>📞 CALL BEFORE DELIVERY: <span class="big-number">98765-43210</span></li>
+                                <li>⏰ Next service at <span class="big-number">50,000 KM</span></li>
+                                <li>⚠️ Check oil every <span class="big-number">1000 KM</span></li>
+                            </ul>
+                        </div>
+                        <center style="margin-top: 15px;">
+                            <a href="#" class="jc-update-link warning" onclick="sendNotification()">
+                                📱 SEND CUSTOMER NOTIFICATION
+                            </a>
+                        </center>
+                    </div>
+
+                    <!-- Quick Summary -->
+                    <div class="jc-card jc-full-width">
+                        <div class="jc-card-header">
+                            <div class="jc-card-title">
+                                SUMMARY
+                            </div>
+                        </div>
+                        <hr style="margin-top:-14px; border: none; border-top: 1px solid #e5e5e5; margin-left:-16px; margin-right:-16px;">
+                    
+                        <div class="jc-quick-info">
+                            <div class="jc-quick-box">
+                                <div class="jc-quick-icon">6</div>
+                                <div class="jc-quick-text">SERVICES</div>
+                            </div>
+                            <div class="jc-quick-box">
+                                <div class="jc-quick-icon">5</div>
+                                <div class="jc-quick-text">PROBLEMS</div>
+                            </div>
+                            <div class="jc-quick-box">
+                                <div class="jc-quick-icon">3</div>
+                                <div class="jc-quick-text">DAYS</div>
+                            </div>
+                            <div class="jc-quick-box">
+                                <div class="jc-quick-icon">65%</div>
+                                <div class="jc-quick-text">DONE</div>
+                            </div>
+                            <div class="jc-quick-box">
+                                <div class="jc-quick-icon">₹9.6K</div>
+                                <div class="jc-quick-text">TOTAL</div>
+                            </div>
+                            <div class="jc-quick-box">
+                                <div class="jc-quick-icon">₹6.6K</div>
+                                <div class="jc-quick-text">DUE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- </div> -->
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function shareWhatsApp() {
+        const message = 'Job Card: JC-2024-001\nCustomer: John Davidson\nVehicle: MH-12-AB-1234\nTotal: ₹9,600\nStatus: 65% Complete\nDelivery: Dec 18, 2024';
+        const whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(message);
+        window.open(whatsappUrl, '_blank');
+    }
+
+    function updatePayment() {
+        const amount = prompt('Enter payment amount:', '');
+        if (amount) {
+            alert('Payment of ₹' + amount + ' recorded');
+            // Add your API call here
+        }
+    }
+
+    function updateProgress() {
+        const progress = prompt('Enter progress percentage (0-100):', '65');
+        if (progress) {
+            document.querySelector('.jc-progress-fill').style.width = progress + '%';
+            document.querySelector('.jc-progress-fill').textContent = progress + '% DONE';
+            // Add your API call here
+        }
+    }
+
+    function sendNotification() {
+        if (confirm('Send SMS notification to customer?\nMobile: 98765-43210')) {
+            alert('✅ SMS notification sent successfully!');
+            // Add your SMS API call here
+        }
+    }
+
+    function viewHistory(type) {
+        alert('Opening ' + type + ' history');
+        // Add navigation to history page
+        // window.location.href = '/history/' + type + '/123';
+    }
+</script>
+{% endblock %}

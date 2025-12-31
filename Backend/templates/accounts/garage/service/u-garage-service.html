@@ -1,0 +1,172 @@
+{% extends "index.html" %}
+
+{% block title %}u-accounts-garage-service{% endblock %}
+
+{% block style %}
+<style>
+    .form-container {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .form-section {
+        padding: 2rem;
+    }
+    .form-section h4 {
+        color: #4b5563;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    .form-section h4:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 3px;
+        background-color: #7367f0;
+        border-radius: 2px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #7367f0;
+        box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.2);
+    }
+    .btn-primary {
+        background-color: #7367f0;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+    .btn-outline-secondary {
+        padding: 0.5rem 1.5rem;
+    }
+    .form-actions {
+        border-top: 1px solid #eaeaea;
+        padding: 1.5rem 2rem;
+        background-color: #f9fafb;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Accounts</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'r-accounts-garage' relgarageservice_obj.business.id %}">List Garage</a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'v-accounts-garage' relgarageservice_obj.garage.id %}">Garage Profile</a>
+                                </li>
+                                <li class="breadcrumb-item"><a href="{% url 'r-accounts-garage-service' relgarageservice_obj.garage.id %}">List Garage Service</a>
+                                </li>
+                                <li class="breadcrumb-item active">Update Garage Service
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="u-accounts-garage-service">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-9">
+                        <div class="card form-container">
+                            <form method="post" action="{% url 'u-accounts-garage-service' relgarageservice_obj.id %}">
+                                {% csrf_token %}
+                                <div class="row g-0">
+                                    <!-- Form Fields -->
+                                    <div class="col-12">
+                                        <div class="form-section">
+                                            <h4>Update Service Rate</h4>
+                                            <div class="row">                                                
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <label class="form-label" for="service_id">
+                                                        <i data-feather="tool" class="font-medium-2 me-50"></i>
+                                                        Service <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="service_id" name="service_id" required>
+                                                        {% for service_obj in service_objs %}
+                                                        <option value="{{service_obj.id}}" {% if service_obj.id == relgarageservice_obj.service.id %} selected {% endif %}>{{service_obj.service_type.name}} - {{service_obj.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <label class="form-label" for="cc_id">
+                                                        <i data-feather="credit-card" class="font-medium-2 me-50"></i>
+                                                        CC <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="cc_id" name="cc_id" required>
+                                                        {% for cc_obj in cc_objs %}
+                                                        <option value="{{cc_obj.id}}" {% if cc_obj.id == relgarageservice_obj.cc.id %} selected {% endif %}>{{cc_obj.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <label class="form-label" for="price">
+                                                        ₹ Price <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="number" class="form-control" name="price" step="0.01" min="0" value="{{relgarageservice_obj.price}}" required>
+                                                </div>
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <label class="form-label" for="status">
+                                                        <i data-feather="toggle-right" class="font-medium-2 me-50"></i>
+                                                        Status <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="status" name="status" required>
+                                                        <option value="active" {% if relgarageservice_obj.status == 'active' %} selected {% endif %}>Active</option>
+                                                        <option value="inactive" {% if relgarageservice_obj.status == 'inactive' %} selected {% endif %}>Inactive</option>
+                                                    </select>
+                                                </div> 
+                                                <div class="col-12">
+                                                    <label class="form-label" for="description">Description</label>
+                                                    <textarea class="form-control" name="description">{{relgarageservice_obj.description|default:''}}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Form Actions -->
+                                        <div class="form-actions d-flex justify-content-between">
+                                            <button type="reset" class="btn btn-outline-secondary waves-effect">
+                                                <i data-feather="refresh-ccw" class="me-25"></i> Reset
+                                            </button>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-25"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}{% endblock %}

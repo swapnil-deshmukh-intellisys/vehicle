@@ -1,0 +1,1235 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-prf-customers{% endblock %}
+
+{% block navlink %}
+ <!-- customers Summary -->
+<li class="nav-item me-2 subsection-group" data-menu="customer" style="display: none;">
+    <a class="nav-link" href="{% url 'r-prf-summary' %}" style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+        <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>Summary</span>
+    </a>
+</li>
+<li class="nav-item me-2 subsection-group" data-menu="customer" style="display: none;">
+    <a class="nav-link" href="{% url 'r-prf-customers' %}" style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+        <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>Customers</span>
+    </a>
+</li>
+<li class="nav-item me-2 subsection-group" data-menu="customer" style="display: none;">
+    <a class="nav-link" href="{% url 'r-prf-vehicles' %}" style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+        <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+        <span>Vehicles</span>
+    </a>
+</li>
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="{% static 'app-assets/fonts/inter/inter.css' %}">{# Local Inter font #}
+<style>
+    /* Apply Inter font to the entire page */
+    body, .table, .card, .btn, .form-control, .badge {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    /* Enhanced Table Styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin-top: -8px;
+    }
+    
+    .table thead th {
+        border-bottom: none;
+        background-color: #3b82f6 !important;
+        padding: 18px 18px 12px 18px;
+        font-weight: 600;
+        color: #ffffff !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table tbody tr {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 8px;
+        background-color: #ffffff;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .table tbody td {
+        padding: 16px 18px;
+        vertical-align: middle;
+        border-top: none;
+    }
+    
+    /* Purple Button Styling */
+    .btn-purple {
+        background-color: #1304b9;
+        border-color: #1304b9;
+        color: #fff;
+    }
+    
+    .btn-purple:hover {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(115, 103, 240, 0.4);
+    }
+
+    /* Purple Light Button Styling */
+    .btn-purple-light {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+    
+    .btn-purple-light:hover {
+        background-color: #1304b9;
+        border-color: #1304b9;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(115, 103, 240, 0.4);
+    }
+    
+    /* Red Button Styling */
+    .btn-red {
+        background-color: #b80505;
+        border-color: #b80505;
+        color: #fff;
+    }
+    
+    .btn-red:hover {
+        background-color: #f05252;
+        border-color: #f05252;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Red Light Button Styling */
+    .btn-red-light {
+        background-color: #f05252;
+        border-color: #f05252;
+        color: #fff;
+    }
+    
+    .btn-red-light:hover {
+        background-color: #b80505;
+        border-color: #b80505;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Blue Button Styling */
+    .btn-blue {
+        background-color: #ad2edf;
+        border-color: #ad2edf;
+        color: #fff;
+    }
+    
+    .btn-blue:hover {
+        background-color: #58027a;
+        border-color: #58027a;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Skyblue Button Styling */
+    .btn-skyblue {
+        background-color: #15a8a1;
+        border-color: #15a8a1;
+        color: #fff;
+    }
+    
+    .btn-skyblue:hover {
+        background-color: #15a8a1d2;
+        border-color: #15a8a1d2;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Pulse Animation */
+    .pulse-animation {
+        position: relative;
+    }
+    
+    .pulse-animation:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(115, 103, 240, 0.7);
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(115, 103, 240, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(115, 103, 240, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(115, 103, 240, 0);
+        }
+    }
+</style>
+<style>
+    :root {
+        --primary: #5851e1;
+        --primary-light: #eeedfb;
+        --success: #5851e1;
+        /* Changed from green to primary color */
+        --danger: #f05252;
+        --warning: #ff9f43;
+        --info: #3f87f5;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --border-radius: 0.5rem;
+        --box-shadow: 0 4px 12px 0 rgba(31, 41, 55, 0.08);
+    }
+
+    /* Modern Card Styling */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: all 0.3s ease;
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        /*background: var(--primary);*/
+        background: #3b82f6;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px 0 rgba(31, 41, 55, 0.1);
+    }
+
+    .card:hover::before {
+        opacity: 1;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+        overflow-x: auto;
+        border-radius: var(--border-radius);
+        padding: 0;
+    }
+
+    .table {
+        --bs-table-striped-bg: rgba(88, 81, 225, 0.02);
+        --bs-table-hover-bg: rgba(88, 81, 225, 0.04);
+        --bs-table-bg: transparent;
+        margin-bottom: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    /* Override bootstrap table success colors */
+    .table-success {
+        --bs-table-bg: rgba(88, 81, 225, 0.1) !important;
+        --bs-table-striped-bg: rgba(88, 81, 225, 0.15) !important;
+        --bs-table-striped-color: #1f2937 !important;
+        --bs-table-active-bg: rgba(88, 81, 225, 0.2) !important;
+        --bs-table-active-color: #1f2937 !important;
+        --bs-table-hover-bg: rgba(88, 81, 225, 0.15) !important;
+        --bs-table-hover-color: #1f2937 !important;
+        color: #1f2937 !important;
+        border-color: rgba(88, 81, 225, 0.2) !important;
+    }
+
+    .table> :not(caption)>*>* {
+        padding: 0.85rem 1.25rem;
+        vertical-align: middle;
+    }
+
+    .table thead th {
+        border-bottom: 1px solid #edf2f7;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.3px;
+        color: #ffffff !important;
+        background-color: #3b82f6 !important;
+        text-transform: uppercase;
+        padding: 18px 1.25rem 12px 1.25rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.35em 0.85em;
+        font-size: 0.7em;
+        font-weight: 500;
+        border-radius: 12px;
+        text-transform: capitalize;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        letter-spacing: 0.3px;
+    }
+
+    .status-badge::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 6px;
+        background: currentColor;
+    }
+
+    /* Action Buttons */
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btns .btn {
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-width: 1px;
+        font-size: 0.8rem;
+    }
+
+    .action-btns .btn i {
+        font-size: 1em;
+    }
+
+    .btn-outline-primary {
+        color: var(--text-primary);
+        border-color: var(--text-primary);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--text-primary);
+        color: white;
+    }
+
+    .btn-outline-danger {
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+
+    .btn-outline-danger:hover {
+        background-color: var(--danger);
+        color: white;
+    }
+
+    .btn-outline-info {
+        color: var(--info);
+        border-color: var(--info);
+    }
+
+    .btn-outline-info:hover {
+        background-color: var(--info);
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    /* Search and Filter */
+    .search-filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background: #fff;
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+
+    .card-header {
+        background: transparent;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(34, 41, 47, 0.05);
+    }
+    
+    tr.clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    tr.clickable-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Prevent the checkbox from triggering row click */
+    tr.clickable-row input[type="checkbox"] {
+        pointer-events: auto;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-box .input-group-text {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 4;
+        border: none;
+        background: transparent;
+        padding: 0 1rem;
+    }
+
+    .search-box .form-control {
+        padding-left: 2.8rem;
+        border-radius: 6px !important;
+        border: 1px solid #d8d6de;
+        transition: all 0.3s;
+    }
+
+    .search-box .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
+    }
+
+    .filter-select {
+        min-width: 150px;
+        border-radius: 6px !important;
+        border: 1px solid #d8d6de;
+        transition: all 0.3s;
+    }
+
+    .filter-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
+    }
+
+    /* Status Badges */
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .badge-open {
+        background-color: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
+    }
+    
+    .badge-finalized {
+        background-color: rgba(40, 199, 111, 0.15);
+        color: #28c76f;
+    }
+    
+    /* Time Indicator Styling */
+    .time-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        position: relative;
+    }
+    
+    .time-indicator.recent {
+        border-right: 3px solid #28c76f;
+    }
+    
+    .time-indicator.older {
+        border-right: 3px solid #ea5455;
+    }
+    
+    .time-indicator i {
+        color: #6e6b7b;
+    }
+    
+    .time-indicator small {
+        color: #6e6b7b;
+        font-size: 0.85rem;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-filter-container {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .search-box,
+        .filter-select {
+            width: 100%;
+            min-width: 100%;
+        }
+
+        .table td,
+        .table th {
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    /* Pagination */
+    .pagination {
+        margin: 1.5rem 0 0 0;
+        justify-content: flex-end;
+    }
+
+    .pagination .page-link {
+        border: 1px solid #e0e0e0;
+        margin: 0 0.25rem;
+        min-width: 2.286rem;
+        height: 2.286rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #5e5873;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .pagination .page-link:hover {
+        background: #f5f5f5;
+        color: var(--primary);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        box-shadow: 0 4px 10px 0 rgba(115, 103, 240, 0.3);
+    }
+
+    .page-item .page-link {
+        border-radius: 50% !important;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 2px;
+        border: none;
+        color: #6e6b7b;
+    }
+
+    .page-item.active .page-link {
+        background-color: #7367f0;
+        color: #fff;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: #f8f7fa;
+        border-radius: var(--border-radius);
+        margin: 1.5rem 0;
+    }
+
+    .empty-state .avatar {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(115, 103, 240, 0.1) !important;
+    }
+
+    .empty-state .avatar i {
+        font-size: 3rem;
+        color: var(--primary);
+    }
+
+    .empty-state h4 {
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        color: #6e6b7b;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state .btn {
+        padding: 0.7rem 1.5rem;
+        font-weight: 500;
+        border-radius: 6px;
+    }
+
+    .empty-state .avatar {
+        margin: 0 auto 1.5rem;
+    }
+
+    /* Pagination Styling */
+    .pagination {
+        margin-bottom: 0;
+    }
+    
+    .pagination .page-item {
+        margin: 0 2px;
+    }
+    
+    .pagination .page-item .page-link {
+        border-radius: 50%;
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-weight: 500;
+        border: none;
+        box-shadow: 0 2px 4px rgba(115, 103, 240, 0.15);
+        transition: all 0.2s ease;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .pagination .page-item .page-link:hover:not(.disabled) {
+        background-color: rgba(115, 103, 240, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .pagination .page-item.disabled .page-link {
+        background-color: #f8f8f8;
+        color: #b9b9c3;
+        opacity: 0.7;
+    }
+    
+    /* Responsive improvements for mobile devices */
+    @media (max-width: 767px) {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .search-container {
+            width: 100%;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-top: 1rem;
+        }
+        
+        .search-box {
+            width: 100%;
+        }
+        
+        .search-box input {
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+        
+        .table-responsive {
+            margin-top: 1rem;
+        }
+        
+        .pagination .page-item .page-link {
+            min-width: 32px;
+            height: 32px;
+        }
+        
+        .pagination .page-item {
+            margin: 0 1px;
+        }
+        
+        .time-indicator {
+            white-space: nowrap;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem;
+        }
+    }
+    
+    /* Modal Styling */
+    .modal-content {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 5px 40px rgba(34, 41, 47, 0.15);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: var(--primary);
+        color: white;
+        padding: 1.2rem 1.5rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .modal-header .btn-close {
+        filter: invert(1) brightness(10);
+        opacity: 0.8;
+        transition: all 0.2s;
+    }
+
+    .modal-header .btn-close:hover {
+        opacity: 1;
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        background: #f9fafb;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #334155;
+    }
+
+    .form-select,
+    .form-control {
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        border-color: #e2e8f0;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(88, 81, 225, 0.1);
+        outline: none;
+    }
+
+    .damage-photo-thumbnail {
+        transition: transform 0.2s;
+        margin: 2px;
+        cursor: pointer;
+        border: 1px solid #000;
+    }
+    .damage-photo-thumbnail:hover {
+        transform: scale(1.1);
+        z-index: 1000;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+</style>
+
+<!-- card view style -->
+<style>
+@media (max-width: 768px) {
+  .card-body p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .card-body .btn {
+    padding: 4px 8px;
+  }
+}
+
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title mb-0">Customers</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">               
+                <section  id="r-prf-customers">
+                    <!-- Responsive tables start -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div>
+                                        {% if 'add' in useruiacl.Profile.Customers %} 
+                                        <button type="button" class="btn btn-sm btn-icon btn-success rounded-circle shadow-sm" data-bs-toggle="modal" data-bs-target="#c-prf-customers-modal">
+                                            <i data-feather='plus-square'></i>
+                                        </button>    
+                                        {% endif %}
+
+                                        {% if 'delete' in useruiacl.Profile.Customers %}
+                                            {% if customer_objs %}
+                                            <button type="button" id="delPrfCustomers" class="btn btn-sm btn-icon btn-danger rounded-circle shadow-sm"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete customers">
+                                                <i data-feather='trash-2'></i>
+                                            </button>                                     
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% if 'edit' in useruiacl.Profile.Customers %}
+                                            {% if customer_objs %}
+                                            <button type="button" class="btn btn-sm btn-icon btn-info rounded-circle shadow-sm" data-bs-toggle="modal" data-bs-target="#f-prf-customers-modal">
+                                                <i data-feather='search'></i>
+                                            </button>    
+                                            {% endif %}
+                                        {% endif %}
+                                        
+                                        <a href="{% url 'r-prf-customers' %}" class="btn btn-sm btn-icon btn-secondary rounded-circle shadow-sm"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Refresh">
+                                            <i data-feather='refresh-cw'></i>
+                                        </a> 
+                                    </div>
+                                    {% if customer_objs %}
+                                    <div class="search-container position-relative">
+                                        <div class="search-box position-relative">
+                                        <i data-feather="search" class="text-primary position-absolute"
+                                            style="left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px;"></i>
+                                        <input type="text" id="searchInputPrfCustomers"
+                                                class="form-control form-control-lg border-0 shadow-sm rounded-pill ps-5"
+                                                placeholder="Search..."
+                                                style="min-width: 320px; background-color: #f8fafc; transition: all 0.3s ease;"
+                                                oninput="searchTable('searchInputPrfCustomers', 'tablePrfCustomers')">
+                                        <div class="search-spinner position-absolute d-none" style="top: 12px; right: 15px;">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                            <span class="visually-hidden">Searching...</span>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>                            
+                                {% if customer_objs %}
+                                    <div class="table-responsive">
+                                        <table class="table table-hover align-middle mb-0" id="tablePrfCustomers">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="text-nowrap form-check-success">
+                                                        {% if 'delete' in useruiacl.Profile.Customers %}
+                                                        <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all customers"> 
+                                                        {% endif %}
+                                                        Phone
+                                                    </th>
+                                                    <th scope="col" class="text-nowrap">Name</th>
+                                                    <th scope="col" class="text-nowrap">Email</th>
+                                                    <th scope="col" class="text-nowrap">Vehicles</th>  
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for customer in customer_objs %}
+                                                <tr class="clickable-row" data-href="{% url 'u-prf-customers' customer.id %}">
+                                                    <td class="text-nowrap d-flex">
+                                                        {% if 'delete' in useruiacl.Profile.Customers %}
+                                                        <form method="post" class="form-check-success">
+                                                            {% csrf_token %}
+                                                            <input  class="form-check-input me-1" type="checkbox" name="checkedPrfCustomers" value="{{customer.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select customer">  
+                                                        </form> 
+                                                        {% endif %}
+                                                        {% if 'edit' in useruiacl.Profile.Customers %}
+                                                        <div class="d-flex flex-column">
+                                                            <div class="fw-semibold">
+                                                                <span>
+                                                                    <i data-feather="phone" class="text-primary me-50" width="14" height="14"></i>
+                                                                    {{ customer.phone|default:'-' }}
+                                                                </span>                                                           
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}                                                  
+                                                    </td> 
+                                                    <td>
+                                                        <div class="d-flex flex-column">
+                                                            <div class="fw-semibold">
+                                                                <span>
+                                                                    <i data-feather="user" class="text-primary me-50" width="14" height="14"></i>
+                                                                    {{customer.name|default:'-'}}
+                                                                </span>                                                           
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex flex-column">
+                                                            <div class="fw-semibold">
+                                                                <span>
+                                                                    <i data-feather="mail" class="text-primary me-50" width="14" height="14"></i>
+                                                                    {{customer.email|default:'-'}}
+                                                                </span>                                                           
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex flex-column">
+                                                            <div class="fw-semibold">
+                                                                <span>
+                                                                    <i class="fas fa-motorcycle text-primary me-50" width="14" height="14"></i>
+                                                                    {{customer.vehicle_count|default:'0'}}
+                                                                </span>                                                           
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>                                    
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <div class="card-header">
+                                            <div>                                    
+                                                Showing {{ customer_objs.start_index }} to {{ customer_objs.end_index }} of {{ customer_objs.paginator.count }} entries
+                                            </div>
+                                            <div> 
+                                                {% if customer_objs.has_other_pages %}
+                                                    <nav aria-label="Page navigation">
+                                                        <ul class="pagination pagination-success">  
+
+                                                            <!-- First Page Link -->
+                                                            {% if customer_objs.number > 1 %}
+                                                            <li class="page-item first">
+                                                                <a href="?page=1&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link">First</a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item first disabled">
+                                                                <span class="page-link">First</span>
+                                                            </li>
+                                                            {% endif %}   
+
+                                                            <!-- Previous Page Link -->
+                                                            {% if customer_objs.has_previous %}
+                                                            <li class="page-item prev">
+                                                                <a href="?page={{ customer_objs.previous_page_number }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link" aria-label="Previous"></a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item prev disabled">
+                                                                <span class="page-link" aria-label="Previous"></span>
+                                                            </li>
+                                                            {% endif %}
+
+                                                            <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                            {% for page in customer_objs.paginator.page_range %}
+                                                                {% if page >= customer_objs.number|add:'-1' and page <= customer_objs.number|add:'1' %}
+                                                                    {% if page == customer_objs.number %}
+                                                                    <li class="page-item active">
+                                                                        <span class="page-link">{{ page }}</span>
+                                                                    </li>
+                                                                    {% else %}
+                                                                    <li class="page-item">
+                                                                        <a href="?page={{ page }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link">{{ page }}</a>
+                                                                    </li>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+
+                                                            <!-- Next Page Link -->
+                                                            {% if customer_objs.has_next %}
+                                                            <li class="page-item next">
+                                                                <a href="?page={{ customer_objs.next_page_number }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link" aria-label="Next"></a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item next disabled">
+                                                                <span class="page-link" aria-label="Next"></span>
+                                                            </li>
+                                                            {% endif %}
+
+                                                            <!-- Last Page Link -->
+                                                            {% if customer_objs.number < customer_objs.paginator.num_pages %}
+                                                            <li class="page-item last">
+                                                                <a href="?page={{ customer_objs.paginator.num_pages }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link">Last</a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item last disabled">
+                                                                <span class="page-link">Last</span>
+                                                            </li>
+                                                            {% endif %}
+
+                                                        </ul>
+                                                    </nav>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>  
+                                    {% else %}
+                                    <div class="text-center">
+                                        <div class="avatar bg-light-danger avatar-xl">
+                                            <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                        </div>
+                                        <p class="card-text fw-bolder">No data available.</p>
+                                        <p class="card-text fw-bold">Click on <i data-feather='user-plus'></i> icon to add customer.</p>
+                                    </div> 
+                                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Responsive tables end -->
+                </section>
+            </div>
+        </div>
+    </div>
+
+
+<!-- Search Customers Modal -->
+<div class="modal fade text-start" id="f-prf-customers-modal" tabindex="-1" aria-labelledby="f-prf-customers-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <small class="modal-title" id="f-prf-customers-modal-label">Search Customer</small>
+                <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="get" action="{% url 'r-prf-customers' %}">
+                    <div class="row">                                                                
+                        <div class="col-12 col-md-4 mb-1">                                                                
+                            <label class="form-label" for="searchby_name">Search By Name</label>
+                            <input type="text" class="form-control" name="searchby_name" />
+                        </div>
+                        <div class="col-12 col-md-4 mb-1">                                                                
+                            <label class="form-label" for="searchby_phone">Search By Phone</label>
+                            <input type="text" class="form-control" name="searchby_phone" />
+                        </div>
+                        <div class="col-12 col-md-4 mb-1">                                                                
+                            <label class="form-label" for="searchby_vehiclenumber">Search By Vehicle Number</label>
+                            <input type="text" class="form-control" name="searchby_vehiclenumber" />
+                        </div>
+                        <div class="col-12 text-end">                                                            
+                            <button type="submit" class="btn btn-sm btn-success">Search</button>
+                        </div>
+                    </div>
+                </form>    
+            </div>                                                 
+        </div>
+    </div>
+</div>
+<!-- Search Customers Modal -->  
+ 
+<!-- Create Customers Modal -->
+<div class="modal fade text-start" id="c-prf-customers-modal" tabindex="-1" aria-labelledby="c-prf-customers-modal-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <small class="modal-title" id="c-prf-customers-modal-label">Add Customer</small>
+                <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="customerForm" action="{% url 'c-prf-customers' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">                                  
+                        <div class="col-12 col-md-4 mb-1">
+                            <label class="form-label" for="phone">Phone<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="phone" id="modalPhone" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required/>
+                        </div>
+                        <div class="col-12 col-md-4 mb-1">
+                            <label class="form-label" for="phone">Alternate Phone</label>
+                            <input type="text" class="form-control" name="alt_phone" id="altPhone" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number"/>
+                        </div>
+                        <div class="col-12 col-md-4 mb-1">                                                                
+                            <label class="form-label" for="name">Name<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="col-12 col-md-4 mb-1">
+                            <label class="form-label" for="email">Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text">@</span>                                                 
+                                <input type="email" class="form-control trimwhitespace" name="email" />
+                            </div>
+                        </div> 
+                        <div class="col-12 col-md-4 mb-1">                                                                
+                            <label class="form-label" for="gst">GST</label>
+                            <input type="text" class="form-control" name="gst">
+                        </div>   
+                        <div class="col-12 col-md-4 mb-1">
+                            <label class="form-label" for="pincode">Pincode</label>
+                            <input type="text" class="form-control" name="pincode" pattern="[0-9]{6}" title="Please enter a 6-digit pincode" />
+                        </div>
+                        <div class="col-12 mb-1">                                                                
+                            <label class="form-label" for="address">Address</label>
+                            <textarea class="form-control" name="address"></textarea>
+                        </div>
+                        <div class="col-12 text-end">                                                 
+                            <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                        </div>
+                    </div>
+                </form>    
+            </div>                                                 
+        </div>
+    </div>
+</div>
+<!-- Create Customers Modal --> 
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize feather icons
+        feather.replace(); 
+
+        /**
+         * Show toast notification
+         * @param {string} type - success, info, warning, error
+         * @param {string} message - Message to display
+         */
+         const showToast = (type, message) => {
+            toastr[type](message, type.toUpperCase(), {
+                closeButton: true,
+                tapToDismiss: false,
+                progressBar: true,
+                showMethod: 'fadeIn',
+                hideMethod: 'fadeOut',
+                timeOut: 3000
+            });
+        };
+        
+        // for delete customers
+        const delPrfCustomersButton = document.getElementById("delPrfCustomers");
+        delPrfCustomersButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            document.querySelectorAll('input[name="checkedPrfCustomers"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-prf-customers' %}";
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+
+        
+        // for create customers
+        const customerForm = document.getElementById('customerForm');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        /**
+         * Create a new customer
+         * @param {FormData} formData 
+         */
+         const handleCustomerCreate = async (formData) => {
+            try {
+                const response = await fetch(customerForm.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    showToast('success', data.message);
+
+                    // Close and reset modal
+                    const customerModal = bootstrap.Modal.getInstance(document.getElementById('c-prf-customers-modal'));
+                    customerModal.hide();
+                    customerForm.reset();
+                    setTimeout(() => { location.reload(); }, 3000);
+                } else {
+                    showToast('error', data.message);
+                }
+            } catch (error) {
+                showToast('error', `Something went wrong: ${error}`);
+            }
+        };
+        // Add new customer form submit
+        customerForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(customerForm);
+            handleCustomerCreate(formData);
+        });
+
+        // Make table rows clickable
+        const rows = document.querySelectorAll('tr.clickable-row');        
+        rows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Don't navigate if clicking on a checkbox, button, or link
+                if (e.target.closest('input[type="checkbox"]') || 
+                    e.target.closest('button') || 
+                    e.target.closest('a')) {
+                    return;
+                }                
+                // Navigate to the URL specified in data-href attribute
+                const href = this.dataset.href;
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,722 @@
+{% extends "index.html" %}
+
+{% block title %}u-accounts-garage{% endblock %}
+
+{% block style %}
+<style>
+    .logo-preview {
+        width: 100px;
+        height: 100px;
+        border: 2px dashed #7367f0;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+    .logo-preview img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+    .service-tag {
+        display: inline-block;
+        background-color: #f8f8f8;
+        border-radius: 5px;
+        padding: 8px 12px;
+        margin: 5px;
+        border: 1px solid #e0e0e0;
+    }
+    .service-tag .remove-service {
+        margin-left: 8px;
+        color: #ea5455;
+        cursor: pointer;
+    }
+    .service-input-group {
+        margin-bottom: 15px;
+    }
+    .section-divider {
+        border-top: 1px solid #ebe9f1;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+    .section-divider span {
+        position: absolute;
+        top: -12px;
+        left: 10px;
+        background: white;
+        padding: 0 10px;
+        color: #7367f0;
+        font-weight: 600;
+    }
+    .form-section {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-garage' %}">List Garage</a>
+                                    </li>
+                                    <li class="breadcrumb-item"><a href="{% url 'v-accounts-garage' garage_obj.id %}">Garage Profile</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Update Garage
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="u-accounts-garage">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Update Garage Profile</h4>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'u-accounts-garage' garage_obj.id %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Logo Upload Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Garage Identity</span></div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-center">
+                                                <div class="logo-preview" id="logoPreview" {% if garage_obj.logo %}data-logo-src="/{{ garage_obj.logo }}"{% endif %}>
+                                                    {% if garage_obj.logo %}
+                                                        <img src="/{{ garage_obj.logo }}" alt="Logo Preview" class="img-fluid" />
+                                                    {% else %}
+                                                        <i data-feather="image" class="font-large-1 text-muted"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="d-flex flex-column w-100">
+                                                    <label for="garageLogo" class="btn btn-primary mb-75 btn-sm waves-effect waves-float waves-light w-100 text-center">
+                                                        <span>{% if garage_obj.logo %}Change Logo{% else %}Upload Logo{% endif %}</span>
+                                                        <input type="file" id="garageLogo" name="garage_logo" accept="image/*" class="d-none" />
+                                                    </label>
+                                                    <small class="text-muted text-center">PNG recommended. Max 100KB<br>Optimal size: 200×200px (1:1 ratio)</small>
+                                                    <small id="logoError" class="text-danger text-center d-none"></small>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-center">
+                                                <div class="logo-preview" id="signatoryPreview" {% if garage_obj.authorized_signatory %}data-signatory-src="/{{ garage_obj.authorized_signatory }}"{% endif %}>
+                                                    {% if garage_obj.authorized_signatory %}
+                                                        <img src="/{{ garage_obj.authorized_signatory }}" alt="Signatory Preview" class="img-fluid" />
+                                                    {% else %}
+                                                        <i data-feather="user-check" class="font-large-1 text-muted"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="d-flex flex-column w-100">
+                                                    <label for="authorizedSignatory" class="btn btn-outline-primary mb-75 btn-sm waves-effect waves-float waves-light w-100 text-center">
+                                                        <span>{% if garage_obj.authorized_signatory %}Change Signatory{% else %}Upload Signatory{% endif %}</span>
+                                                        <input type="file" id="authorizedSignatory" name="authorized_signatory" accept="image/*" class="d-none" />
+                                                    </label>
+                                                    <small class="text-muted text-center">PNG recommended. Max 100KB<br>Optimal size: 200×200px (1:1 ratio)</small>
+                                                    <small id="signatoryError" class="text-danger text-center d-none"></small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-12">
+                                                <div class="row">
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label" for="garageName">
+                                                            <i data-feather="home" class="font-medium-2 me-50"></i>
+                                                            Garage Name<span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" id="garageName" name="garage_name" 
+                                                               value="{{ garage_obj.name }}" placeholder="Garage name" required />
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label" for="garageTagline">
+                                                            <i data-feather="tag" class="font-medium-2 me-50"></i>
+                                                            Tagline/Slogan
+                                                        </label>
+                                                        <input type="text" class="form-control" id="garageTagline" name="garage_tagline" 
+                                                               value="{{ garage_obj.tagline|default:'' }}" placeholder="Tagline or slogan" />
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label" for="yearEstablished">
+                                                            <i data-feather="calendar" class="font-medium-2 me-50"></i>
+                                                            Year Established
+                                                        </label>
+                                                        <input type="number" class="form-control" id="yearEstablished" name="year_established" 
+                                                               value="{{ garage_obj.year_established|default:'' }}" placeholder="Year" min="1900" max="{% now 'Y' %}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Contact Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Contact Information</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="contactPerson">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        Contact Person<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="contactPerson" name="contact_person" 
+                                                           value="{{ garage_obj.contact_person|default:'' }}" placeholder="Full name" required />
+                                                </div>
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="contactEmail">
+                                                        <i data-feather="mail" class="font-medium-3 me-50"></i>
+                                                        Email Address<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="email" class="form-control" id="contactEmail" name="contact_email" 
+                                                           value="{{ garage_obj.email|default:'' }}" placeholder="Email address" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="contactPhone">
+                                                        <i data-feather="phone" class="font-medium-3 me-50"></i>
+                                                        Phone<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="tel" class="form-control" id="contactPhone" name="contact_phone" 
+                                                           value="{{ garage_obj.phone|default:'' }}" placeholder="Phone" required />
+                                                </div>
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="alternatePhone">
+                                                        <i data-feather="phone-call" class="font-medium-3 me-50"></i>
+                                                        Alternate Phone
+                                                    </label>
+                                                    <input type="tel" class="form-control" id="alternatePhone" name="alternate_phone" 
+                                                           value="{{ garage_obj.alt_phone|default:'' }}" placeholder="Alternate phone" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Address Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Garage Address</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="streetAddress">
+                                                        <i data-feather="map-pin" class="font-medium-3 me-50"></i>
+                                                        Street Address<span class="text-danger">*</span>
+                                                    </label>
+                                                    <textarea class="form-control" id="streetAddress" name="street_address" 
+                                                              rows="2" placeholder="Street address" required>{{ garage_obj.address|default:'' }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="location">Location<span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="location" name="location" placeholder="Location" required value="{{ garage_obj.location|default:'' }}" {% if usertype != 'admin' and usertype != 'business' %}readonly{% endif %} />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="city_id">City/Town<span class="text-danger">*</span></label>
+                                                    <select class="select2 form-select" id="city_id" name="city_id">
+                                                        {% for city in city_objs %}
+                                                            <option value="{{ city.id }}" {% if city.id == garage_obj.city.id %} selected {% endif %}>{{ city.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="state">State<span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="state" name="state" 
+                                                           value="{{ garage_obj.state|default:'' }}" placeholder="State" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="pincode">Pincode<span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="pincode" name="pincode" 
+                                                           value="{{ garage_obj.postal_code|default:'' }}" placeholder="Pincode" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="landmark">Landmark/Nearby</label>
+                                                    <input type="text" class="form-control" id="landmark" name="landmark" 
+                                                           value="{{ garage_obj.landmark|default:'' }}" placeholder="Nearby landmark" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="latitude">
+                                                        <i data-feather="map" class="font-medium-3 me-50"></i>
+                                                        Latitude
+                                                    </label>
+                                                    <input type="text" 
+                                                           class="form-control" 
+                                                           id="latitude" 
+                                                           name="latitude" 
+                                                           value="{{ garage_obj.latitude|default:'' }}" 
+                                                           placeholder="e.g. 28.6139" 
+                                                           pattern="^-?([1-8]?\d|90)(\.\d+)?$" 
+                                                           title="Enter a valid latitude between -90 and 90 degrees" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="longitude">
+                                                        <i data-feather="map" class="font-medium-3 me-50"></i>
+                                                        Longitude
+                                                    </label>
+                                                    <input type="text" 
+                                                           class="form-control" 
+                                                           id="longitude" 
+                                                           name="longitude" 
+                                                           value="{{ garage_obj.longitude|default:'' }}" 
+                                                           placeholder="e.g. 77.2090" 
+                                                           pattern="^-?(1[0-7]\d|\d{1,2})(\.\d+)?$" 
+                                                           title="Enter a valid longitude between -180 and 180 degrees" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Service Category Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Service Category</span></div>
+                                        <div class="row mt-2">                                            
+                                            {% if usertype == 'admin' or usertype == 'business' %}
+                                            <div class="col-12">
+                                                <label for="servicecategory">Category<span class="text-danger">*</span></label>
+                                                <select id="servicecategory" name="servicecategory" class="select2 form-select" multiple="multiple" required>
+                                                    {% for servicecategory_obj in servicecategory_objs %}
+                                                        <option value="{{servicecategory_obj.id}}" {% if servicecategory_obj.id in selected_servicecategory_ids %}selected{% endif %}>{{servicecategory_obj.name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            {% else %}
+                                                <div class="d-flex flex-wrap gap-1">
+                                                {% for servicecategory_obj in servicecategory_objs %}
+                                                    {% if servicecategory_obj.id in selected_servicecategory_ids %}
+                                                    <span class="badge bg-light-primary text-primary me-1 mb-1">
+                                                        {{ servicecategory_obj.name }}
+                                                    </span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Vehicle Type Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Vehicle Type</span></div>
+                                        <div class="row mt-2">
+                                            {% if usertype == 'admin' or usertype == 'business' %}
+                                            <div class="col-12">
+                                                <label for="vehicletype">Vehicle Type<span class="text-danger">*</span></label>
+                                                <select id="vehicletype" name="vehicletype" class="select2 form-select" multiple="multiple" required>
+                                                    {% for vehicletype_obj in vehicletype_objs %}
+                                                        <option value="{{vehicletype_obj.id}}" {% if vehicletype_obj.id in selected_vehicletype_ids %}selected{% endif %}>{{vehicletype_obj.wheeler}} Wheeler{% if vehicletype_obj.is_ev %}, EV{% endif %}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            {% else %}
+                                                <div class="d-flex flex-wrap gap-1">
+                                                {% for vehicletype_obj in vehicletype_objs %}
+                                                    {% if vehicletype_obj.id in selected_vehicletype_ids %}
+                                                    <span class="badge bg-light-success text-success me-1 mb-1">
+                                                        {{ vehicletype_obj.name }} ({{vehicletype_obj.wheeler}} Wheeler{% if vehicletype_obj.is_ev %}, EV{% endif %})
+                                                    </span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div> 
+
+                                    <!-- Additional Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Additional Information</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="garageDescription">
+                                                        <i data-feather="file-text" class="font-medium-3 me-50"></i>
+                                                        Description
+                                                    </label>
+                                                    <textarea class="form-control" id="garageDescription" name="garage_description" rows="2" placeholder="Tell us about your garage">{{ garage_obj.about|default:'' }}</textarea>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- New Fields -->
+                                            <div class="col-12">
+                                                <div class="form-check form-switch mb-1">
+                                                    <input type="checkbox" class="form-check-input" id="isDisplayed" name="is_displayed" 
+                                                           {% if garage_obj.displayed %}checked{% endif %} {% if usertype != 'admin' and usertype != 'business' %}disabled{% endif %}>
+                                                    <label class="form-check-label" for="isDisplayed">
+                                                        <i data-feather="eye" class="font-medium-3 me-50"></i>
+                                                        Display Garage
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-1">
+                                                    <input type="checkbox" class="form-check-input" id="isExclusive" name="is_exclusive" 
+                                                           {% if garage_obj.is_exclusive %}checked{% endif %} {% if usertype != 'admin' and usertype != 'business' %}disabled{% endif %}>
+                                                    <label class="form-check-label" for="isExclusive">
+                                                        <i data-feather="award" class="font-medium-3 me-50"></i>
+                                                        Exclusive Garage
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-1">
+                                                    <input type="checkbox" class="form-check-input" id="isVerified" name="is_verified" 
+                                                           {% if garage_obj.is_verified %}checked{% endif %} {% if usertype != 'admin' and usertype != 'business' %}disabled{% endif %}>
+                                                    <label class="form-check-label" for="isVerified">
+                                                        <i data-feather="check-circle" class="font-medium-3 me-50"></i>
+                                                        Verified Garage
+                                                    </label>
+                                                </div>
+                                                <div class="form-check form-switch mb-1">
+                                                    <input type="checkbox" class="form-check-input" id="isOffer" name="is_offer" 
+                                                           {% if garage_obj.is_offer %}checked{% endif %} {% if usertype != 'admin' and usertype != 'business' %}disabled{% endif %} 
+                                                           onchange="toggleOfferTextRequired(this)">
+                                                    <label class="form-check-label" for="isOffer">
+                                                        <i data-feather="tag" class="font-medium-3 me-50"></i>
+                                                        Has Special Offer
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-12" id="offerTextGroup" {% if not garage_obj.is_offer %}style="display: none;"{% endif %}>
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="offerText">
+                                                        <i data-feather="edit" class="font-medium-3 me-50"></i>
+                                                        Offer Details<span class="text-danger">*</span>
+                                                    </label>
+                                                    <textarea class="form-control" id="offerText" name="offer_text" rows="2" 
+                                                              placeholder="Enter offer details" {% if usertype != 'admin' and usertype != 'business' %}readonly{% endif %}>{{ garage_obj.offer_text|default:'' }}</textarea>
+                                                    <div class="invalid-feedback">Please provide offer details when 'Has Special Offer' is checked.</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="position">Position</label>
+                                                    <input type="number" class="form-control" id="position" name="position" min="0" step="1" pattern="[0-9]*" inputmode="numeric" onkeypress="return event.charCode >= 48 && event.charCode <= 57" placeholder="Please enter position number" value="{{ garage_obj.position|default:'0' }}" {% if usertype != 'admin' and usertype != 'business' %}readonly{% endif %} oninput="this.value = Math.abs(parseInt(this.value) || 0)" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="website">
+                                                        <i data-feather="globe" class="font-medium-3 me-50"></i>
+                                                        Website
+                                                    </label>
+                                                    <input type="url" class="form-control" id="website" name="website" 
+                                                           value="{{ garage_obj.website|default:'' }}" placeholder="https://" />
+                                                </div>
+                                            </div>                                            
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="serviceRadius">
+                                                        <i data-feather="map-pin" class="font-medium-3 me-50"></i>
+                                                        Service Radius (km)
+                                                    </label>
+                                                    <input type="number" class="form-control" id="serviceRadius" name="service_radius"
+                                                           step="0.01" min="0.01" max="99999999.99" pattern="^\d+(\.\d{1,2})?$"
+                                                           value="{{ garage_obj.radius|default:'' }}" placeholder="e.g., 5.50" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="gst">
+                                                        <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                        GST
+                                                    </label>
+                                                    <input type="text" 
+                                                           class="form-control" 
+                                                           id="gst" 
+                                                           name="gst" 
+                                                           value="{{ garage_obj.gst|default:'' }}" 
+                                                           placeholder="e.g., 22AAAAA0000A1Z5"
+                                                           pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
+                                                           title="Enter a valid GST number (e.g., 22AAAAA0000A1Z5)" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="pan">
+                                                        <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                        PAN
+                                                    </label>
+                                                    <input type="text" 
+                                                           class="form-control" 
+                                                           id="pan" 
+                                                           name="pan" 
+                                                           value="{{ garage_obj.pan|default:'' }}" 
+                                                           placeholder="e.g., ABCDE1234F"
+                                                           pattern="^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
+                                                           title="Enter a valid PAN number (e.g., ABCDE1234F)" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="aadhar">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        Aadhar
+                                                    </label>
+                                                    <input type="text" 
+                                                           class="form-control" 
+                                                           id="aadhar" 
+                                                           name="aadhar" 
+                                                           value="{{ garage_obj.aadhar|default:'' }}" 
+                                                           placeholder="e.g., 234567890123"
+                                                           pattern="^[2-9]{1}[0-9]{11}$"
+                                                           title="Enter a valid 12-digit Aadhar number"
+                                                           maxlength="12" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="termsConditions">
+                                                        <i data-feather="file-text" class="font-medium-3 me-50"></i>
+                                                        Terms and Conditions <span class="text-danger">*</span>
+                                                    </label>
+                                                    <textarea class="form-control" id="termsConditions" name="terms_conditions" 
+                                                              rows="2" required placeholder="Enter one term per line, or separate by commas. Example:&#10;30-day return policy, Warranty covers parts and labor, Payment due in 15 days">{{ garage_obj.terms_and_conditions|default:'' }}</textarea>
+                                                    <small class="text-muted">These terms will be displayed on your invoices. You can enter one term per line, separate by commas, or write in paragraph form.</small>
+                                                    <div class="invalid-feedback">
+                                                        Please provide terms and conditions for your garage.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary waves-effect" onclick="window.history.back();">
+                                                <i data-feather="x" class="me-25"></i>
+                                                <span>Cancel</span>
+                                            </button>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-50"></i>
+                                                <span>Save Garage Profile</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Image validation function
+    function validateImage(file, type, callback) {
+        const img = new Image();
+        const fileSizeKB = file.size / 1024; // in KB
+        const maxSizeKB = 100; // 100KB
+        
+        // Reset previous errors
+        $(`#${type}Error`).text('').addClass('d-none');
+        
+        // Check file size
+        if (fileSizeKB > maxSizeKB) {
+            $(`#${type}Error`).text(`File size should not exceed ${maxSizeKB}KB`).removeClass('d-none');
+            updateSubmitButton();
+            return false;
+        }
+        
+        // Check file type
+        if (!file.type.match('image.*')) {
+            $(`#${type}Error`).text('Only JPG and PNG images are allowed').removeClass('d-none');
+            updateSubmitButton();
+            return false;
+        }
+        
+        // Check dimensions
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            img.onload = function() {
+                const width = this.width;
+                const height = this.height;
+                let isValid = true;
+                let errorMessage = '';
+                
+                if (type === 'logo' || type === 'signatory') {
+                    const targetWidth = 200;
+                    const targetHeight = 200;
+                    const aspectRatio = width / height;
+                    const targetAspectRatio = 1; // 1:1 aspect ratio
+                    
+                    if (width !== targetWidth || height !== targetHeight) {
+                        errorMessage = `${type.charAt(0).toUpperCase() + type.slice(1)} should be exactly ${targetWidth}x${targetHeight} pixels`;
+                        isValid = false;
+                    } else if (Math.abs(aspectRatio - targetAspectRatio) > 0.1) {
+                        errorMessage = `${type.charAt(0).toUpperCase() + type.slice(1)} should be a perfect square (1:1 aspect ratio)`;
+                        isValid = false;
+                    }
+                }
+                
+                if (!isValid) {
+                    $(`#${type}Error`).text(errorMessage).removeClass('d-none');
+                } else {
+                    $(`#${type}Error`).addClass('d-none');
+                }
+                
+                // Update button state
+                updateSubmitButton();
+                
+                if (isValid && typeof callback === 'function') {
+                    callback(e.target.result);
+                }
+            };
+        };
+        reader.readAsDataURL(file);
+        return true;
+    }
+    
+    // Update submit button state
+    function updateSubmitButton() {
+        const hasLogoError = $('#logoError').is(':visible');
+        const hasSignatoryError = $('#signatoryError').is(':visible');
+        $('button[type="submit"]').prop('disabled', hasLogoError || hasSignatoryError);
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Feather Icons
+        if (feather) {
+            feather.replace({ width: 16, height: 16 });
+        }
+        
+        // Function to handle file preview
+        function setupFilePreview(inputId, previewId, maxSizeMB = 2) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            
+            if (input && preview) {
+                input.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    // Check file type
+                    if (!file.type.match('image.*')) {
+                        alert('Please select an image file (JPG, PNG)');
+                        this.value = '';
+                        return;
+                    }
+                    
+                    // Check file size
+                    if (file.size > maxSizeMB * 1024 * 1024) {
+                        alert(`File size should not exceed ${maxSizeMB}MB`);
+                        this.value = '';
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        preview.innerHTML = `<img src="${e.target.result}" class="img-fluid" />`;
+                        // Re-initialize feather icons in case they were removed
+                        if (feather) {
+                            feather.replace();
+                        }
+                    };
+                    
+                    reader.onerror = function() {
+                        console.error('Error reading file');
+                        alert('Error reading file. Please try again.');
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+        
+        // Set up previews for logo and signatory with validation
+        document.getElementById('garageLogo').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                validateImage(this.files[0], 'logo', function(src) {
+                    document.getElementById('logoPreview').innerHTML = `<img src="${src}" class="img-fluid" />`;
+                });
+            }
+        });
+        
+        document.getElementById('authorizedSignatory').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                validateImage(this.files[0], 'signatory', function(src) {
+                    document.getElementById('signatoryPreview').innerHTML = `<img src="${src}" class="img-fluid" />`;
+                });
+            }
+        });
+    });
+    
+    // Function to toggle required attribute on offer text
+    function toggleOfferTextRequired(checkbox) {
+        const offerTextGroup = document.getElementById('offerTextGroup');
+        const offerText = document.getElementById('offerText');
+        
+        if (checkbox.checked) {
+            offerTextGroup.style.display = 'block';
+            offerText.required = true;
+        } else {
+            offerTextGroup.style.display = 'none';
+            offerText.required = false;
+            // Clear any previous validation messages
+            offerText.setCustomValidity('');
+        }
+    }
+
+    // Initialize with existing images and form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set initial required state for offer text
+        const isOfferCheckbox = document.getElementById('isOffer');
+        if (isOfferCheckbox) {
+            const offerText = document.getElementById('offerText');
+            offerText.required = isOfferCheckbox.checked;
+            
+            // Add form validation
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (isOfferCheckbox.checked && !offerText.value.trim()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        offerText.setCustomValidity('Please provide offer details when \'Has Special Offer\' is checked.');
+                        offerText.reportValidity();
+                    } else {
+                        offerText.setCustomValidity('');
+                    }
+                }, false);
+            }
+        }
+        // Initialize logo preview
+        var logoPreview = document.getElementById('logoPreview');
+        if (logoPreview && logoPreview.dataset.logoSrc) {
+            logoPreview.innerHTML = '<img src="' + logoPreview.dataset.logoSrc + '" class="img-fluid" />';
+        }
+        
+        // Initialize signatory preview
+        var signatoryPreview = document.getElementById('signatoryPreview');
+        if (signatoryPreview && signatoryPreview.dataset.signatorySrc) {
+            signatoryPreview.innerHTML = '<img src="' + signatoryPreview.dataset.signatorySrc + '" class="img-fluid" />';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}Inventory Summary{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="{% static 'app-assets/fonts/inter/inter.css' %}">{# Local Inter font #}
+<style>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background-color: #f9fafb;
+    }
+    
+    .dashboard-header {
+        padding: 10px 0;
+        margin-bottom: 16px;
+    }
+    
+    .dashboard-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 8px;
+    }
+    
+    .dashboard-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 400;
+    }
+    
+    .feature-card {
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+        height: 100%;
+        overflow: hidden;
+        background-color: white;
+    }
+    
+    .feature-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    .feature-card .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f3f4f6;
+        background-color: white;
+    }
+    
+    .feature-card .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    
+    .feature-card .card-body {
+        padding: 20px 24px;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .feature-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s ease;
+    }
+    
+    .feature-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .feature-item:hover {
+        transform: translateX(4px);
+    }
+    
+    .feature-icon {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        color: #4f46e5;
+    }
+    
+    .feature-link {
+        color: #4b5563;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        flex-grow: 1;
+        transition: color 0.2s ease;
+    }
+    
+    .feature-link:hover {
+        color: #4f46e5;
+    }
+    
+    .stats-row {
+        margin-bottom: 16px;
+    }
+    
+    .stat-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+        height: 100%;
+    }
+    
+    .stat-title {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 8px;
+        font-weight: 500;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    
+    .stat-change {
+        font-size: 12px;
+        margin-top: 4px;
+    }
+    
+    .stat-change.positive {
+        color: #10b981;
+    }
+    
+    .stat-change.negative {
+        color: #ef4444;
+    }
+    
+    .quick-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid #e5e7eb;
+        background-color: white;
+        color: #4b5563;
+    }
+    
+    .quick-action-btn:hover {
+        background-color: #f9fafb;
+        color: #111827;
+        border-color: #d1d5db;
+    }
+    
+    .quick-action-btn i {
+        margin-right: 6px;
+    }
+    
+    .primary-btn {
+        background-color: #4f46e5;
+        color: white;
+        border-color: #4f46e5;
+    }
+    
+    .primary-btn:hover {
+        background-color: #4338ca;
+        color: white;
+        border-color: #4338ca;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-10 col-12 mb-1">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h4 class="content-header-title mb-0">Inventory Summary</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right col-md-2 col-12">
+                <div class="mb-1 breadcrumb-right">
+                    <!-- <div class="dropdown">
+                        <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+        <div class="content-body">            
+            <!-- Quick Stats Row -->
+            <div class="row stats-row">
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Current Stock</div>
+                        <div class="stat-value">{{ product_catalogues_count }}</div>
+                        <div class="stat-change positive">+12% from last month</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Stock Outward</div>
+                        <div class="stat-value">{{ stock_outwards_count }}</div>
+                        <div class="stat-change positive">+2 new this week</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Stock Inward</div>
+                        <div class="stat-value">{{ stock_inwards_count }}</div>
+                        <div class="stat-change positive">+3.2% from last month</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 mb-2">
+                    <div class="stat-card">
+                        <div class="stat-title">Suppliers</div>
+                        <div class="stat-value">{{ suppliers_count }}</div>
+                        <div class="stat-change positive">+5 points this week</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="row mb-2">
+                <div class="col-12">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if 'Current_Stock' in useruiacl.Inventory %}
+                            <a href="{% url 'r-inv-current-stock' %}" class="quick-action-btn primary-btn">
+                                <i data-feather="package" style="width: 16px; height: 16px; margin-right: 6px;"></i> Current Stock
+                            </a> 
+                            {% endif %}                                    
+                            {% if 'Stock_Outward' in useruiacl.Inventory %}
+                            <a href="{% url 'r-inv-stock-outward' %}" class="quick-action-btn">
+                                <i data-feather="arrow-up" style="width: 16px; height: 16px; margin-right: 6px;"></i> Stock Outward
+                            </a> 
+                            {% endif %}
+                            {% if 'Stock_Inward' in useruiacl.Inventory %}
+                            <a href="{% url 'r-inv-stock-inward' %}" class="quick-action-btn">
+                                <i data-feather="arrow-down" style="width: 16px; height: 16px; margin-right: 6px;"></i> Stock Inward
+                            </a> 
+                            {% endif %}
+                            {% if 'Suppliers' in useruiacl.Inventory %}
+                            <a href="{% url 'r-inv-suppliers' %}" class="quick-action-btn">
+                                <i data-feather="truck" style="width: 16px; height: 16px; margin-right: 6px;"></i> Suppliers
+                            </a> 
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Feature Cards -->
+            <div class="row match-height">
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Inventory</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                {% if 'Current_Stock' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="package" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-current-stock' %}" class="feature-link">Current Stock</a>
+                                </li> 
+                                {% endif %}                                    
+                                {% if 'Stock_Outward' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="arrow-up" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-stock-outward' %}" class="feature-link">Stock Outward</a>
+                                </li> 
+                                {% endif %}
+                                {% if 'Stock_Inward' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="arrow-down" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-stock-inward' %}" class="feature-link">Stock Inward</a>
+                                </li> 
+                                {% endif %}
+                                {% if 'Suppliers' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="truck" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-suppliers' %}" class="feature-link">Suppliers</a>
+                                </li> 
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-12 mb-2">
+                    <div class="feature-card">
+                        <div class="card-header">
+                            <h5 class="card-title">Inventory Catalog</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">                                
+                                {% if 'Categories' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="list" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-categories' %}" class="feature-link">Categories {{ product_categories_count }}</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Brands' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="tag" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-brands' %}" class="feature-link">Brands {{ product_brands_count }}</a>
+                                </li>
+                                {% endif %}
+                                {% if 'Model' in useruiacl.Inventory %}
+                                <li class="feature-item">
+                                    <div class="feature-icon">
+                                        <i data-feather="box" style="width: 18px; height: 18px;"></i>
+                                    </div>
+                                    <a href="{% url 'r-inv-model' %}" class="feature-link">Model {{ product_model_count }}</a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>           
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize feather icons
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+</script>
+{% endblock %}

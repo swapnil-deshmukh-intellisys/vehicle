@@ -1,0 +1,289 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-users{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">Roles & Permission</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-users-profile' %}">Profile</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">User List
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Responsive tables start -->
+                <div class="row" id="r-users">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">   
+                                <div>
+                                    {% if 'add' in useruiacl.Users.Users %}
+                                    <a href="{% url 'c-users' %}" class="btn btn-icon btn-outline-success waves-effect" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Add users">
+                                        <i data-feather='plus-square'></i>
+                                    </a> 
+                                    {% endif %} 
+
+                                    {% if 'delete' in useruiacl.Users.Users %}
+                                        {% if users %}                              
+                                        <button type="button"  id="delUsers" class="btn btn-icon btn-outline-danger waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete users">
+                                            <i data-feather="trash-2"></i>
+                                        </button>  
+                                        {% endif %} 
+                                    {% endif %}
+                                </div>
+                                {% if users %} 
+                                <div>
+                                    <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputLogs" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputLogs', 'tableLogs')"/>
+                                    </div>
+                                </div>
+                                {% endif %}   
+                            </div>
+                            <div class="card-body">
+                                {% if users %} 
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-sm table-striped table-hover" id="tableLogs">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="text-nowrap form-check-success">
+                                                    {% if 'delete' in useruiacl.Users.Users %}
+                                                    <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all users to delete"> 
+                                                    {% endif %}  
+                                                    name
+                                                </th> 
+                                                <th scope="col" class="text-nowrap">garage</th>                                             
+                                                <th scope="col" class="text-nowrap">email</th>
+                                                <th scope="col" class="text-nowrap">business</th>
+                                                <th scope="col" class="text-nowrap">role</th>
+                                                <!-- <th scope="col" class="text-nowrap">user type</th>
+                                                <th scope="col" class="text-nowrap">garage group</th>
+                                                <th scope="col" class="text-nowrap">garages</th> -->
+                                                <th scope="col" class="text-nowrap">status</th>
+                                                <th scope="col" class="text-nowrap">created at</th>
+                                                <th scope="col" class="text-nowrap">expiry</th>
+                                                {% if 'edit' in useruiacl.Users.Users %}
+                                                <th scope="col" class="text-nowrap">action</th>
+                                                {% endif %}  
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for user in users %}
+                                            <tr>
+                                                <td class="text-nowrap d-flex">
+                                                    {% if 'delete' in useruiacl.Users.Users %}
+                                                    <form method="post" class="form-check-success">
+                                                        {% csrf_token %}
+                                                        <input  class="form-check-input me-1" type="checkbox" name="checkedUsers" value="{{user.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select user to delete">  
+                                                    </form> 
+                                                    {% endif %}  
+                                                    {{user.name}}                                                   
+                                                </td>
+                                                <td class="text-nowrap">
+                                                    {% if user.garagegroup %}
+                                                        {{ user.garagegroup.name }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-nowrap">{{user.email}}</td>
+                                                <td class="text-nowrap">{{user.business.name}}</td>
+                                                <td class="text-nowrap">{{user.roles.name}}</td>
+                                                <!-- <td class="text-nowrap">
+                                                    <span class="badge rounded-pill bg-light-primary">{{user.usertype|title|default:'-'}}</span>
+                                                </td>
+                                                <td class="text-nowrap">
+                                                    {% if user.garagegroup %}
+                                                        {{ user.garagegroup.name }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-nowrap">
+                                                    {% with garages=user.rel_garage_user.all %}
+                                                        {% if garages %}
+                                                            {% for rel in garages|slice:":3" %}
+                                                                <span class="badge rounded-pill bg-light-info me-1">{{ rel.garage.name }}</span>
+                                                            {% endfor %}
+                                                            {% if garages|length > 3 %}
+                                                                <span class="badge rounded-pill bg-light-secondary">+{{ garages|length|add:"-3" }} more</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                </td> -->
+                                                <td class="text-nowrap">
+                                                    <span class="badge rounded-pill {% if user.status == 'active' %}bg-light-success{% else %}bg-light-danger{% endif %}">{{user.status|title}}</span>
+                                                </td>
+                                                <td class="text-nowrap">{{user.created_at|utc_to_ist|date:'M d, Y H:i:s'}}</td>
+                                                <td class="text-nowrap">{{user.expiry|utc_to_ist|date:'M d, Y H:i:s'}}</td>
+                                                {% if 'edit' in useruiacl.Users.Users %}
+                                                <td class="text-nowrap">
+                                                    <div class="dropdown-items-wrapper">
+                                                        <i data-feather="more-vertical" id="dropdownMenuLink1" role="button" data-bs-toggle="dropdown" aria-expanded="false"></i>
+                                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink1">
+                                                            <a class="dropdown-item" href="{% url 'u-users' user.id %}">
+                                                                <i data-feather="edit" class="me-25"></i>
+                                                                <span class="align-middle">Edit</span>
+                                                            </a>
+                                                            <a class="dropdown-item" href="{% url 'u-users-password' user.id %}">
+                                                                <i data-feather="lock" class="me-25"></i>
+                                                                <span class="align-middle">User Password</span>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                {% endif %} 
+                                            </tr>                                    
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <div class="card-header">
+                                        <div>                                    
+                                            Showing {{ users.start_index }} to {{ users.end_index }} of {{ users.paginator.count }} entries
+                                        </div>
+                                        <div> 
+                                            {% if users.has_other_pages %}
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-success">  
+    
+                                                        <!-- First Page Link -->
+                                                        {% if users.number > 1 %}
+                                                        <li class="page-item first">
+                                                            <a href="?page=1" class="page-link">First</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item first disabled">
+                                                            <span class="page-link">First</span>
+                                                        </li>
+                                                        {% endif %}   
+    
+                                                        <!-- Previous Page Link -->
+                                                        {% if users.has_previous %}
+                                                        <li class="page-item prev">
+                                                            <a href="?page={{ users.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item prev disabled">
+                                                            <span class="page-link" aria-label="Previous"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                        {% for page in users.paginator.page_range %}
+                                                            {% if page >= users.number|add:'-1' and page <= users.number|add:'1' %}
+                                                                {% if page == users.number %}
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ page }}</span>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="page-item">
+                                                                    <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                                </li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+    
+                                                        <!-- Next Page Link -->
+                                                        {% if users.has_next %}
+                                                        <li class="page-item next">
+                                                            <a href="?page={{ users.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item next disabled">
+                                                            <span class="page-link" aria-label="Next"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Last Page Link -->
+                                                        {% if users.number < users.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ users.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                    </ul>
+                                                </nav>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="avatar bg-light-danger avatar-xl">
+                                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                    </div>
+                                    <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to create user.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive tables end -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const delUsersButton = document.getElementById("delUsers");
+
+        delUsersButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            document.querySelectorAll('input[name="checkedUsers"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-users' %}";
+
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+    });
+</script>
+{% endblock %}

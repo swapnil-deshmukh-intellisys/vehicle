@@ -1,0 +1,1003 @@
+<script>
+    $(document).ready(function () {
+        // Initialize variables
+        let customers = [];
+        const customerSelect = $('#SelectCustomer');
+        const $customerForm = $('#addNewCustomerForm');
+        const $saveCustomerBtn = $('#saveNewCustomerBtn');
+
+        // Add this function to handle service history
+        function showServiceHistory(customerId = null, vehicleId = null) {
+            if (!customerId && !vehicleId) {
+                console.log('No customer or vehicle ID provided for service history');
+                return;
+            }
+
+            // Show loading state
+            const serviceHistoryList = document.getElementById('serviceHistoryList');
+            if (serviceHistoryList) {
+                serviceHistoryList.innerHTML = '<li>Loading service history...</li>';
+            }
+
+            // Make API call to fetch service history
+            fetch('/api/service-history/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    customer_id: customerId,
+                    vehicle_id: vehicleId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const serviceHistoryList = document.getElementById('serviceHistoryList');
+                if (!serviceHistoryList) return;
+
+                if (data.status === 'success' && data.data && data.data.length > 0) {
+                    // Create table header
+                    let tableHTML = `
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>JOBCARD</th>
+                                        <th>DATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    // Add table rows
+                    data.data.forEach(item => {
+                        tableHTML += `
+                            <tr>
+                                <td class="text-nowrap">
+                                    <a href="/u-txn-job-sheets/${item.id}/" 
+                                    target="_blank" 
+                                    class="text-primary text-decoration-none">
+                                        ${item.jobcard_number || 'N/A'}
+                                    </a>
+                                </td>
+                                <td class="text-nowrap">${new Date(item.created_at).toLocaleString()}</td>
+                            </tr>
+                        `;
+                    });
+
+                    // Close table tags
+                    tableHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                    
+                    serviceHistoryList.innerHTML = tableHTML;
+                } else {
+                    serviceHistoryList.innerHTML = `
+                        <div class="alert alert-secondary text-center mb-0">
+                            <i class="fas fa-info-circle me-1"></i> No service history available for this customer.
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching service history:', error);
+                const serviceHistoryList = document.getElementById('serviceHistoryList');
+                if (serviceHistoryList) {
+                    serviceHistoryList.innerHTML = '<li class="text-danger">Error loading service history</li>';
+                }
+            });
+        }
+
+        // Function to load customers
+        function loadCustomers(targetCustomerId = null, targetVehicleId = null) {
+            $.ajax({
+                url: '{% url "list-customer-details" %}',
+                type: 'GET',
+                success: function (response) {
+                    customers = response;
+                    populateCustomerSelect(customers);
+
+                    if (targetCustomerId) {
+                        // Re-select the customer
+                        customerSelect.val(targetCustomerId).trigger('change');
+                        
+                        // If we also have a target vehicle, select it after a short delay
+                        // to allow loadCustomerVehicles (triggered by change) to finish
+                        if (targetVehicleId) {
+                            setTimeout(() => {
+                                $('#vehicleSelect').val(targetVehicleId).trigger('change');
+                            }, 500);
+                        }
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading customers:', error);
+                    toastr.error('Failed to load customers');
+                }
+            });
+        }
+
+        // Function to populate customer select with "Add New" option
+        function populateCustomerSelect(customers) {
+            customerSelect.empty();
+            customerSelect.append($('<option value=""></option>').text('Select customer'));
+            customerSelect.append($('<option value="add_new">+ Add New</option>'));
+
+            customers.forEach(function (customer) {
+                customerSelect.append($('<option></option>')
+                    .val(customer.customer_id)
+                    .text(customer.searchItem || `${customer.name} (${customer.phone || 'No phone'})`)
+                    .data('customer-data', customer)
+                );
+            });
+
+            if (!customerSelect.hasClass('select2-hidden-accessible')) {
+                customerSelect.select2({
+                    placeholder: 'Select customer',
+                    allowClear: true,
+                    width: '100%'
+                });
+            } else {
+                customerSelect.trigger('change');
+            }
+        }
+
+        // Function to populate customer details in the UI
+        function populateCustomerDetails(customer) {
+            
+            if (!customer) {
+                console.log('No customer data provided, exiting...');
+                return;
+            }
+
+            $('#selectedCustomerDetails').show();
+            $('#noCustomerSelected').hide();
+
+            showServiceHistory(customer.customer_id, customer.vehicle_id);
+
+            // Populate customer basic info
+            $('#displayCustomerName').text(customer.name || '-');
+            $('#displayCustomerPhone').text(customer.phone || '-');
+            $('#displayCustomerAltPhone').text(customer.alt_phone || '-');
+            $('#displayCustomerEmail').text(customer.email || '-');
+            
+            // Populate the edit form
+            $('#editCustomerId').val(customer.customer_id);
+            $('#editCustomerName').val(customer.name || '');
+            $('#editCustomerPhone').val(customer.phone || '');
+            $('#editCustomerAltPhone').val(customer.alt_phone || '');
+            $('#editCustomerEmail').val(customer.email || '');
+
+            // Handle address information
+            if (customer.address || customer.pincode) {
+                $('#selectedCustomerAddress').show();
+                $('#noAddressSelected').hide();
+                $('#displayCustomerAddress').text(customer.address || '-');
+                $('#displayCustomerPincode').text(customer.pincode || '-');
+
+                // Populate the edit form
+                $('#editAddressCustomerId').val(customer.customer_id);
+                $('#editCustomerPincode').val(customer.pincode || '');
+                $('#editCustomerAddress').val(customer.address || '');
+            } else {
+                $('#selectedCustomerAddress').hide();
+                $('#noAddressSelected').show();
+            }
+
+            // Load vehicles for this customer
+            loadCustomerVehicles(customer.customer_id);
+
+            // Activate the first tab
+            $('.nav-tabs a[href="#customers"]').tab('show');
+        }
+
+        // Function to load vehicles for a customer
+        function loadCustomerVehicles(customerId, preSelectedVehicleId = null) {
+            if (!customerId) return;
+            
+            $.ajax({
+                url: `/api/vehicles/${customerId}/`,
+                type: 'GET',
+                success: function(response) {
+                    let vehicles = [];
+                    if (response && response.status === 'success' && response.vehicles) {
+                        vehicles = response.vehicles;
+                    } else if (Array.isArray(response)) {
+                         vehicles = response;
+                    }
+
+                    if (vehicles && vehicles.length > 0) {
+                        populateVehicleSelect(vehicles);
+                        $('#selectedCustomerVehicle').show();
+                        $('#noVehicleSelected').hide();
+                        $('#addVehicleCustomerId').val(customerId);
+
+                        if (preSelectedVehicleId) {
+                            $('#vehicleSelect').val(preSelectedVehicleId).trigger('change');
+                        }
+                    } else {
+                        $('#vehicleSelect').empty().append('<option value="">No vehicles found</option>');
+                        $('#selectedCustomerVehicle').show();
+                        $('#noVehicleSelected').hide();
+                        $('#selectedVehicleDetails').hide();
+                        $('#addVehicleCustomerId').val(customerId);
+                    }
+                },
+                error: function() {
+                    $('#vehicleSelect').empty().append('<option value="">Error loading vehicles</option>');
+                    $('#selectedCustomerVehicle').show();
+                    $('#noVehicleSelected').hide();
+                    $('#addVehicleCustomerId').val(customerId);
+                }
+            });
+        }
+
+        // Function to populate vehicle select dropdown
+        function populateVehicleSelect(vehicles) {
+            const vehicleSelect = $('#vehicleSelect');
+            vehicleSelect.empty();
+            vehicleSelect.append('<option value="">Choose a vehicle...</option>');
+            
+            vehicles.forEach(function(vehicle) {
+                // Determine ID field (API uses 'id', view used 'vehicle_id')
+                const vehicleId = vehicle.id || vehicle.vehicle_id;
+                const registration = vehicle.registration_no || vehicle.license_plate_no || 'No Reg';
+                const displayText = `${vehicle.model || 'Unknown'} - ${registration}`;
+                
+                vehicleSelect.append(
+                    $('<option></option>')
+                        .val(vehicleId)
+                        .text(displayText)
+                        .data('vehicle-data', {
+                            id: vehicleId,
+                            model: vehicle.model,
+                            make: vehicle.make,
+                            registration_no: registration,
+                            year_of_manufacture: vehicle.year_of_manufacture,
+                            color: vehicle.color,
+                            engine_number: vehicle.engine_number || vehicle.engine_no,
+                            chassis_number: vehicle.chassis_number || vehicle.chassis_no
+                        })
+                );
+            });
+        }
+
+        // Handle vehicle selection change
+        $(document).on('change', '#vehicleSelect', function() {
+            const selectedVehicleId = $(this).val();
+            
+            if (selectedVehicleId) {
+                const vehicleData = $(this).find('option:selected').data('vehicle-data');
+                if (vehicleData) {
+                    displayVehicleDetails(vehicleData);
+                    $('#editVehicleBtn').show();
+                    $('#SelectedVehicle').val(selectedVehicleId);
+                }
+            } else {
+                $('#selectedVehicleDetails').hide();
+                $('#editVehicleBtn').hide();
+                $('#SelectedVehicle').val('');
+            }
+        });
+
+        // Function to display selected vehicle details
+        function displayVehicleDetails(vehicle) {
+            $('#displayVehicleModel').text(vehicle.model || '-');
+            $('#displayVehicleMake').text(vehicle.make || '-');
+            $('#displayVehicleNumber').text(vehicle.registration_no || '-');
+            $('#displayVehicleYear').text(vehicle.year_of_manufacture || '-');
+            $('#displayVehicleColor').text(vehicle.color || '-');
+            $('#displayVehicleEngine').text(vehicle.engine_number || '-');
+            $('#displayVehicleChassis').text(vehicle.chassis_number || '-');
+            
+            // Populate edit form
+            $('#editVehicleId').val(vehicle.id);
+            $('#editVehicleModel').val(vehicle.model || '');
+            $('#editVehicleMake').val(vehicle.make || '');
+            $('#editVehicleNumber').val(vehicle.registration_no || '');
+            $('#editVehicleYear').val(vehicle.year_of_manufacture || '');
+            $('#editVehicleColor').val(vehicle.color || '');
+            $('#editVehicleEngine').val(vehicle.engine_number || '');
+            $('#editVehicleChassis').val(vehicle.chassis_number || '');
+            
+            $('#selectedVehicleDetails').show();
+        }
+
+        // Handle add vehicle form submission
+        $('#addVehicleForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const customerId = $('#addVehicleCustomerId').val();
+            if (!customerId) {
+                toastr.error('Customer ID is required');
+                return;
+            }
+            
+            const vehicleData = {
+                customer_id: customerId,
+                model: $('#addVehicleModel').val().trim(),
+                make: $('#addVehicleMake').val().trim(),
+                registration_no: $('#addVehicleNumber').val().trim(),
+                year_of_manufacture: $('#addVehicleYear').val().trim(),
+                color: $('#addVehicleColor').val().trim(),
+                engine_number: $('#addVehicleEngine').val().trim(),
+                chassis_number: $('#addVehicleChassis').val().trim(),
+                csrfmiddlewaretoken: getCookie('csrftoken')
+            };
+            
+            if (!vehicleData.model) {
+                toastr.error('Vehicle model is required');
+                return;
+            }
+            
+            const $saveBtn = $('#saveAddVehicleBtn');
+            $saveBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Adding...');
+            
+            // Use existing vehicle creation endpoint
+            const createVehicleApiUrl = "{% url 'c-prf-vehicles' 0 %}".replace('0', customerId);
+            
+            $.ajax({
+                url: createVehicleApiUrl,
+                type: 'POST',
+                data: vehicleData,
+                success: function(response) {
+                    if (response.status) {
+                        $('#addVehicleModal').modal('hide');
+                        $('#addVehicleForm')[0].reset();
+                        // Reload customers to get updated vehicle list, passing current customer and new vehicle
+                        loadCustomers(customerId, response.vehicle_id);
+                        toastr.success('Vehicle added successfully');
+                    } else {
+                        toastr.error('Error: ' + (response.message || 'Failed to add vehicle'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error adding vehicle:', error);
+                    toastr.error('Error adding vehicle. Please try again.');
+                },
+                complete: function() {
+                    $saveBtn.prop('disabled', false).text('Add Vehicle');
+                }
+            });
+        });
+
+        // Handle customer selection change
+        customerSelect.on('change', function () {
+            const selectedValue = $(this).val();
+
+            if (selectedValue === 'add_new') {
+                $('#addNewCustomerModal').modal('show');
+                customerSelect.val('').trigger('change');
+                return;
+            }
+
+            if (selectedValue) {
+                const selectedOption = $(this).find('option:selected');
+                const customerData = selectedOption.data('customer-data') ||
+                    customers.find(c => c.customer_id == selectedValue);
+
+                if (customerData) {
+                    populateCustomerDetails(customerData);
+                }
+            } else {
+                $('#selectedCustomerDetails, #selectedCustomerAddress, #selectedCustomerVehicle').hide();
+                $('#noCustomerSelected, #noAddressSelected, #noVehicleSelected').show();
+            }
+        });
+
+        // Handle Add Vehicle Toggle
+        $('#addVehicleToggle').on('change', function() {
+            const isChecked = $(this).is(':checked');
+            const vehicleSection = $('#vehicleSection');
+            
+            if (isChecked) {
+                vehicleSection.slideDown(300, function() {
+                    vehicleSection.addClass('show');
+                });
+                // Make vehicle number required when toggle is enabled
+                $('#newVehicleModel').attr('required', true);
+            } else {
+                vehicleSection.removeClass('show').slideUp(300);
+                // Remove required attribute and clear vehicle fields
+                $('#newVehicleModel').removeAttr('required');
+                clearVehicleFields();
+            }
+        });
+
+        // Function to clear vehicle fields
+        function clearVehicleFields() {
+            $('#newVehicleModel, #newVehicleMake, #newVehicleNumber, #newVehicleYear, #newVehicleColor, #newVehicleEngine, #newVehicleChassis').val('');
+        }
+
+        // Handle save new customer with optional vehicle
+        $customerForm.on('submit', function (e) {
+            e.preventDefault();
+            const csrfToken = getCookie('csrftoken');
+            
+            const customerData = {
+                name: $('#newCustomerName').val().trim(),
+                phone: $('#newCustomerPhone').val().trim(),
+                alt_phone: $('#newCustomerAltPhone').val().trim(),
+                email: $('#newCustomerEmail').val().trim(),
+                pincode: $('#newCustomerPincode').val().trim(),
+                address: $('#newCustomerAddress').val().trim(),
+                csrfmiddlewaretoken: csrfToken
+            };
+
+            // Validate customer data
+            if (!customerData.name || !customerData.phone) {
+                console.error('Validation failed: Missing required customer fields');
+                console.error('Name:', customerData.name);
+                console.error('Phone:', customerData.phone);
+                toastr.error('Please fill in all required customer fields');
+                return;
+            }
+
+            // Validate phone number format
+            if (customerData.phone && customerData.phone.length !== 10) {
+                console.error('Validation failed: Phone number must be exactly 10 digits');
+                console.error('Phone length:', customerData.phone.length);
+                toastr.error('Phone number must be exactly 10 digits');
+                return;
+            }
+
+            // Validate phone number contains only digits
+            if (customerData.phone && !/^\d+$/.test(customerData.phone)) {
+                console.error('Validation failed: Phone number must contain only digits');
+                toastr.error('Phone number must contain only digits');
+                return;
+            }
+
+            const isVehicleEnabled = $('#addVehicleToggle').is(':checked');
+            let vehicleData = null;
+            
+            if (isVehicleEnabled) {
+                vehicleData = {
+                    model: $('#newVehicleModel').val().trim(),
+                    make: $('#newVehicleMake').val().trim(),
+                    license_plate_no: $('#newVehicleNumber').val().trim(),
+                    registration_no: $('#newVehicleNumber').val().trim(),
+                    year_of_manufacture: $('#newVehicleYear').val().trim(),
+                    color: $('#newVehicleColor').val().trim(),
+                    engine_no: $('#newVehicleEngine').val().trim(),
+                    chassis_no: $('#newVehicleChassis').val().trim(),
+                    csrfmiddlewaretoken: getCookie('csrftoken')
+                };
+
+                console.log('Collected Vehicle Data:', vehicleData);
+
+                // Validate vehicle data if toggle is enabled
+                if (!vehicleData.model) {
+                    console.error('Validation failed: Missing vehicle model');
+                    toastr.error('Please enter vehicle model');
+                    return;
+                }
+            }
+
+            console.log('All validations passed, proceeding with API call');
+            console.log('Disabling save button and showing loading state');
+
+            $saveCustomerBtn.prop('disabled', true)
+                .html('<i class="fas fa-spinner fa-spin me-1"></i>Saving...');
+
+            // First, save the customer
+            console.log('Calling saveCustomer function...');
+            saveCustomer(customerData, vehicleData);
+        });
+
+        // Function to save customer
+        function saveCustomer(customerData, vehicleData) {
+            console.log('=== ADD CUSTOMER API CALL START ===');
+            const createCustomerApiUrl = '{% url "c-prf-customers" %}';
+            console.log('API URL:', createCustomerApiUrl);
+            console.log('Request Method:', 'POST');
+            console.log('Customer Data being sent:', customerData);
+            console.log('Vehicle Data (if any):', vehicleData);
+            console.log('Timestamp:', new Date().toISOString());
+            
+            // Validate API URL
+            if (!createCustomerApiUrl || createCustomerApiUrl.includes('NoReverseMatch')) {
+                console.error('Invalid API URL - check Django URL configuration');
+                toastr.error('Configuration error: Invalid API endpoint');
+                resetSaveButton();
+                return;
+            }
+            
+            $.ajax({
+                url: createCustomerApiUrl,
+                type: 'POST',
+                data: customerData,
+                beforeSend: function(xhr, settings) {
+                    console.log('=== AJAX REQUEST DETAILS ===');
+                    console.log('XHR Object:', xhr);
+                    console.log('Settings:', settings);
+                    console.log('Request Headers:', xhr.getAllResponseHeaders());
+                },
+                success: function (response) {
+                    console.log('=== ADD CUSTOMER API SUCCESS RESPONSE ===');
+                    console.log('Full Response:', response);
+                    console.log('Response Status:', response.status);
+                    console.log('Customer ID:', response.customer_id);
+                    console.log('Response Message:', response.message);
+                    console.log('Response Timestamp:', new Date().toISOString());
+                    
+                    if (response.status) {
+                        const customerId = response.customer_id;
+                        console.log('Customer created successfully with ID:', customerId);
+                        
+                        // If vehicle data exists, save vehicle
+                        if (vehicleData) {
+                            console.log('Proceeding to save vehicle for customer ID:', customerId);
+                            vehicleData.customer_id = customerId;
+                            saveVehicle(vehicleData, customerData, customerId);
+                        } else {
+                            console.log('No vehicle data, completing customer creation only');
+                            // No vehicle, just complete customer creation
+                            completeCustomerCreation(customerData, customerId, null);
+                        }
+                    } else {
+                        console.error('Customer creation failed:', response.message || 'Unknown error');
+                        toastr.error('Error: ' + (response.message || 'Failed to save customer'));
+                        resetSaveButton();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.log('=== ADD CUSTOMER API ERROR RESPONSE ===');
+                    console.error('XHR Object:', xhr);
+                    console.error('Status:', status);
+                    console.error('Error:', error);
+                    console.error('Response Text:', xhr.responseText);
+                    console.error('Status Code:', xhr.status);
+                    console.error('Status Text:', xhr.statusText);
+                    console.error('Ready State:', xhr.readyState);
+                    console.error('Error Timestamp:', new Date().toISOString());
+                    
+                    // Try to parse error response and show detailed error message
+                    let errorMessage = 'Error saving customer. Please try again.';
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        console.error('Parsed Error Response:', errorResponse);
+                        
+                        if (errorResponse.message) {
+                            errorMessage = errorResponse.message;
+                        } else if (errorResponse.error) {
+                            errorMessage = errorResponse.error;
+                        } else if (errorResponse.errors) {
+                            // Handle validation errors
+                            const errors = Object.values(errorResponse.errors).flat();
+                            errorMessage = errors.join(', ');
+                        }
+                    } catch (parseError) {
+                        console.error('Could not parse error response as JSON:', parseError);
+                        
+                        // Handle common HTTP status codes
+                        if (xhr.status === 403) {
+                            errorMessage = 'Permission denied. Please check your authentication.';
+                        } else if (xhr.status === 404) {
+                            errorMessage = 'API endpoint not found. Please contact support.';
+                        } else if (xhr.status === 500) {
+                            errorMessage = 'Server error. Please try again later.';
+                        } else if (xhr.status === 0) {
+                            errorMessage = 'Network error. Please check your connection.';
+                        }
+                    }
+                    
+                    console.error('Error saving customer:', error);
+                    toastr.error(errorMessage, 'Error', {
+                        timeOut: 5000,
+                        closeButton: true,
+                        progressBar: true
+                    });
+                    resetSaveButton();
+                },
+                complete: function(xhr, status) {
+                    console.log('=== ADD CUSTOMER API CALL COMPLETE ===');
+                    console.log('Final Status:', status);
+                    console.log('Final XHR State:', xhr.readyState);
+                    console.log('Completion Timestamp:', new Date().toISOString());
+                    console.log('=== END ADD CUSTOMER API CALL ===');
+                }
+            });
+        }
+
+        // Function to save vehicle (Note: You'll need to create this endpoint)
+        function saveVehicle(vehicleData, customerData, customerId) {
+            const createVehicleApiUrl = "{% url 'c-prf-vehicles' 0 %}".replace('0', customerId);
+            $.ajax({
+                url: createVehicleApiUrl,
+                type: 'POST',
+                data: vehicleData,
+                success: function (response) {
+                    if (response.status) {
+                        const vehicleId = response.vehicle_id;
+                        completeCustomerCreation(customerData, customerId, {
+                            vehicle_id: vehicleId,
+                            model: vehicleData.model,
+                            make: vehicleData.make,
+                            license_plate_no: vehicleData.license_plate_no,
+                            year_of_manufacture: vehicleData.year_of_manufacture,
+                            color: vehicleData.color,
+                            engine_no: vehicleData.engine_no,
+                            chassis_no: vehicleData.chassis_no
+                        });
+                    } else {
+                        toastr.warning('Customer saved but vehicle creation failed: ' + (response.message || 'Unknown error'));
+                        completeCustomerCreation(customerData, customerId, null);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error saving vehicle:', error);
+                    toastr.warning('Customer saved but vehicle creation failed. Please add vehicle separately.');
+                    completeCustomerCreation(customerData, customerId, null);
+                }
+            });
+        }
+
+        // Function to complete customer creation process
+        function completeCustomerCreation(customerData, customerId, vehicleInfo) {
+            console.log('=== COMPLETING CUSTOMER CREATION ===');
+            console.log('Customer Data:', customerData);
+            console.log('Customer ID:', customerId);
+            console.log('Vehicle Info:', vehicleInfo);
+            
+            const newCustomer = {
+                customer_id: customerId,
+                searchItem: `${customerData.name}|${customerData.phone}|${vehicleInfo ? vehicleInfo.license_plate_no : '-'}`,
+                name: customerData ? customerData.name : '-',
+                phone: customerData.phone,
+                alt_phone: customerData ? customerData.alt_phone : '-',
+                email: customerData ? customerData.email : '-',
+                pincode: customerData ? customerData.pincode : '-',
+                address: customerData ? customerData.address : '-',
+                vehicle_id: vehicleInfo ? vehicleInfo.vehicle_id : null,
+                make: vehicleInfo ? vehicleInfo.make : '-',
+                model: vehicleInfo ? vehicleInfo.model : '-',
+                registration_no: vehicleInfo ? vehicleInfo.registration_no : '-',
+                license_plate_no: vehicleInfo ? vehicleInfo.license_plate_no : '-',
+                year_of_manufacture: vehicleInfo ? vehicleInfo.year_of_manufacture : '-',
+                color: vehicleInfo ? vehicleInfo.color : '-',
+                engine_number: vehicleInfo ? vehicleInfo.engine_no : '-',
+                chassis_number: vehicleInfo ? vehicleInfo.chassis_no : ''
+            };
+
+            console.log('New Customer Object Created:', newCustomer);
+            console.log('Adding customer to local array...');
+            customers.push(newCustomer);
+            
+            console.log('Updating customer select dropdown...');
+            populateCustomerSelect(customers);
+            
+            console.log('Setting selected customer to:', customerId);
+            customerSelect.val(customerId).trigger('change');
+            
+            // Ensure customer details are populated after selection
+            console.log('Populating customer details in UI...');
+            setTimeout(() => {
+                populateCustomerDetails(newCustomer);
+            }, 100);
+            
+            console.log('Hiding modal and resetting form...');
+            $('#addNewCustomerModal').modal('hide');
+            $customerForm[0].reset();
+            clearVehicleFields();
+            $('#addVehicleToggle').prop('checked', false);
+            $('#vehicleSection').hide();
+            
+            const message = vehicleInfo ? 
+                'Customer and vehicle added successfully!' : 
+                'Customer added successfully!';
+            console.log('Success message:', message);
+            
+            // Show success message with enhanced options
+            toastr.success(message, 'Success!', {
+                timeOut: 3000,
+                closeButton: true,
+                progressBar: true,
+                positionClass: 'toast-top-right'
+            });
+            
+            console.log('Resetting save button...');
+            resetSaveButton();
+            console.log('=== CUSTOMER CREATION COMPLETED ===');
+        }
+
+        // Function to reset save button
+        function resetSaveButton() {
+            $saveCustomerBtn.prop('disabled', false)
+                .html('<i class="fas fa-save me-1"></i>Save');
+        }
+
+        // Handle edit customer form submission
+        $('#editCustomerForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // Get form values with null checks
+            const name = $('#editCustomerName').val() || '';
+            const phone = $('#editCustomerPhone').val() || '';
+            
+            const formData = {
+                customerid: $('#editCustomerId').val() || '',
+                name: name.trim(),
+                phone: phone.trim(),
+                alt_phone: ($('#editCustomerAltPhone').val() || '').trim(),
+                email: ($('#editCustomerEmail').val() || '').trim(),
+                csrfmiddlewaretoken: getCookie('csrftoken') || ''
+            };
+
+            if (!formData.customerid) {
+                toastr.warning('Customer ID is required');
+                return;
+            }
+
+            if (!formData.name || !formData.phone) {
+                toastr.warning('Please fill in all required fields');
+                return;
+            }
+
+            // Rest of your AJAX code...
+            const $saveBtn = $('#saveEditCustomerBtn');
+            $saveBtn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+            $.ajax({
+                url: '{% url "update-customer-details" %}',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#editCustomerModal').modal('hide');
+                        if (formData.name) {
+                            $('#displayCustomerName').text(formData.name);                            
+                        }
+                        if (formData.phone) {
+                            $('#displayCustomerPhone').text(formData.phone);                            
+                        }
+                        if (formData.alt_phone) {
+                            $('#displayCustomerAltPhone').text(formData.alt_phone);                            
+                        }
+                        if (formData.email) {
+                            $('#displayCustomerEmail').text(formData.email);                            
+                        }
+                        toastr.success('Customer updated successfully');
+                    } else {
+                        toastr.error('Error: ' + (response.message || 'Failed to update customer'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating customer:', error);
+                    toastr.error('Error updating customer. Please try again.');
+                },
+                complete: function() {
+                    $saveBtn.prop('disabled', false).text('Save Changes');
+                }
+            });
+        });
+
+        // Handle edit address form submission
+        $('#editAddressForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values with null checks
+            const formData = {
+                customerid: $('#editAddressCustomerId').val() || '',
+                pincode: ($('#editCustomerPincode').val() || '').trim(),
+                address: ($('#editCustomerAddress').val() || '').trim(),
+                csrfmiddlewaretoken: getCookie('csrftoken') || ''
+            };
+
+            if (!formData.customerid) {
+                toastr.warning('Customer ID is required');
+                return;
+            }
+
+            const $saveBtn = $('#saveEditAddressBtn');
+            $saveBtn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+            // Update customer via AJAX
+            $.ajax({
+                url: '{% url "update-customer-details" %}',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#editAddressModal').modal('hide');
+                        if (formData.pincode) {
+                            $('#displayCustomerPincode').text(formData.pincode);                            
+                        }
+                        if (formData.address) {
+                            $('#displayCustomerAddress').text(formData.address);                            
+                        }
+                        toastr.success('Address updated successfully');
+                    } else {
+                        toastr.error('Error: ' + (response.message || 'Failed to update address'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating address:', error);
+                    toastr.error('Error updating address. Please try again.');
+                },
+                complete: function() {
+                    $saveBtn.prop('disabled', false).text('Save Changes');
+                }
+            });
+        });
+
+        // Handle edit vehicle form submission
+        $('#editVehicleForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values with null checks
+            const formData = {
+                vehicleid: $('#editVehicleId').val() || '',
+                registration_no: ($('#editVehicleNumber').val() || '').trim(),
+                make: ($('#editVehicleMake').val() || '').trim(),
+                model: ($('#editVehicleModel').val() || '').trim(),
+                year_of_manufacture: ($('#editVehicleYear').val() || '').trim(),
+                color: ($('#editVehicleColor').val() || '').trim(),
+                engine_number: ($('#editVehicleEngine').val() || '').trim(),
+                chassis_number: ($('#editVehicleChassis').val() || '').trim(),
+                csrfmiddlewaretoken: getCookie('csrftoken') || ''
+            };
+
+            // Validation
+            if (!formData.vehicleid) {
+                toastr.warning('Vehicle ID is required');
+                return;
+            }
+
+            if (!formData.model) {
+                toastr.warning('Please enter vehicle model');
+                return;
+            }
+
+            const $saveBtn = $('#saveEditVehicleBtn');
+            $saveBtn.prop('disabled', true)
+                .html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+            // Update vehicle via AJAX
+            $.ajax({
+                url: '{% url "update-vehicle-details" %}',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#editVehicleModal').modal('hide');
+                        if (formData.registration_no) {
+                            $('#displayVehicleNumber').text(formData.registration_no);                            
+                        }
+                        if (formData.make) {
+                            $('#displayVehicleMake').text(formData.make);                            
+                        }
+                        if (formData.model) {
+                            $('#displayVehicleModel').text(formData.model);                            
+                        }
+                        if (formData.year_of_manufacture) {
+                            $('#displayVehicleYear').text(formData.year_of_manufacture);                            
+                        }
+                        if (formData.color) {
+                            $('#displayVehicleColor').text(formData.color);                            
+                        }
+                        if (formData.engine_number) {
+                            $('#displayVehicleEngine').text(formData.engine_number);                            
+                        }
+                        if (formData.chassis_number) {
+                            $('#displayVehicleChassis').text(formData.chassis_number);                            
+                        }
+                        toastr.success('Vehicle updated successfully');
+                    } else {
+                        toastr.error('Error: ' + (response.message || 'Failed to update vehicle'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating vehicle:', error);
+                    toastr.error('Error updating vehicle. Please try again.');
+                },
+                complete: function() {
+                    $saveBtn.prop('disabled', false).text('Save Changes');
+                }
+            });
+        });
+
+        // Add these event handlers for modal show events
+        $('#editCustomerModal').on('show.bs.modal', function () {
+            // Get the current customer data from the displayed values
+            const customerData = {
+                name: $('#displayCustomerName').text().trim(),
+                phone: $('#displayCustomerPhone').text().trim(),
+                alt_phone: $('#displayCustomerAltPhone').text().trim(),
+                email: $('#displayCustomerEmail').text().trim()
+            };
+
+            // Populate the edit form
+            $('#editCustomerName').val(customerData.name);
+            $('#editCustomerPhone').val(customerData.phone);
+            $('#editCustomerAltPhone').val(customerData.alt_phone);
+            $('#editCustomerEmail').val(customerData.email);
+        });
+
+        $('#editAddressModal').on('show.bs.modal', function () {
+            // Get the current address data from the displayed values
+            const addressData = {
+                address: $('#displayCustomerAddress').text().trim(),
+                pincode: $('#displayCustomerPincode').text().trim()
+            };
+
+            // Populate the edit form
+            $('#editCustomerAddress').val(addressData.address);
+            $('#editCustomerPincode').val(addressData.pincode);
+        });
+
+        $('#editVehicleModal').on('show.bs.modal', function () {
+            // Get the current vehicle data from the displayed values
+            const vehicleData = {
+                model: $('#displayVehicleModel').text().trim(),
+                make: $('#displayVehicleMake').text().trim(),
+                number: $('#displayVehicleNumber').text().trim(),
+                year: $('#displayVehicleYear').text().trim(),
+                // year: ($('#displayVehicleYear').text().trim() && $('#displayVehicleYear').text().trim() !== '-') 
+                //     ? new Date($('#displayVehicleYear').text().trim()).toISOString().split('T')[0] 
+                //     : '',
+                color: $('#displayVehicleColor').text().trim(),
+                engine: $('#displayVehicleEngine').text().trim(),
+                chassis: $('#displayVehicleChassis').text().trim()
+            };
+
+            // Populate the edit form
+            $('#editVehicleModel').val(vehicleData.model);
+            $('#editVehicleMake').val(vehicleData.make);
+            $('#editVehicleNumber').val(vehicleData.number);
+            $('#editVehicleYear').val(vehicleData.year);
+            $('#editVehicleColor').val(vehicleData.color);
+            $('#editVehicleEngine').val(vehicleData.engine);
+            $('#editVehicleChassis').val(vehicleData.chassis);
+        });
+
+        // Initialize tabs
+        $('.nav-tabs a').on('click', function (e) {
+            e.preventDefault();
+            $(this).tab('show');
+        });
+
+        // Initialize customer select when modal is shown
+        $('#addNewCustomerModal').on('shown.bs.modal', function () {
+            $('#newCustomerName').focus();
+        });
+
+        // Reset modal when hidden
+        $('#addNewCustomerModal').on('hidden.bs.modal', function () {
+            $customerForm[0].reset();
+            clearVehicleFields();
+            $('#addVehicleToggle').prop('checked', false);
+            $('#vehicleSection').removeClass('show').hide();
+            // Remove required attribute from vehicle fields to prevent validation conflicts
+            $('#newVehicleModel').removeAttr('required');
+            resetSaveButton();
+        });
+
+        // Initialize vehicle number field without required attribute to prevent validation conflicts
+        $('#newVehicleModel').removeAttr('required');
+        
+        // Load customers on page load
+        loadCustomers();
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>

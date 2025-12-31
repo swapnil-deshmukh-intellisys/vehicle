@@ -1,0 +1,556 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-accounts-brand{% endblock %}
+
+{% block style %}
+<style>
+/* shri */
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .content-header-title {
+        display: inline-block;
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+    .breadcrumb-wrapper {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -4px; /* Adjust as needed */
+    }
+    .card {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    }
+    .input-group input {
+    border-radius: 6px !important;
+    border: 1px solid #dcdcdc;
+    background-color: #fafafa;
+    }
+    .input-group-text {
+        background-color: #f0f0f0;
+        border-radius: 6px 0 0 6px;
+    }
+    /* -------------------------------
+   ✅ Table Row Styling
+    -------------------------------- */
+    #tableBrand.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #fcfcfc !important;
+    }
+
+    #tableBrand tbody tr:nth-child(even) {
+    background-color: #fafafa !important;
+    }
+
+    #tableBrand.table-hover tbody tr:hover {
+    background-color: #eef7ff !important;
+    cursor: pointer !important;
+    transition: background-color 0.3s ease !important;
+    }
+
+    /* -------------------------------
+    ✅ Header Styling
+    -------------------------------- */
+    #tableBrand th {
+    font-weight: 600 !important;
+    background-color: #f5f5f5 !important;
+    color: #333 !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    letter-spacing: 0.5px !important;
+    border-bottom: 2px solid #e2e2e2 !important;
+    padding: 10px 14px !important;
+    line-height: 1.5 !important;
+    }
+
+    /* Sticky headers */
+    #tableBrand thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: #f5f5f5 !important;
+    }
+
+    /* -------------------------------
+    ✅ Cell Styling
+    -------------------------------- */
+    #tableBrand td {
+    font-size: 14px !important;
+    color: #444444 !important;
+    padding: 10px 14px !important;
+    line-height: 1.5 !important;
+    border-bottom: 1px solid #eee !important;
+    }
+
+    /* Checkbox alignment */
+    #tableBrand td:first-child input[type="checkbox"] {
+    margin-top: 3px !important;
+    }
+
+    /* Selected row (when checkbox selected via JS) */
+    #tableBrand tbody tr.selected-row {
+    background-color: #4c4d4e !important;
+    }
+
+    /* -------------------------------
+    ✅ Pagination Styling
+    -------------------------------- */
+    .pagination {
+    justify-content: center !important;
+    gap: 4px    !important;
+    }
+
+    .page-link {
+    border-radius: 6px;
+    padding: 5px 10px;
+    }
+
+    /* -------------------------------
+    ✅ Highlighted Search Text
+    -------------------------------- */
+    .highlight {
+    background-color: yellow !important;
+    font-weight: bold !important;
+    }
+    .table-responsive-scroll {
+    max-height: 420px !important;
+    overflow-y: auto    !important;
+    position: relative !important;
+    }
+    .table-responsive-scroll thead th {
+        position: sticky !important;
+        top: 0 !important;
+        background-color: #f5f5f5 !important;
+        z-index: 2 !important;
+        box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    .table tbody tr td {
+        white-space: nowrap !important;
+    }
+    table thead th {
+        text-transform: uppercase !important;
+        font-size: .75rem !important;
+        padding: .75rem 1rem !important;
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+    table tbody tr {
+     transition: background .2s !important;
+    }
+    table tbody tr:hover {
+    background: #f9fafb !important;
+    }
+    
+    
+
+    table td, table th {
+    text-align: left !important;
+    vertical-align: middle !important;
+    padding: 12px !important;
+    white-space: nowrap;
+    width: 10%; /* distribute space evenly */
+    }
+
+    
+    /* Make entire table fixed layout and evenly spaced */
+    #tableBrand {
+        table-layout: fixed !important;
+        width: 100% !important;
+    }
+
+    /* Remove gap after checkbox */
+    #tableBrand td:first-child,
+    #tableBrand th:first-child {
+        padding-left: 0px !important;
+        
+        width: 2% !important;
+        text-align: center !important;
+    }
+
+    /* Reduce Vehicle image column width */
+    #tableBrand td:nth-child(2),
+    #tableBrand th:nth-child(2) {
+        width: 5% !important;
+    }
+
+    /* Equal space for other columns */
+    #tableBrand td:nth-child(3),
+    #tableBrand th:nth-child(3),
+    #tableBrand td:nth-child(4),
+    #tableBrand th:nth-child(4),
+    #tableBrand td:nth-child(5),
+    #tableBrand th:nth-child(5) {
+        width: 28% !important;
+    }
+
+    /* Ensure vehicle image doesn't overflow */
+    .vehicle-img {
+        width: 50px !important;
+        height: 50px !important;
+        object-fit: cover !important;
+        border-radius: 10px !important;
+    }
+    /* Ensure enough vertical space for multi-line rows */
+    #tableBrand tbody tr {
+        height: auto !important;
+        min-height: 60px !important;
+    }
+
+    /* Adjust padding and allow text wrap */
+    #tableBrand td {
+        white-space: normal !important;
+        padding: 8px 12px !important;
+        vertical-align: middle !important;
+    }
+
+    /* Make & Model section styles for 2 lines with spacing */
+    .make-model-cell strong {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+    .make-model-cell small {
+        display: block;
+        color: #6c757d;
+        font-size: 13px;
+    }
+
+
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0 title">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item active">Vehicle Listing
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body container-fluid px-4">
+                <!-- Responsive tables start -->
+                <div class="row" id="r-accounts-brand">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">  
+                                                               
+                                {% if vehicle_objs %} 
+                                <div>
+                                    <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputBrand" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputBrand', 'tableBrand')"/>
+                                    </div>
+                                </div>  
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if vehicle_objs %} 
+                                <div class="table-responsive ">
+                                    <table class="table mb-0 table-sm table-striped table-hover " id="tableBrand">
+                                        
+                                        <!-- <thead>
+                                            <tr>
+                                                <th>
+                                                <input type="checkbox" id="selectAll" />
+                                                </th>
+                                                <th>Vehicle</th>
+                                                <th>Make & Model</th>
+                                                <th>Customer Info</th>
+                                            </tr>
+                                        </thead> -->
+
+                                        <!-- <tbody>
+                                            {% for vehicle in vehicle_objs %}
+                                                <tr class="clickable-row" data-href="...">
+                                                    <td>
+                                                    <input type="checkbox" name="selected" value="{{ vehicle.id }}">
+                                                    </td>
+                                                    <td class="text-center align-middle">
+                                                        {% if vehicle.image_path %}
+                                                        <img src="{{ vehicle.image_path }}" alt="Vehicle" class="vehicle-img">
+                                                        {% else %}
+                                                        <img src="{% static 'default-vehicle.png' %}" alt="Default" class="vehicle-img">
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="text-center align-left">
+                                                        <strong>{{ vehicle.make }}</strong><br>
+                                                        <small class="text-muted">{{ vehicle.model }}</small>
+                                                    </td>
+                                                    <td class="text-center align-left">
+                                                        <strong>{{ vehicle.customer_name }}</strong><br>
+                                                        <small class="text-muted">{{ vehicle.customer_phone }}</small>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody> -->
+                                        <thead>
+                                            <tr>
+                                                <th><input type="checkbox" id="selectAll" /></th>
+                                                <th style="width: 30%;">Vehicle</th>
+                                                <th></th>
+                                                <th style="width: 60%;">Customer</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for vehicle in vehicle_objs %}
+                                            <tr class="clickable-row" data-href="...">
+                                                <td><input type="checkbox" name="selected" value="{{ vehicle.id }}"></td>
+                                                
+                                                <td class="text-center align-middle">
+                                                    <img class="me-3 rounded vehicle-img" src="../../../{{ vehicle.image_path}}" height="40" width="40" alt="{{ vehicle.model|default:'' }}">
+
+                                                </td>
+                                                <td>
+                                                    <div style="border-right: 3px solid #dc3545">
+                                                        <div>
+                                                            <i data-feather="settings" class="me-25 text-warning" style="width: 14px;"></i>
+                                                            {% if vehicle.model_id %}
+                                                                <a href="{% url 'u-accounts-model' vehicle.model_id %}">
+                                                                    {{ vehicle.model }}
+                                                                </a>
+                                                            {% else %}
+                                                                {{ vehicle.model }}
+                                                            {% endif %}
+                                                             
+                                                        </div>
+                                                        <div>
+                                                            <i data-feather="zap" class="me-25 text-success" style="width: 14px;"></i>
+                                                            {% if vehicle.model_id %}
+                                                                <a href="{% url 'u-accounts-model' vehicle.model_id %}">
+                                                                    {{ vehicle.make }}
+                                                                </a>
+                                                            {% else %}
+                                                                {{ vehicle.make }}
+                                                            {% endif %}
+                                                            
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <!-- <td class="text-left align-middle" style="width: 35%;">
+                                                    <div class="d-flex align-items-center">
+                                                        <img class="me-2 rounded vehicle-img" src="../../../{{ vehicle.image_path }}" height="40" width="40" alt="{{ vehicle.model|default:'' }}">
+                                                        <div class="ms-1">
+                                                            <div>
+                                                                <i data-feather="settings" class="me-25 text-warning" style="width: 14px;"></i>
+                                                                {% if vehicle.model_id %}
+                                                                    <a href="{% url 'u-accounts-model' vehicle.model_id %}">
+                                                                        {{ vehicle.model }}
+                                                                    </a>
+                                                                {% else %}
+                                                                    {{ vehicle.model }}
+                                                                {% endif %}
+                                                            </div>
+                                                            <div style="border-right: 3px solid #dc3545">
+                                                                <i data-feather="zap" class="me-25 text-success" style="width: 14px;"></i>
+                                                                {% if vehicle.model_id %}
+                                                                    <a href="{% url 'u-accounts-model' vehicle.model_id %}">
+                                                                        {{ vehicle.make }}
+                                                                    </a>
+                                                                {% else %}
+                                                                    {{ vehicle.make }}
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td> -->
+
+
+                                                <td class="text-left ps-2" style="cursor: pointer;" onclick="window.location.href='{% url 'r-prf-summary' %}'">
+                                                    <div>
+                                                        <div>
+                                                            <i data-feather="user" class="me-25 text-danger" style="width: 14px;"></i>
+                                                            <a href="{% url 'u-prf-customers_all' vehicle.customer_id %}" class="fw-bold text-decoration-underline">
+                                                                {{ vehicle.customer_name|default:"Unknown" }}
+                                                            </a>
+                                                        </div>
+                                                        <div>
+                                                            <i data-feather="phone" class="me-25 text-primary" style="width: 14px;"></i>
+                                                            <a href="{% url 'u-prf-customers_all' vehicle.customer_id %}" class="fw-bold text-decoration-underline">
+                                                                {{ vehicle.customer_phone|default:"N/A" }}
+                                                            </a>
+                                                            
+                                                        </div>
+                                                        <div >
+                                                            <i data-feather="home" class="me-25 text-danger" style="width: 14px;"></i>
+                                                            <a href="{% url 'u-prf-customers_all' vehicle.customer_id %}" class="fw-bold text-decoration-underline">
+                                                                {{ vehicle.customer_address|default:"" }}
+                                                            </a>
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </td>
+                                                
+                                                
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+
+                                    </table>
+                                    <div class="card-header">
+                                        <div>                                    
+                                            Showing {{ vehicle_objs.start_index }} to {{ vehicle_objs.end_index }} of {{ brand_objs.paginator.count }} entries
+                                        </div>
+                                        <div> 
+                                            {% if vehicle_objs.has_other_pages %}
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-success">  
+    
+                                                        <!-- First Page Link -->
+                                                        {% if vehicle_objs.number > 1 %}
+                                                        <li class="page-item first">
+                                                            <a href="?page=1" class="page-link">First</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item first disabled">
+                                                            <span class="page-link">First</span>
+                                                        </li>
+                                                        {% endif %}   
+    
+                                                        <!-- Previous Page Link -->
+                                                        {% if vehicle_objs.has_previous %}
+                                                        <li class="page-item prev">
+                                                            <a href="?page={{ vehicle_objs.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item prev disabled">
+                                                            <span class="page-link" aria-label="Previous"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                        {% for page in vehicle_objs.paginator.page_range %}
+                                                            {% if page >= vehicle_objs.number|add:'-1' and page <= vehicle_objs.number|add:'1' %}
+                                                                {% if page == vehicle_objs.number %}
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ page }}</span>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="page-item">
+                                                                    <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                                </li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+    
+                                                        <!-- Next Page Link -->
+                                                        {% if vehicle_objs.has_next %}
+                                                        <li class="page-item next">
+                                                            <a href="?page={{ vehicle_objs.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item next disabled">
+                                                            <span class="page-link" aria-label="Next"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Last Page Link -->
+                                                        {% if vehicle_objs.number < vehicle_objs.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ vehicle_objs.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                    </ul>
+                                                </nav>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="avatar bg-light-danger avatar-xl">
+                                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                    </div>
+                                    <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to add brand.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive tables end -->  
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const delBrandButton = document.getElementById("delBrand");
+
+        delBrandButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            document.querySelectorAll('input[name="checkedBrand"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-accounts-brand' %}";
+
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+    });
+
+    function highlightSearch(inputId, tableId) {
+    const input = document.getElementById(inputId).value.toLowerCase();
+    const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+
+    rows.forEach(row => {
+        row.innerHTML = row.innerHTML.replace(/<span class="highlight">(.*?)<\/span>/g, '$1');
+        if (input) {
+        [...row.cells].forEach(cell => {
+            if (cell.textContent.toLowerCase().includes(input)) {
+            const regex = new RegExp(`(${input})`, 'gi');
+            cell.innerHTML = cell.textContent.replace(regex, `<span class="highlight">$1</span>`);
+            }
+        });
+        }
+    });
+    }
+</script>
+{% endblock %}

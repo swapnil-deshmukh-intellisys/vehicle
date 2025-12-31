@@ -1,0 +1,195 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to modify the table for mechanic view
+    function prepareMechanicView() {
+        const element = document.querySelector('#v-job-sheets');
+        if (!element) return null;
+
+        // Create a clone to avoid modifying the original DOM
+        const clone = element.cloneNode(true);
+        
+        // Hide price-related columns
+        const tables = clone.querySelectorAll('.jc-table');
+        tables.forEach(table => {
+            // Update headers
+            const headers = table.querySelectorAll('th');
+            if (headers.length >= 6) {
+                // Keep only ITEM and QTY columns
+                for (let i = headers.length - 1; i >= 2; i--) {
+                    headers[i].remove();
+                }
+            }
+
+            // Update rows and remove grand total
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                // Remove grand total row
+                if (row.classList.contains('jc-total-row')) {
+                    row.remove();
+                    return;
+                }
+                
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 6) {
+                    // Keep only ITEM and QTY columns
+                    for (let i = cells.length - 1; i >= 2; i--) {
+                        cells[i].remove();
+                    }
+                }
+            });
+        });
+
+        // Remove any remaining grand total rows that might be outside tables
+        const grandTotalRows = clone.querySelectorAll('.jc-total-row');
+        grandTotalRows.forEach(row => row.remove());
+
+        return clone;
+    }
+
+    // Function to generate Customer PDF
+    function generateCustomerPDF() {
+        generatePDF('Customer_');
+    }
+
+    // Function to generate Mechanic PDF
+    function generateMechanicPDF() {
+        // For mechanic view, we need to modify the content before generating PDF
+        generatePDF('Mechanic_', true);
+    }
+
+    // Common PDF generation function
+    function generatePDF(prefix, isMechanicView = false) {
+        try {
+            // Get the element to be converted to PDF
+            let element = document.querySelector('#v-job-sheets');
+            
+            if (!element) {
+                throw new Error('Could not find job card content');
+            }
+
+            // If it's a mechanic view, prepare the view first
+            if (isMechanicView) {
+                element = prepareMechanicView();
+                if (!element) {
+                    throw new Error('Could not prepare mechanic view');
+                }
+
+                // Temporarily add to body for rendering
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                tempDiv.appendChild(element);
+                document.body.appendChild(tempDiv);
+            }
+
+            // Options for PDF generation
+            const options = {
+                margin: 0,
+                filename: `${prefix}{{ jobcard_obj.jobcard_number|default:'' }}_${new Date().toISOString().split('T')[0]}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    dpi: 192,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            // Generate and download the PDF
+            const promise = html2pdf()
+                .set(options)
+                .from(element)
+                .save();
+
+            // Clean up after PDF generation if it was a mechanic view
+            if (isMechanicView) {
+                promise.then(() => {
+                    const tempDiv = element.parentNode;
+                    if (tempDiv && tempDiv.parentNode) {
+                        tempDiv.parentNode.removeChild(tempDiv);
+                    }
+                });
+            }
+                
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toastr.error('Error', 'Failed to generate PDF: ' + error.message, 'error');
+        }
+    }
+
+    // Function to handle PDF generation with loading state
+    async function handlePDFGeneration(button, generateFunction, otherButtonId) {
+        // Get the other button
+        const otherButton = document.getElementById(otherButtonId);
+        const originalOtherButtonState = otherButton ? otherButton.disabled : false;
+        
+        // Show loading indicator and disable both buttons
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+        button.disabled = true;
+        if (otherButton) {
+            otherButton.disabled = true;
+        }
+        
+        try {
+            // Check if html2pdf is already loaded
+            if (typeof html2pdf === 'undefined') {
+                // Load html2pdf script
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+                    script.integrity = 'sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==';
+                    script.crossOrigin = 'anonymous';
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('Failed to load PDF generator'));
+                    document.head.appendChild(script);
+                });
+            }
+            
+            // Generate PDF using the provided function
+            await new Promise((resolve) => {
+                // Add a small delay to ensure the UI updates
+                setTimeout(() => {
+                    generateFunction();
+                    resolve();
+                }, 100);
+            });
+            
+        } catch (error) {
+            console.error('Error:', error);
+            toastr.error('Error', error.message || 'Failed to generate PDF', 'error');
+        } finally {
+            // Always restore button states
+            button.innerHTML = originalText;
+            button.disabled = false;
+            if (otherButton) {
+                otherButton.disabled = originalOtherButtonState;
+            }
+        }
+    }
+
+    // Add click event listeners to both buttons
+    const customerBtn = document.getElementById('jcCustomerBtn');
+    const mechanicBtn = document.getElementById('jcMechanicBtn');
+
+    if (customerBtn) {
+        customerBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handlePDFGeneration(this, generateCustomerPDF, 'jcMechanicBtn');
+        });
+    }
+
+    if (mechanicBtn) {
+        mechanicBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            handlePDFGeneration(this, generateMechanicPDF, 'jcCustomerBtn');
+        });
+    }
+});
+</script>

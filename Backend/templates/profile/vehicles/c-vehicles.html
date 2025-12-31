@@ -1,0 +1,412 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}Add Vehicle{% endblock %}
+
+{% block style %}
+<style>
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .content-header-title {
+        display: inline-block;
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+    .breadcrumb-wrapper {
+        display: inline-block;
+        vertical-align: middle;
+        margin-top: -4px;
+    }
+    .vehicle-form-section {
+        border-left: 3px solid #7367f0;
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .vehicle-form-section h4 {
+        color: #5e5873;
+        font-weight: 500;
+    }
+    .image-preview-container {
+        width: 100%;
+        height: 200px;
+        border: 2px dashed #d8d6de;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+    .image-preview {
+        max-width: 100%;
+        max-height: 100%;
+        display: none;
+    }
+    .upload-placeholder {
+        text-align: center;
+    }
+    .upload-placeholder i {
+        font-size: 2rem;
+        color: #d8d6de;
+        margin-bottom: 0.5rem;
+    }
+    .form-label-with-icon {
+        display: flex;
+        align-items: center;
+    }
+    .form-label-with-icon i {
+        margin-right: 0.5rem;
+        color: #7367f0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0 title">Vehicles</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'r-home' %}">Home</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'r-vehicles' %}">Vehicles</a></li>
+                                <li class="breadcrumb-item active">Add Vehicle</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                <div class="mb-1 breadcrumb-right">
+                    <a href="{% url 'r-vehicles' %}" class="btn btn-primary waves-effect">
+                        <i data-feather="arrow-left" class="me-25"></i>
+                        <span>Back to Vehicles</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <!-- Add Vehicle Form -->
+            <section id="add-vehicle-form">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Add New Vehicle</h4>
+                            </div>
+                            <div class="card-body">
+                                <form class="form" method="post" enctype="multipart/form-data" action="{% url 'c-vehicles' %}">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Vehicle Image -->
+                                    <div class="row mb-2">
+                                        <div class="col-12 col-md-6 offset-md-3">
+                                            <div class="vehicle-form-section">
+                                                <h4 class="mb-1">Vehicle Image</h4>
+                                                <div class="image-preview-container">
+                                                    <img id="vehicle-image-preview" class="image-preview" src="#" alt="Vehicle Preview">
+                                                    <div id="upload-placeholder" class="upload-placeholder">
+                                                        <i data-feather="image"></i>
+                                                        <p class="mb-0">Click to upload vehicle image</p>
+                                                        <small class="text-muted">Supports JPG, PNG, JPEG</small>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-1">
+                                                    <input type="file" class="form-control" id="vehicle-image" name="vehicle_image" accept="image/*" onchange="previewImage(this)">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Vehicle Information -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="vehicle-form-section">
+                                                <h4 class="mb-1">Vehicle Information</h4>
+                                                <div class="row">
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="make">
+                                                                <i data-feather="tag"></i>Make
+                                                            </label>
+                                                            <input type="text" id="make" class="form-control" name="make" placeholder="e.g. Toyota" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="model">
+                                                                <i data-feather="tag"></i>Model
+                                                            </label>
+                                                            <input type="text" id="model" class="form-control" name="model" placeholder="e.g. Corolla" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="variant">
+                                                                <i data-feather="layers"></i>Variant
+                                                            </label>
+                                                            <input type="text" id="variant" class="form-control" name="variant" placeholder="e.g. GLi">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="year">
+                                                                <i data-feather="calendar"></i>Year
+                                                            </label>
+                                                            <input type="number" id="year" class="form-control" name="year" placeholder="e.g. 2022" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="color">
+                                                                <i data-feather="droplet"></i>Color
+                                                            </label>
+                                                            <input type="text" id="color" class="form-control" name="color" placeholder="e.g. Red">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Registration Details -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="vehicle-form-section">
+                                                <h4 class="mb-1">Registration Details</h4>
+                                                <div class="row">
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="registration-number">
+                                                                <i data-feather="hash"></i>Registration Number
+                                                            </label>
+                                                            <input type="text" id="registration-number" class="form-control" name="registration_number" placeholder="e.g. ABC-123" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="vin">
+                                                                <i data-feather="code"></i>VIN (Vehicle Identification Number)
+                                                            </label>
+                                                            <input type="text" id="vin" class="form-control" name="vin" placeholder="e.g. 1HGCM82633A123456">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="registration-date">
+                                                                <i data-feather="calendar"></i>Registration Date
+                                                            </label>
+                                                            <input type="date" id="registration-date" class="form-control" name="registration_date">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="registration-expiry">
+                                                                <i data-feather="calendar"></i>Registration Expiry
+                                                            </label>
+                                                            <input type="date" id="registration-expiry" class="form-control" name="registration_expiry">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Technical Specifications -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="vehicle-form-section">
+                                                <h4 class="mb-1">Technical Specifications</h4>
+                                                <div class="row">
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="engine-type">
+                                                                <i data-feather="cpu"></i>Engine Type
+                                                            </label>
+                                                            <input type="text" id="engine-type" class="form-control" name="engine_type" placeholder="e.g. 1.8L 4-Cylinder">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="transmission">
+                                                                <i data-feather="settings"></i>Transmission
+                                                            </label>
+                                                            <select id="transmission" class="form-select" name="transmission">
+                                                                <option value="">Select Transmission</option>
+                                                                <option value="Automatic">Automatic</option>
+                                                                <option value="Manual">Manual</option>
+                                                                <option value="CVT">CVT</option>
+                                                                <option value="DCT">DCT</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="fuel-type">
+                                                                <i data-feather="droplet"></i>Fuel Type
+                                                            </label>
+                                                            <select id="fuel-type" class="form-select" name="fuel_type">
+                                                                <option value="">Select Fuel Type</option>
+                                                                <option value="Petrol">Petrol</option>
+                                                                <option value="Diesel">Diesel</option>
+                                                                <option value="Hybrid">Hybrid</option>
+                                                                <option value="Electric">Electric</option>
+                                                                <option value="CNG">CNG</option>
+                                                                <option value="LPG">LPG</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="body-type">
+                                                                <i data-feather="truck"></i>Body Type
+                                                            </label>
+                                                            <select id="body-type" class="form-select" name="body_type">
+                                                                <option value="">Select Body Type</option>
+                                                                <option value="Sedan">Sedan</option>
+                                                                <option value="Hatchback">Hatchback</option>
+                                                                <option value="SUV">SUV</option>
+                                                                <option value="Crossover">Crossover</option>
+                                                                <option value="Coupe">Coupe</option>
+                                                                <option value="Convertible">Convertible</option>
+                                                                <option value="Wagon">Wagon</option>
+                                                                <option value="Van">Van</option>
+                                                                <option value="Pickup">Pickup</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="mileage">
+                                                                <i data-feather="activity"></i>Mileage (km)
+                                                            </label>
+                                                            <input type="number" id="mileage" class="form-control" name="mileage" placeholder="e.g. 45000">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="last-service-date">
+                                                                <i data-feather="tool"></i>Last Service Date
+                                                            </label>
+                                                            <input type="date" id="last-service-date" class="form-control" name="last_service_date">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Owner Information -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="vehicle-form-section">
+                                                <h4 class="mb-1">Owner Information</h4>
+                                                <div class="row">
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="owner">
+                                                                <i data-feather="user"></i>Owner
+                                                            </label>
+                                                            <select id="owner" class="form-select" name="owner" required>
+                                                                <option value="">Select Owner</option>
+                                                                {% for customer in customers %}
+                                                                <option value="{{ customer.id }}">{{ customer.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6 col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="status">
+                                                                <i data-feather="check-circle"></i>Status
+                                                            </label>
+                                                            <select id="status" class="form-select" name="status">
+                                                                <option value="Active">Active</option>
+                                                                <option value="Inactive">Inactive</option>
+                                                                <option value="In Service">In Service</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Additional Notes -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="vehicle-form-section">
+                                                <h4 class="mb-1">Additional Notes</h4>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <div class="mb-1">
+                                                            <label class="form-label form-label-with-icon" for="notes">
+                                                                <i data-feather="file-text"></i>Notes
+                                                            </label>
+                                                            <textarea id="notes" class="form-control" name="notes" rows="3" placeholder="Any additional information about the vehicle"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Form Actions -->
+                                    <div class="row">
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                            <button type="submit" class="btn btn-primary">Add Vehicle</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize feather icons
+        if (typeof feather !== 'undefined') {
+            feather.replace();
+        }
+    });
+    
+    // Function to preview the vehicle image
+    function previewImage(input) {
+        const preview = document.getElementById('vehicle-image-preview');
+        const placeholder = document.getElementById('upload-placeholder');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.style.display = 'none';
+            placeholder.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

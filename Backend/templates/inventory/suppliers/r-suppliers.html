@@ -1,0 +1,362 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-inv-suppliers{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0"><a href="{% url 'r-inventory' %}">Inventory</a></h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item active">Suppliers
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Responsive tables start -->
+                <div class="row" id="r-inv-suppliers">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">  
+                                <div> 
+                                    {% if 'add' in useruiacl.Inventory.Suppliers %}
+                                    <button type="button" class="btn btn-icon btn-outline-success waves-effect" data-bs-toggle="modal" data-bs-target="#c-inv-suppliers-modal">
+                                        <i data-feather='plus-square'></i>
+                                    </button>
+                                    {% endif %}   
+                                    
+                                    {% if 'delete' in useruiacl.Inventory.Suppliers %}
+                                        {% if suppliers %} 
+                                        <button type="button"  id="delSuppliers" class="btn btn-icon btn-outline-danger waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete suppliers">
+                                            <i data-feather='trash-2'></i>
+                                        </button>
+                                        {% endif %}
+                                    {% endif %}    
+                                </div>                                
+                                {% if suppliers %} 
+                                <div>
+                                    <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputSuppliers" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputSuppliers', 'tableSuppliers')"/>
+                                    </div>
+                                </div>  
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if suppliers %} 
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-sm table-striped table-hover" id="tableSuppliers">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="text-nowrap form-check-success">
+                                                    {% if 'delete' in useruiacl.Inventory.Suppliers %}
+                                                    <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all suppliers"> 
+                                                    {% endif %} 
+                                                    Supplier
+                                                </th>
+                                                <th scope="col" class="text-nowrap">Contact</th>
+                                                <th scope="col" class="text-nowrap">Mobile</th>
+                                                <th scope="col" class="text-nowrap">Location</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for supplier in suppliers %}
+                                            <tr>
+                                                <td class="text-nowrap d-flex">
+                                                    {% if 'delete' in useruiacl.Inventory.Suppliers %}
+                                                    <form method="post" class="form-check-success">
+                                                        {% csrf_token %}
+                                                        <input  class="form-check-input me-1" type="checkbox" name="checkedSuppliers" value="{{supplier.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select supplier">  
+                                                    </form>  
+                                                    {% endif %} 
+                                                    {% if 'edit' in useruiacl.Inventory.Suppliers %}
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#u-inv-suppliers-modal-{{supplier.id}}">
+                                                        {{supplier.supplier}}
+                                                    </a>
+                                                    {% else %} 
+                                                        {{supplier.supplier}}     
+                                                    {% endif %}                                              
+                                                </td> 
+                                                <td class="text-nowrap">{{supplier.supplier}}</td>
+                                                <td class="text-nowrap">{{supplier.mobile}}</td>
+                                                <td class="text-nowrap">{{supplier.location}}</td>
+                                            </tr>                                                                                                                                                                                                                                                               
+                                            <!-- Update Suppliers Modal -->
+                                            <div class="modal fade text-start" id="u-inv-suppliers-modal-{{supplier.id}}" tabindex="-1" aria-labelledby="u-inv-suppliers-modal-label-{{supplier.id}}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <small class="modal-title" id="u-inv-suppliers-modal-label-{{supplier.id}}">Update Supplier - [{{supplier.supplier}}]</small>
+                                                            <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post" action="{% url 'u-inv-suppliers' supplier.id %}">
+                                                                {% csrf_token %}
+                                                                <div class="row">
+                                                                    <div class="col-12 col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="code">Supplier Code</label>
+                                                                            <input type="text" class="form-control trimwhitespace" name="code" value="{{supplier.code}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-8">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="supplier">Supplier*</label>
+                                                                            <input type="text" class="form-control" name="supplier" value="{{supplier.supplier}}" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="name">Contact Person</label>
+                                                                            <input type="text" class="form-control" name="name" value="{{supplier.name}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="mobile">Mobile*</label>
+                                                                            <input type="text" class="form-control" name="mobile" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" value="{{supplier.mobile}}" required/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-4">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="email">Email</label>
+                                                                            <input type="email" class="form-control" name="email" value="{{supplier.email}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-6">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="location">Location*</label>
+                                                                            <input type="text" class="form-control" name="location" value="{{supplier.location}}" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="address">Address</label>
+                                                                            <textarea class="form-control" name="address">{{supplier.address}}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 text-end">   
+                                                                        <div class="mb-1">                                                                 
+                                                                            <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                                                                        </div> 
+                                                                    </div>
+                                                                </div>  
+                                                            </form>   
+                                                        </div>                                                 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Update Suppliers Modal -->                                  
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <div class="card-header">
+                                        <div>                                    
+                                            Showing {{ suppliers.start_index }} to {{ suppliers.end_index }} of {{ suppliers.paginator.count }} entries
+                                        </div>
+                                        <div> 
+                                            {% if suppliers.has_other_pages %}
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-success">  
+    
+                                                        <!-- First Page Link -->
+                                                        {% if suppliers.number > 1 %}
+                                                        <li class="page-item first">
+                                                            <a href="?page=1" class="page-link">First</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item first disabled">
+                                                            <span class="page-link">First</span>
+                                                        </li>
+                                                        {% endif %}   
+    
+                                                        <!-- Previous Page Link -->
+                                                        {% if suppliers.has_previous %}
+                                                        <li class="page-item prev">
+                                                            <a href="?page={{ suppliers.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item prev disabled">
+                                                            <span class="page-link" aria-label="Previous"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                        {% for page in suppliers.paginator.page_range %}
+                                                            {% if page >= suppliers.number|add:'-1' and page <= suppliers.number|add:'1' %}
+                                                                {% if page == suppliers.number %}
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ page }}</span>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="page-item">
+                                                                    <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                                </li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+    
+                                                        <!-- Next Page Link -->
+                                                        {% if suppliers.has_next %}
+                                                        <li class="page-item next">
+                                                            <a href="?page={{ suppliers.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item next disabled">
+                                                            <span class="page-link" aria-label="Next"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Last Page Link -->
+                                                        {% if suppliers.number < suppliers.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ suppliers.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                    </ul>
+                                                </nav>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="avatar bg-light-danger avatar-xl">
+                                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                    </div>
+                                    <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to add suppliers.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive tables end -->                                                                                                                                                                                    
+                <!-- Create Suppliers Modal -->
+                <div class="modal fade text-start" id="c-inv-suppliers-modal" tabindex="-1" aria-labelledby="c-inv-suppliers-modal-label" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <small class="modal-title" id="c-inv-suppliers-modal-label">Add Supplier</small>
+                                <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'r-inv-suppliers' %}">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-12 col-md-4">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="code">Supplier Code</label>
+                                                <input type="text" class="form-control trimwhitespace" name="code">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-8">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="supplier">Supplier*</label>
+                                                <input type="text" class="form-control" name="supplier" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="name">Contact Person</label>
+                                                <input type="text" class="form-control" name="name">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="mobile">Mobile*</label>
+                                                <input type="text" class="form-control" name="mobile" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required/>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="email">Email</label>
+                                                <input type="email" class="form-control" name="email">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="location">Location*</label>
+                                                <input type="text" class="form-control" name="location" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="address">Address</label>
+                                                <textarea class="form-control" name="address"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 text-end">   
+                                            <div class="mb-1">                                                                 
+                                                <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                                            </div> 
+                                        </div>
+                                    </div> 
+                                </form>   
+                            </div>                                                 
+                        </div>
+                    </div>
+                </div>
+                <!-- Create Suppliers Modal --> 
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const delSuppliersButton = document.getElementById("delSuppliers");
+
+        delSuppliersButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            document.querySelectorAll('input[name="checkedSuppliers"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-inv-suppliers' %}";
+
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+    });
+</script>
+{% endblock %}

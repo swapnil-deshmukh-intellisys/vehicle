@@ -1,0 +1,470 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { PlusIcon, MapPinIcon, ClockIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { fetchUserAddresses, createAddress, fetchCities } from '../../../services/bookingService';
+import AddAddressModal from './AddAddressModal';
+import { useTheme } from '../../context/ThemeContext';
+import { getSubscriberId } from '../../../services/authService';
+import { ColorPalette } from '../../../constants/designSystem';
+
+const SlotAndAddressStep = ({ 
+  slotAndAddress, 
+  setSlotAndAddress, 
+  loading, 
+  setLoading, 
+  errors, 
+  setErrors 
+}) => {
+  const { theme } = useTheme();
+  const [addresses, setAddresses] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [selectedDateLabel, setSelectedDateLabel] = useState('');
+  const [selectedSlot, setSelectedSlot] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [selectedEstimateOption, setSelectedEstimateOption] = useState("no");
+  const [isAddAddressModalOpen, setIsAddAddressModalOpen] = useState(false);
+  const [hasAddress, setHasAddress] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
+
+  // Generate available slots (matching old website logic)
+  const generateAvailableSlots = () => {
+    const addDays = (date, days) => {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    };
+
+    const formatDateLabel = (date) => {
+      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const dayName = days[date.getDay()];
+      // Use local date methods to avoid timezone issues
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`; // yyyy-mm-dd in local timezone
+      return `${formattedDate} (${dayName})`;
+    };
+
+    const generateSlots = (dayIndex) => {
+      const today = new Date();
+      const date = addDays(today, dayIndex);
+      const slots = [];
+
+      let startHour = 10;
+      const endHour = 18;
+
+      if (dayIndex === 0) {
+        const currentHour = today.getHours();
+        const currentMinutes = today.getMinutes();
+        startHour = currentMinutes > 0 ? currentHour + 1 : currentHour;
+        if (startHour < 10) startHour = 10;
+        if (startHour > endHour) return []; // No slots for today if past endHour
+      }
+
+      for (let hour = startHour; hour <= endHour; hour++) {
+        const isPM = hour >= 12;
+        const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+        const label = `${displayHour.toString().padStart(2, "0")}:00 ${isPM ? "PM" : "AM"}`;
+        slots.push({ label });
+      }
+
+      return slots;
+    };
+
+    // Generate slots for 4 days (today + next 3 days)
+    const slotsArray = [0, 1, 2, 3].map((dayIndex) => ({
+      dateLabel: formatDateLabel(addDays(new Date(), dayIndex)),
+      slots: generateSlots(dayIndex),
+    }));
+
+    // If today has no slots, drop it and return next 3 days
+    if (slotsArray[0].slots.length === 0) {
+      return slotsArray.slice(1, 4); // return days 1, 2, 3 (3 days starting tomorrow)
+    }
+
+    // Otherwise return first 3 days including today
+    return slotsArray.slice(0, 3);
+  };
+
+  // Usage
+  const garageData = useMemo(() => {
+    return {
+      availableSlots: generateAvailableSlots(),
+    };
+  }, []);
+
+  const filterSlots = (slots) =>
+    slots.filter((slot) => {
+      const timeString = slot.label.replace(/\s*(AM|PM)/i, "");
+      const [hours] = timeString.split(":").map(Number);
+      const isPM = /PM/i.test(slot.label);
+      const slotHour = isPM && hours !== 12 ? hours + 12 : hours;
+      return slotHour >= 10 && slotHour < 19;
+    });
+
+  // Auto-select first date and slot on mount
+  useEffect(() => {
+    if (garageData.availableSlots?.length > 0 && !selectedDateLabel) {
+      const firstSlot = garageData.availableSlots[0];
+      const filtered = filterSlots(firstSlot.slots || []);
+
+      setSelectedDateLabel(firstSlot.dateLabel);
+      setSlotAndAddress((prev) => ({
+        ...prev,
+        date: firstSlot.dateLabel,
+        slot: filtered[0]?.label || "",
+      }));
+      setSelectedSlot(filtered[0]?.label || "");
+
+      console.log("🔵 Auto-selected first date:", firstSlot.dateLabel);
+      if (filtered[0]) {
+        console.log("🔵 Auto-selected first slot:", filtered[0].label);
+      }
+    }
+  }, [garageData.availableSlots, selectedDateLabel, setSlotAndAddress]);
+
+  // Load cities from landing page API (like old website)
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const cityName = sessionStorage.getItem("selectedCity") || "Pune";
+        const citiesData = await fetchCities(cityName);
+        console.log("🖼️ Fetched cities data:", citiesData);
+        
+        if (Array.isArray(citiesData) && citiesData.length > 0) {
+          setCities(citiesData);
+        } else {
+          setCities([]);
+        }
+      } catch (err) {
+        console.error("❌ Failed to load cities data:", err);
+        setCities([]);
+      }
+    };
+
+    loadCities();
+  }, []);
+
+  // Load user addresses
+  useEffect(() => {
+    const loadAddresses = async () => {
+      setLoading(true);
+      try {
+        const subscriberId = getSubscriberId();
+        if (!subscriberId) {
+          setErrors({ addresses: 'Authentication error. Please log in again.' });
+          setLoading(false);
+          return;
+        }
+        const userAddresses = await fetchUserAddresses(subscriberId);
+        console.log("🔍 User addresses loaded:", userAddresses);
+        setAddresses(userAddresses);
+        
+        // Auto-select default address if available
+        const defaultAddress = userAddresses.find(addr => addr.is_default);
+        if (defaultAddress) {
+          setSelectedAddress(defaultAddress);
+          setHasAddress(true);
+        }
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+        setErrors({ addresses: 'Failed to load addresses. Please try again.' });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadAddresses();
+  }, [setLoading, setErrors]);
+
+  // Update parent component when selections change
+  useEffect(() => {
+    if (selectedDateLabel && selectedSlot && selectedAddress) {
+      setSlotAndAddress({
+        date: selectedDateLabel,
+        slot: selectedSlot,
+        address: selectedAddress,
+        estimate: selectedEstimateOption
+      });
+      setErrors({});
+    } else {
+      setSlotAndAddress(null);
+    }
+  }, [selectedDateLabel, selectedSlot, selectedAddress, selectedEstimateOption, setSlotAndAddress, setErrors]);
+
+  const handleDateClick = (date) => {
+    setSelectedDateLabel(date);
+    setSlotAndAddress((prev) => ({
+      ...prev,
+      date,
+    }));
+    console.log("🟢 Selected Date:", date);
+  };
+
+  const handleSlotClick = (slotLabel) => {
+    console.log("✅ Selected Slot:", slotLabel);
+    setSelectedSlot(slotLabel);
+    setSlotAndAddress((prev) => ({
+      ...prev,
+      slot: slotLabel,
+    }));
+  };
+
+  const handleEstimateSelection = (value) => {
+    setSlotAndAddress((prev) => ({
+      ...prev,
+      estimate: value,
+    }));
+    setSelectedEstimateOption(value);
+    console.log("Selected Estimate Option:", value);
+  };
+
+  const handleAddAddressSuccess = (newAddress) => {
+    setAddresses(prev => [...prev, newAddress]);
+    setSelectedAddress(newAddress);
+    setHasAddress(true);
+    setIsAddAddressModalOpen(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <p className={theme === 'light' ? 'text-gray-700' : 'text-gray-400'}>Loading addresses...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8 overflow-x-hidden w-full">
+      {/* Header */}
+      <div className="text-center">
+        <h2 className={`text-xl md:text-2xl lg:text-3xl font-bold mb-2 ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Select Date, Time & Address</h2>
+        <p className={`text-xs md:text-sm ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>Choose when and where you want the service</p>
+      </div>
+      
+      {/* Error Display */}
+      {errors.slot && (
+        <div className={`${theme === 'light' ? 'bg-red-50 border border-red-200' : 'bg-red-900/20 border border-red-500/50'} text-red-600 p-4 rounded-xl backdrop-blur-sm`}>
+          <p className="text-sm font-medium">{errors.slot}</p>
+        </div>
+      )}
+      
+      {errors.addresses && (
+        <div className={`${theme === 'light' ? 'bg-red-50 border border-red-200' : 'bg-red-900/20 border border-red-500/50'} text-red-600 p-4 rounded-xl backdrop-blur-sm`}>
+          <p className="text-sm font-medium">{errors.addresses}</p>
+        </div>
+      )}
+      
+      {/* Date Selection */}
+      <div className="space-y-4">
+        <h3 className={`text-base md:text-lg font-bold flex items-center ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+          <CalendarDaysIcon className="w-5 h-5 mr-2 text-red-500" />
+          Select Date
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {garageData.availableSlots.map((slotData) => (
+            <button
+              key={slotData.dateLabel}
+              onClick={() => handleDateClick(slotData.dateLabel)}
+              className={`w-full px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-300 transform hover:scale-[1.02] shadow-lg ${
+                selectedDateLabel === slotData.dateLabel
+                  ? `bg-gradient-to-r ${ColorPalette.primary.button.gradient} text-white shadow-xl`
+                  : theme === 'light'
+                  ? 'bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-red-300'
+                  : 'bg-gray-800/80 backdrop-blur-sm border border-gray-700 text-gray-300 hover:bg-gray-700 hover:border-red-500'
+              }`}
+            >
+              {slotData.dateLabel}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Time Slot Selection */}
+      {selectedDateLabel && (
+        <div className="space-y-4">
+          <h3 className={`text-base md:text-lg font-bold flex items-center ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+            <ClockIcon className="w-5 h-5 mr-2 text-red-500" />
+            Select Time Slot
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {(() => {
+              const selectedDateData = garageData.availableSlots.find(
+                slot => slot.dateLabel === selectedDateLabel
+              );
+              const filteredSlots = selectedDateData ? filterSlots(selectedDateData.slots) : [];
+              
+              return filteredSlots.map((slot) => (
+                <button
+                  key={slot.label}
+                  onClick={() => handleSlotClick(slot.label)}
+                  className={`px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                    selectedSlot === slot.label
+                      ? `bg-gradient-to-r ${ColorPalette.primary.button.gradient} text-white shadow-xl`
+                      : theme === 'light'
+                      ? 'bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-red-300'
+                      : 'bg-gray-800/80 backdrop-blur-sm border border-gray-700 text-gray-300 hover:bg-gray-700 hover:border-red-500'
+                  }`}
+                >
+                  {slot.label}
+                </button>
+              ));
+            })()}
+          </div>
+        </div>
+      )}
+      
+      {/* Address Selection */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className={`text-base md:text-lg font-bold flex items-center ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+            <MapPinIcon className="w-5 h-5 mr-2 text-red-500" />
+            Select Address
+          </h3>
+          <button
+            onClick={() => setIsAddAddressModalOpen(true)}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all duration-300 transform hover:scale-105 shadow-lg bg-gradient-to-r ${ColorPalette.primary.button.gradient} text-white hover:${ColorPalette.primary.button.hover.gradient}`}
+          >
+            <PlusIcon className="w-4 h-4" />
+            <span>Add New</span>
+          </button>
+        </div>
+        
+        <div className="space-y-3">
+          {addresses.map((address) => {
+            const isSelected = selectedAddress?.id === address.id;
+            return (
+            <div
+              key={address.id}
+              onClick={() => setSelectedAddress(address)}
+              className={`group relative rounded-2xl p-5 cursor-pointer transition-all duration-500 transform hover:scale-[1.01] hover:-translate-y-1 border ${
+                theme === 'light'
+                  ? isSelected
+                    ? 'bg-white/80 backdrop-blur-xl border-red-500/50 shadow-xl shadow-red-500/20'
+                    : 'bg-white/80 backdrop-blur-xl border-gray-200/50 hover:border-red-300/50 shadow-lg hover:shadow-xl'
+                  : isSelected
+                    ? 'bg-gray-800/80 backdrop-blur-xl border-red-500/50 shadow-xl shadow-red-500/20'
+                    : 'bg-gray-800/80 backdrop-blur-xl border-gray-700/50 hover:border-red-500/50 shadow-xl hover:shadow-2xl'
+              }`}
+            >
+              {/* Premium gradient overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/0 to-red-500/0 group-hover:from-red-500/5 group-hover:via-red-500/3 group-hover:to-red-500/5 transition-all duration-500 pointer-events-none rounded-2xl ${isSelected ? 'from-red-500/10 via-red-500/5 to-red-500/10' : ''}`}></div>
+              <div className="flex items-start justify-between relative z-10">
+                <div className="flex items-start space-x-3 flex-1">
+                  {/* Radio Button */}
+                  <input
+                    type="radio"
+                    name="address"
+                    value={address.id}
+                    checked={isSelected}
+                    onChange={() => setSelectedAddress(address)}
+                    className={`w-5 h-5 text-red-600 focus:ring-red-500 focus:ring-2 mt-1 ${
+                      theme === 'light' ? 'bg-white border-gray-400' : 'bg-gray-700 border-gray-600'
+                    }`}
+                  />
+                  
+                  {/* Address Details */}
+                  <div className="flex-1">
+                    <p className={`text-xs md:text-sm mb-1 font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      <span className="text-red-500">🏙️</span> City: {address.city}
+                    </p>
+                    <p className={`text-xs md:text-sm mb-1 font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+                      <span className="text-red-500">📌</span> Pincode: {address.pincode}
+                    </p>
+                    <p className={`text-xs md:text-sm ${theme === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>
+                      <span className="text-red-500">📍</span> {address.address}
+                    </p>
+                    {address.landmark && (
+                      <p className={`text-xs mt-1 ${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+                        Landmark: {address.landmark}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  {address.is_default && (
+                    <span className="bg-gradient-to-r from-emerald-500 to-green-600 text-white text-xs px-3 py-1 rounded-full font-bold shadow-lg">
+                      Default
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )})}
+        </div>
+      </div>
+      
+      {/* Estimate Option */}
+      <div className="space-y-4">
+        <h3 className={`text-base md:text-lg font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Additional Options</h3>
+        <div className={`rounded-2xl p-5 border transition-all duration-500 transform hover:scale-[1.01] ${
+          theme === 'light' 
+            ? 'bg-white/80 backdrop-blur-xl border-gray-200/50 shadow-lg hover:shadow-xl' 
+            : 'bg-gray-800/80 backdrop-blur-xl border-gray-700/50 shadow-xl hover:shadow-2xl'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`font-medium ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Do you want a detailed estimate?</span>
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="estimate"
+                  value="yes"
+                  checked={selectedEstimateOption === "yes"}
+                  onChange={(e) => handleEstimateSelection(e.target.value)}
+                  className={`w-4 h-4 text-red-600 focus:ring-red-500 focus:ring-2 ${theme === 'light' ? 'bg-white border-gray-400' : 'bg-gray-700 border-gray-600'}`}
+                />
+                <span className={theme === 'light' ? 'text-gray-900' : 'text-white'}>Yes</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="estimate"
+                  value="no"
+                  checked={selectedEstimateOption === "no"}
+                  onChange={(e) => handleEstimateSelection(e.target.value)}
+                  className={`w-4 h-4 text-red-600 focus:ring-red-500 focus:ring-2 ${theme === 'light' ? 'bg-white border-gray-400' : 'bg-gray-700 border-gray-600'}`}
+                />
+                <span className={theme === 'light' ? 'text-gray-900' : 'text-white'}>No</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Suggestion Field */}
+      <div className="space-y-4">
+        <h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Add Suggestion</h3>
+        <div className={`rounded-xl p-4 border ${theme === 'light' ? 'bg-white border-gray-200' : 'bg-gray-800 border-gray-700'}`}>
+          <textarea
+            placeholder="Enter your suggestions or special requirements..."
+            value={slotAndAddress?.suggestion || ''}
+            onChange={(e) => setSlotAndAddress((prev) => ({
+              ...prev,
+              suggestion: e.target.value
+            }))}
+            className={`w-full border rounded-lg p-3 focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none ${
+              theme === 'light'
+                ? 'bg-gray-50 text-gray-900 placeholder-gray-500 border-gray-300'
+                : 'bg-gray-700 text-white placeholder-gray-400 border-gray-600'
+            }`}
+            rows={4}
+          />
+        </div>
+      </div>
+
+      {/* Add Address Modal */}
+      <AddAddressModal
+        isOpen={isAddAddressModalOpen}
+        onClose={() => setIsAddAddressModalOpen(false)}
+        onSuccess={handleAddAddressSuccess}
+        cities={cities}
+      />
+    </div>
+  );
+};
+
+export default SlotAndAddressStep;

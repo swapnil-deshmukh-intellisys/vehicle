@@ -1,0 +1,349 @@
+{% extends "index.html" %}
+
+{% block title %}c-accounts-brand{% endblock %}
+
+{% block style %}
+<style>
+    .form-container {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .image-upload-section {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid #eaeaea;
+        height: 100%;
+    }
+    /* shri */
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .content-header-title {
+        display: inline-block;
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+    .breadcrumb-wrapper {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -4px; /* Adjust as needed */
+    }
+    /* shri */
+    .image-preview {
+        width: 220px;
+        height: 220px;
+        border: 2px dashed #d1d5db;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+    .image-preview:hover {
+        border-color: #7367f0;
+    }
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+    .image-upload-btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    .image-upload-text {
+        font-size: 0.75rem;
+        color: #6b7280;
+        text-align: center;
+        margin: 0.5rem 0 0;
+        line-height: 1.4;
+    }
+    .form-section {
+        padding: 2rem;
+    }
+    .form-section h4 {
+        color: #4b5563;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    .form-section h4:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 3px;
+        background-color: #7367f0;
+        border-radius: 2px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #7367f0;
+        box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.2);
+    }
+    .btn-primary {
+        background-color: #7367f0;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+    .btn-outline-secondary {
+        padding: 0.5rem 1.5rem;
+    }
+    .form-actions {
+        border-top: 1px solid #eaeaea;
+        padding: 1.5rem 2rem;
+        background-color: #f9fafb;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0 title">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-brand' %}">List Brand</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Create Brand
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="c-accounts-brand">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="card form-container">
+                            <form method="post" action="{% url 'c-accounts-brand' %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row g-0">
+                                    <!-- Left Side - Image Upload Section -->
+                                    <div class="col-12 col-md-4">
+                                        <div class="image-upload-section">
+                                            <div class="image-preview" id="imagePreview">
+                                                <i data-feather="image" class="font-large-1 text-muted"></i>
+                                            </div>
+                                            <div class="text-center w-100">
+                                                <label for="brandImage" class="btn btn-primary btn-sm waves-effect waves-float waves-light image-upload-btn">
+                                                    <i data-feather="upload" class="me-25"></i> Upload Image
+                                                    <input type="file" id="brandImage" name="brand_img" accept="image/*" class="d-none" />
+                                                </label>
+                                                <p class="image-upload-text">
+                                                    <small>Recommended: 500x500px<br>JPG, PNG format<br>Max size: 2MB</small>
+                                                </p>
+                                                <small id="imageError" class="text-danger d-none"></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Side - Form Fields -->
+                                    <div class="col-12 col-md-8">
+                                        <div class="form-section">
+                                            <h4>Brand Details</h4>
+                                            <div class="row">
+                                                <div class="col-12 mb-3">
+                                                    <label class="form-label" for="name">
+                                                        <i data-feather="tag" class="font-medium-2 me-50"></i>
+                                                        Name <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter brand name" required />
+                                                </div>
+                                                
+                                                <div class="col-12 mb-3">
+                                                    <label class="form-label" for="status">
+                                                        <i data-feather="toggle-right" class="font-medium-2 me-50"></i>
+                                                        Status <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="status" name="status" required>
+                                                        <option value="" disabled selected>Select status</option>
+                                                        <option value="active">Active</option>
+                                                        <option value="inactive">Inactive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Form Actions -->
+                                        <div class="form-actions d-flex justify-content-between">
+                                            <button type="reset" class="btn btn-outline-secondary waves-effect">
+                                                <i data-feather="refresh-ccw" class="me-25"></i> Reset
+                                            </button>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-25"></i> Save Brand
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Feather Icons
+        if (feather) {
+            feather.replace({ width: 16, height: 16 });
+        }
+
+        // Image validation and preview
+        const imageInput = document.getElementById('brandImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const imageError = document.getElementById('imageError');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        let isValidImage = false;
+
+        function validateImage(file) {
+            // Reset state
+            imageError.classList.add('d-none');
+            
+            // If no file is selected, it's optional - enable submit
+            if (!file) {
+                if (submitBtn) submitBtn.disabled = false;
+                return Promise.resolve(true);
+            }
+            
+            // Validate file type if file is provided
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validTypes.includes(file.type.toLowerCase())) {
+                showImageError('Please upload a valid image (JPEG, JPG, or PNG)');
+                if (submitBtn) submitBtn.disabled = true;
+                return Promise.resolve(false);
+            }
+            
+            // Validate file size (2MB max) if file is provided
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                showImageError('Image size should be less than 2MB');
+                if (submitBtn) submitBtn.disabled = true;
+                return Promise.resolve(false);
+            }
+            
+            // Additional validation for image dimensions and aspect ratio
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const minWidth = 100;
+                    const minHeight = 100;
+                    const maxWidth = 2000;
+                    const maxHeight = 2000;
+                    
+                    if (img.width < minWidth || img.height < minHeight) {
+                        showImageError(`Image dimensions should be at least ${minWidth}x${minHeight}px`);
+                        if (submitBtn) submitBtn.disabled = true;
+                        resolve(false);
+                        return;
+                    }
+                    
+                    if (img.width > maxWidth || img.height > maxHeight) {
+                        showImageError(`Image dimensions should not exceed ${maxWidth}x${maxHeight}px`);
+                        if (submitBtn) submitBtn.disabled = true;
+                        resolve(false);
+                        return;
+                    }
+                    
+                    // If all validations pass
+                    imagePreview.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="Preview">`;
+                    imageError.classList.add('d-none');
+                    if (submitBtn) submitBtn.disabled = false;
+                    resolve(true);
+                };
+                
+                img.onerror = function() {
+                    showImageError('Invalid image file');
+                    if (submitBtn) submitBtn.disabled = true;
+                    resolve(false);
+                };
+                
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function showImageError(message) {
+            imageError.textContent = message;
+            imageError.classList.remove('d-none');
+            if (imageInput) imageInput.value = '';
+            imagePreview.innerHTML = '<i data-feather="image" class="font-large-1 text-muted"></i>';
+            if (feather) feather.replace();
+            // Don't disable submit on error, just show the error message
+        }
+
+        // Initialize form state - enable submit by default since image is optional
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
+
+        // Handle file input change
+        const fileInput = document.getElementById('brandImage');
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const isValid = await validateImage(file);
+                if (!isValid) {
+                    fileInput.value = ''; // Clear the invalid file
+                    if (submitBtn) submitBtn.disabled = true;
+                } else {
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            } else {
+                // No file selected - keep submit enabled since image is optional
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+        
+        // Form submission validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            // If we have a file input with files and submit is disabled, prevent submission
+            if (fileInput.files.length > 0 && submitBtn && submitBtn.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            // The form will submit normally if all validations pass
+        });
+    });
+</script>
+{% endblock %}

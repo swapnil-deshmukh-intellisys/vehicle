@@ -1,0 +1,162 @@
+<script>
+    $(document).ready(function() {        
+
+        // Store the current files
+        let currentFiles = [];
+        
+        // Function to generate a unique ID for each file
+        function generateFileId(file) {
+            return file.name + file.size + file.lastModified;
+        }
+        
+        // Function to update the file input
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            currentFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            $('#damagePhotos')[0].files = dataTransfer.files;
+            // Update photo count
+            $('#photoCount').text(`${currentFiles.length}/10`);
+            
+            // Toggle upload area visibility
+            if (currentFiles.length >= 10) {
+                $('#uploadArea').hide();
+            } else {
+                $('#uploadArea').show();
+            }
+        }
+        
+        // Function to create preview element
+        function createPreviewElement(file, fileId) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const preview = `
+                    <div class="photo-item position-relative" data-file-id="${fileId}">
+                        <img src="${e.target.result}" class="img-thumbnail rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                        <div class="photo-remove position-absolute top-0 end-0 m-1" style="cursor: pointer; background: rgba(255, 255, 255, 0.8); border-radius: 50%;" data-file-id="${fileId}">
+                            <i data-feather="x" class="text-danger" width="16" height="16"></i>
+                        </div>
+                    </div>
+                `;
+                
+                // If preview already exists, replace it, otherwise append new one
+                const existingPreview = $(`#photoPreview .photo-item[data-file-id="${fileId}"]`);
+                if (existingPreview.length) {
+                    existingPreview.replaceWith(preview);
+                } else {
+                    $('#photoPreview').append(preview);
+                }
+                
+                feather.replace();
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Photo upload preview with append functionality
+        $('#damagePhotos').on('change', function() {
+            const newFiles = Array.from(this.files);
+            
+            // Add new files to current files array (max 5 files)
+            for (const file of newFiles) {
+                if (currentFiles.length >= 10) {
+                    toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+                    break;
+                }
+                
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    toastr.error('File size should not exceed 5MB', 'Error');
+                    continue;
+                }
+                
+                // Check file type
+                if (!file.type.match('image.*')) {
+                    toastr.error('Only image files are allowed', 'Error');
+                    continue;
+                }
+                
+                // Generate unique ID for the file
+                const fileId = generateFileId(file);
+                
+                // Check if file already exists to avoid duplicates
+                const fileExists = currentFiles.some(f => generateFileId(f) === fileId);
+                
+                if (!fileExists) {
+                    // Store the file with its ID
+                    file.uniqueId = fileId;
+                    currentFiles.push(file);
+                    createPreviewElement(file, fileId);
+                } else {
+                    toastr.info('This photo has already been added', 'Duplicate');
+                }
+            }
+            
+            // Reset the file input to allow selecting the same file again
+            $(this).val('');
+            
+            updateFileInput();
+        });
+        
+        // Function to handle file selection
+        function triggerFileInput() {
+            if (currentFiles.length < 10) {
+                $('#damagePhotos').click();
+            } else {
+                toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+            }
+        }
+        
+        // Handle photo removal
+        $(document).on('click', '.photo-remove', function(e) {
+            e.stopPropagation();
+            const fileId = $(this).data('file-id');
+            
+            // Remove the file from currentFiles array
+            currentFiles = currentFiles.filter(file => file.uniqueId !== fileId);
+            
+            // Remove the preview
+            $(`.photo-item[data-file-id="${fileId}"]`).remove();
+            
+            updateFileInput();
+        });
+        
+        // Make upload area clickable
+        $('#uploadArea').on('click', triggerFileInput);
+        
+        // Handle drag and drop
+        $('#uploadArea').on('dragover', function(e) {
+            e.preventDefault();
+            if (currentFiles.length < 5) {
+                $(this).addClass('border-primary bg-light');
+            }
+        });
+        
+        $('#uploadArea').on('dragleave', function(e) {
+            e.preventDefault();
+            $(this).removeClass('border-primary bg-light');
+        });
+        
+        
+        $('#uploadArea').on('drop', function(e) {
+            e.preventDefault();
+            $(this).removeClass('border-primary bg-light');
+            
+            if (currentFiles.length >= 10) {
+                toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+                return;
+            }
+            
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                $('#damagePhotos')[0].files = files;
+                $('#damagePhotos').trigger('change');
+            }
+        });
+        
+        // Initialize with empty state
+        updateFileInput();        
+    });
+</script>

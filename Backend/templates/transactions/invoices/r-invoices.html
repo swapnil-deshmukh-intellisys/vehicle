@@ -1,0 +1,1412 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="{% static 'app-assets/fonts/inter/inter.css' %}">{# Local Inter font #}
+<style>
+    /* Apply Inter font to the entire page */
+    body, .table, .card, .btn, .form-control, .badge {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    /* Enhanced Table Styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin-top: -8px;
+    }
+    
+    .table thead th {
+        border-bottom: none;
+        background-color: #3b82f6 !important;
+        padding: 18px 18px 12px 18px;
+        font-weight: 600;
+        color: #ffffff !important;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table tbody tr {
+        box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        margin-bottom: 8px;
+        background-color: #ffffff;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .table tbody td {
+        padding: 16px 18px;
+        vertical-align: middle;
+        border-top: none;
+    }
+    
+    /* Purple Button Styling */
+    .btn-purple {
+        background-color: #1304b9;
+        border-color: #1304b9;
+        color: #fff;
+    }
+    
+    .btn-purple:hover {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(115, 103, 240, 0.4);
+    }
+
+    /* Purple Light Button Styling */
+    .btn-purple-light {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        color: #fff;
+    }
+    
+    .btn-purple-light:hover {
+        background-color: #1304b9;
+        border-color: #1304b9;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(115, 103, 240, 0.4);
+    }
+    
+    /* Red Button Styling */
+    .btn-red {
+        background-color: #b80505;
+        border-color: #b80505;
+        color: #fff;
+    }
+    
+    .btn-red:hover {
+        background-color: #f05252;
+        border-color: #f05252;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Red Light Button Styling */
+    .btn-red-light {
+        background-color: #f05252;
+        border-color: #f05252;
+        color: #fff;
+    }
+    
+    .btn-red-light:hover {
+        background-color: #b80505;
+        border-color: #b80505;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Blue Button Styling */
+    .btn-blue {
+        background-color: #ad2edf;
+        border-color: #ad2edf;
+        color: #fff;
+    }
+    
+    .btn-blue:hover {
+        background-color: #58027a;
+        border-color: #58027a;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Skyblue Button Styling */
+    .btn-skyblue {
+        background-color: #15a8a1;
+        border-color: #15a8a1;
+        color: #fff;
+    }
+    
+    .btn-skyblue:hover {
+        background-color: #15a8a1d2;
+        border-color: #15a8a1d2;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(32, 32, 32, 0.4);
+    }
+
+    /* Pulse Animation */
+    .pulse-animation {
+        position: relative;
+    }
+    
+    .pulse-animation:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(115, 103, 240, 0.7);
+        animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(115, 103, 240, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(115, 103, 240, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(115, 103, 240, 0);
+        }
+    }
+</style>
+<style>
+    :root {
+        --primary: #5851e1;
+        --primary-light: #eeedfb;
+        --success: #5851e1;
+        /* Changed from green to primary color */
+        --danger: #f05252;
+        --warning: #ff9f43;
+        --info: #3f87f5;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --border-radius: 0.5rem;
+        --box-shadow: 0 4px 12px 0 rgba(31, 41, 55, 0.08);
+    }
+
+    /* Modern Card Styling */
+    .card {
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        transition: all 0.3s ease;
+        background: #fff;
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        /*background: var(--primary);*/
+        background: #3b82f6;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px 0 rgba(31, 41, 55, 0.1);
+    }
+
+    .card:hover::before {
+        opacity: 1;
+    }
+
+    /* Table Styles */
+    .table-responsive {
+        overflow-x: auto;
+        border-radius: var(--border-radius);
+        padding: 0;
+    }
+
+    .table {
+        --bs-table-striped-bg: rgba(88, 81, 225, 0.02);
+        --bs-table-hover-bg: rgba(88, 81, 225, 0.04);
+        --bs-table-bg: transparent;
+        margin-bottom: 0;
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    /* Override bootstrap table success colors */
+    .table-success {
+        --bs-table-bg: rgba(88, 81, 225, 0.1) !important;
+        --bs-table-striped-bg: rgba(88, 81, 225, 0.15) !important;
+        --bs-table-striped-color: #1f2937 !important;
+        --bs-table-active-bg: rgba(88, 81, 225, 0.2) !important;
+        --bs-table-active-color: #1f2937 !important;
+        --bs-table-hover-bg: rgba(88, 81, 225, 0.15) !important;
+        --bs-table-hover-color: #1f2937 !important;
+        color: #1f2937 !important;
+        border-color: rgba(88, 81, 225, 0.2) !important;
+    }
+
+    .table> :not(caption)>*>* {
+        padding: 0.85rem 1.25rem;
+        vertical-align: middle;
+    }
+
+    .table thead th {
+        border-bottom: 1px solid #edf2f7;
+        font-weight: 600;
+        font-size: 0.75rem;
+        letter-spacing: 0.3px;
+        color: #ffffff !important;
+        background-color: #3b82f6 !important;
+        text-transform: uppercase;
+        padding: 18px 1.25rem 12px 1.25rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+
+    /* Status Badges */
+    .status-badge {
+        padding: 0.35em 0.85em;
+        font-size: 0.7em;
+        font-weight: 500;
+        border-radius: 12px;
+        text-transform: capitalize;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        letter-spacing: 0.3px;
+    }
+
+    .status-badge::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        margin-right: 6px;
+        background: currentColor;
+    }
+
+    /* Action Buttons */
+    .action-btns {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btns .btn {
+        padding: 0.45rem 0.9rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-width: 1px;
+        font-size: 0.8rem;
+    }
+
+    .action-btns .btn i {
+        font-size: 1em;
+    }
+
+    .btn-outline-primary {
+        color: var(--text-primary);
+        border-color: var(--text-primary);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--text-primary);
+        color: white;
+    }
+
+    .btn-outline-danger {
+        color: var(--danger);
+        border-color: var(--danger);
+    }
+
+    .btn-outline-danger:hover {
+        background-color: var(--danger);
+        color: white;
+    }
+
+    .btn-outline-info {
+        color: var(--info);
+        border-color: var(--info);
+    }
+
+    .btn-outline-info:hover {
+        background-color: var(--info);
+        color: white;
+    }
+
+    .btn-outline-secondary {
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    /* Search and Filter */
+    .search-filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        background: #fff;
+        padding: 1rem 1.25rem;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+
+    .card-header {
+        background: transparent;
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(34, 41, 47, 0.05);
+    }
+    
+    tr.clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    tr.clickable-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Prevent the checkbox from triggering row click */
+    tr.clickable-row input[type="checkbox"] {
+        pointer-events: auto;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-box .input-group-text {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 4;
+        border: none;
+        background: transparent;
+        padding: 0 1rem;
+    }
+
+    .search-box .form-control {
+        padding-left: 2.8rem;
+        border-radius: 6px !important;
+        border: 1px solid #d8d6de;
+        transition: all 0.3s;
+    }
+
+    .search-box .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
+    }
+
+    .filter-select {
+        min-width: 150px;
+        border-radius: 6px !important;
+        border: 1px solid #d8d6de;
+        transition: all 0.3s;
+    }
+
+    .filter-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 3px 10px 0 rgba(115, 103, 240, 0.1);
+    }
+
+    /* Status Badges */
+    .badge-status {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .badge-open {
+        background-color: rgba(255, 159, 67, 0.15);
+        color: #ff9f43;
+    }
+    
+    .badge-finalized {
+        background-color: rgba(40, 199, 111, 0.15);
+        color: #28c76f;
+    }
+    
+    /* Time Indicator Styling */
+    .time-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        position: relative;
+    }
+    
+    .time-indicator.recent {
+        border-right: 3px solid #28c76f;
+    }
+    
+    .time-indicator.older {
+        border-right: 3px solid #ea5455;
+    }
+    
+    .time-indicator i {
+        color: #6e6b7b;
+    }
+    
+    .time-indicator small {
+        color: #6e6b7b;
+        font-size: 0.85rem;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .search-filter-container {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .search-box,
+        .filter-select {
+            width: 100%;
+            min-width: 100%;
+        }
+        .table td,
+        .table th {
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    /* Pagination */
+    .pagination {
+        margin: 1.5rem 0 0 0;
+        justify-content: flex-end;
+    }
+
+    .pagination .page-link {
+        border: 1px solid #e0e0e0;
+        margin: 0 0.25rem;
+        min-width: 2.286rem;
+        height: 2.286rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #5e5873;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .pagination .page-link:hover {
+        background: #f5f5f5;
+        color: var(--primary);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+        box-shadow: 0 4px 10px 0 rgba(115, 103, 240, 0.3);
+    }
+
+    .page-item .page-link {
+        border-radius: 50% !important;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 2px;
+        border: none;
+        color: #6e6b7b;
+    }
+
+    .page-item.active .page-link {
+        background-color: #7367f0;
+        color: #fff;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        background: #f8f7fa;
+        border-radius: var(--border-radius);
+        margin: 1.5rem 0;
+    }
+
+    .empty-state .avatar {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(115, 103, 240, 0.1) !important;
+    }
+
+    .empty-state .avatar i {
+        font-size: 3rem;
+        color: var(--primary);
+    }
+
+    .empty-state h4 {
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .empty-state p {
+        color: #6e6b7b;
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state .btn {
+        padding: 0.7rem 1.5rem;
+        font-weight: 500;
+        border-radius: 6px;
+    }
+
+    .empty-state .avatar {
+        margin: 0 auto 1.5rem;
+    }
+
+    /* Pagination Styling */
+    .pagination {
+        margin-bottom: 0;
+    }
+    
+    .pagination .page-item {
+        margin: 0 2px;
+    }
+    
+    .pagination .page-item .page-link {
+        border-radius: 50%;
+        min-width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        font-weight: 500;
+        border: none;
+        box-shadow: 0 2px 4px rgba(115, 103, 240, 0.15);
+        transition: all 0.2s ease;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: var(--primary);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .pagination .page-item .page-link:hover:not(.disabled) {
+        background-color: rgba(115, 103, 240, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .pagination .page-item.disabled .page-link {
+        background-color: #f8f8f8;
+        color: #b9b9c3;
+        opacity: 0.7;
+    }
+    
+    /* Responsive improvements for mobile devices */
+    @media (max-width: 767px) {        
+        .search-container {
+            width: 100%;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            margin-top: 1rem;
+        }
+        
+        .search-box {
+            width: 100%;
+        }
+        
+        .search-box input {
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+        
+        .table-responsive {
+            margin-top: 1rem;
+        }
+        
+        .pagination .page-item .page-link {
+            min-width: 32px;
+            height: 32px;
+        }
+        
+        .pagination .page-item {
+            margin: 0 1px;
+        }
+        
+        .time-indicator {
+            white-space: nowrap;
+        }
+        
+        .btn-sm {
+            padding: 0.4rem;
+        }
+    }
+    
+    /* Modal Styling */
+    .modal-content {
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 5px 40px rgba(34, 41, 47, 0.15);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: var(--primary);
+        color: white;
+        padding: 1.2rem 1.5rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .modal-header .btn-close {
+        filter: invert(1) brightness(10);
+        opacity: 0.8;
+        transition: all 0.2s;
+    }
+
+    .modal-header .btn-close:hover {
+        opacity: 1;
+        transform: rotate(90deg);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        padding: 1rem 1.5rem;
+        background: #f9fafb;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #334155;
+    }
+
+    .form-select,
+    .form-control {
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        border-color: #e2e8f0;
+    }
+
+    .form-select:focus,
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 2px rgba(88, 81, 225, 0.1);
+        outline: none;
+    }
+
+    .damage-photo-thumbnail {
+        transition: transform 0.2s;
+        margin: 2px;
+        cursor: pointer;
+        border: 1px solid #000;
+    }
+    .damage-photo-thumbnail:hover {
+        transform: scale(1.1);
+        z-index: 1000;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+</style>
+
+<!-- Mobile specific styles -->
+<style>
+@media (max-width: 768px) {
+  .card-body p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .card-body .btn {
+    padding: 4px 8px;
+  }  
+  /* Mobile invoice items */
+  .invoice-item-mobile {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+  }  
+  .invoice-item-mobile:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15) !important;
+  }  
+  .invoice-item-mobile:active {
+    transform: translateY(-2px) scale(1.01);
+    transition: all 0.1s ease;
+  }  
+  /* Enhanced card sections */
+  .invoice-item-mobile .card .card-body {
+    transition: all 0.2s ease;
+  }  
+  .invoice-item-mobile:hover .card .card-body {
+    background: rgba(255, 255, 255, 0.95) !important;
+  }  
+  /* Mobile stats cards */
+  .col-4 .card {
+    min-height: 100px;
+  }  
+  .col-4 .card-body {
+    padding: 0.75rem 0.5rem;
+  }  
+  .col-4 h6 {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }  
+  .col-4 h5 {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }  
+  /* Mobile section headers */
+  .border-start {
+    padding-left: 0.75rem !important;
+  }  
+  .border-start h6 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }  
+  /* Mobile search */
+  .search-container .form-control {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem 0.6rem 2.5rem;
+  }  
+  /* Mobile badge */
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }  
+  /* Mobile checkbox */
+  .form-check-input {
+    margin-top: 0.1rem;
+  }
+}
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content" style="background: #f9fafb;">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl">
+        <!-- Stats Cards - Desktop Only -->
+        <div class="row match-height d-none d-md-flex">
+            <!-- Total Invoice -->
+            <div class="col-md-4 col-sm-6">
+                <a href="{% url 'r-txn-invoices' %}" class="text-decoration-none">
+                    <div class="card hover-shadow">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="avatar bg-light-primary p-2 me-3 rounded">
+                                <i data-feather="trending-up" class="text-primary"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Total Invoice</h6>
+                                <h3 class="mb-0">{{ total_invoice }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <!-- Created Invoice -->
+            <div class="col-md-4 col-sm-6">
+                <a href="{% url 'r-txn-invoices' %}?filter=created" class="text-decoration-none">
+                    <div class="card hover-shadow">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="avatar bg-light-warning p-2 me-3 rounded">
+                                <i data-feather="plus-square" class="text-warning"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Created Invoice</h6>
+                                <h3 class="mb-0">{{ created_invoice }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <!-- Dispatched Invoice -->
+            <div class="col-md-4 col-sm-6">
+                <a href="{% url 'r-txn-invoices' %}?filter=dispatched" class="text-decoration-none">
+                    <div class="card hover-shadow">
+                        <div class="card-body d-flex align-items-center">
+                            <div class="avatar bg-light-success p-2 me-3 rounded">
+                                <i data-feather="check-circle" class="text-success"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Dispatched Invoice</h6>
+                                <h3 class="mb-0">{{ dispatched_invoice }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title mb-0">Invoices</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">           
+            <!-- ✅ Laptop / Desktop View -->
+            <div class="d-none d-md-block">
+                <div class="row" id="table-responsive">
+                    <div class="col-12">
+                    <div class="card border-0">
+
+                        <!-- Header -->
+                        <div class="card-header d-flex justify-content-between align-items-center border-0 pb-0">
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{% url 'c-txn-invoices' %}"
+                            class="btn btn-sm btn-icon btn-success rounded-circle shadow-sm"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add Invoice">
+                            <i data-feather="plus-square" class="font-medium-2"></i>
+                            </a>
+                            {% if invoice_objs %}
+                            <button type="button" id="delTxnInvoices"
+                                    class="btn btn-sm btn-icon btn-danger rounded-circle shadow-sm"
+                                    data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Selected">
+                            <i data-feather="trash-2" class="font-medium-2"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        {% if invoice_objs %}
+                        <div class="search-container position-relative p-2">
+                            <div class="search-box position-relative">
+                            <i data-feather="search" class="text-primary position-absolute"
+                                style="left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px;"></i>
+                            <input type="text" id="searchTxnInvoices"
+                                    class="form-control form-control-lg border-0 shadow-sm rounded-pill ps-5"
+                                    placeholder="Search..."
+                                    style="min-width: 320px; background-color: #f8fafc; transition: all 0.3s ease;"
+                                    oninput="searchTable('searchTxnInvoices', 'tableTxnInvoices')">
+                            <div class="search-spinner position-absolute d-none" style="top: 12px; right: 15px;">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="visually-hidden">Searching...</span>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        </div>
+
+                        {% if invoice_objs %}
+                        <!-- Table -->
+                        <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="tableTxnInvoices">
+                            <thead>
+                            <tr>
+                                <th class="form-check-primary">
+                                <input class="form-check-input me-1" type="checkbox" id="selectAll">
+                                Invoice
+                                </th>
+                                <th>Status</th>
+                                <th>Customer</th>
+                                <th>Payment</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for invoice in invoice_objs %}
+                            <tr class="clickable-row" data-href="{% if invoice.status == 'created' %}{% url 'u-txn-invoices' invoice.id %}{% elif invoice.status == 'dispatched' %}{% url 'v-txn-invoices' invoice.id %}{% endif %}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <form method="post" class="form-check-primary me-2">
+                                            {% csrf_token %}
+                                            <input class="form-check-input" type="checkbox" name="checkedTxnInvoices"
+                                                value="{{invoice.id}}" data-bs-toggle="tooltip"
+                                                data-bs-placement="top" data-bs-original-title="Select invoice">
+                                        </form>
+                                        <div class="d-flex flex-column">
+                                            <div class="fw-semibold text-dark">
+                                                <span class="text-primary">InvoiceId:</span>
+                                                {{invoice.invoiceid}}
+                                            </div>
+                                        </div>                                                                                                
+                                    </div>
+                                </td>                                                        
+                                <td>
+                                    <div style="border-right: 3px solid {% if invoice.created_at|is_within_24_hours %}#198754{% else %}#dc3545{% endif %};">
+                                        {% if 'edit' in useruiacl.Transactions.Invoices %}
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-{% if invoice.status == 'created' %}primary{% elif invoice.status == 'dispatched' %}warning{% else %}danger{% endif %} dropdown-toggle status-badge {{invoice.status|lower}}" type="button" id="dropdownMenuButton{{invoice.id}}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                {{invoice.status|title}}
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{invoice.id}}">
+                                                {% if invoice.status == 'created' %}
+                                                <li><a class="dropdown-item status-update" href="#" data-invoice-id="{{invoice.id}}" data-status="dispatched">Dispatched</a></li>
+                                                {% else %}                                                                
+                                                <li><span class="dropdown-item disabled">No further status changes available</span></li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                        {% else %}
+                                        <button class="btn btn-sm btn-{% if invoice.status == 'created' %}primary{% elif invoice.status == 'dispatched' %}warning{% else %}danger{% endif %} status-badge" type="button">
+                                            {{invoice.status|title}}
+                                        </button>
+                                        {% endif %}
+                                        <div class="d-flex align-items-center">
+                                            <i data-feather="clock" class="me-25"></i>                                                    
+                                            <small class="align-items-center">{{ invoice.created_at|timesince }}</small>
+                                        </div>
+                                    </div>
+                                </td> 
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <div class="fw-semibold text-dark">
+                                            <span class="text-primary">Name:</span>
+                                                {% if invoice.customer.name %}
+                                                {{ invoice.customer.name }}
+                                                {% else %}{% endif %}
+                                        </div>
+                                        <div class="fw-semibold text-dark">
+                                            <span class="text-primary">Phone:</span>
+                                                {% if invoice.customer.phone %}
+                                                {{invoice.customer.phone}}
+                                                {% else %}{% endif %}
+                                        </div>
+                                        <div class="fw-semibold text-dark">
+                                            <span class="text-primary">Reg No:</span>
+                                            {% if invoice.vehicle.registration_no %}
+                                            {{ invoice.vehicle.registration_no }}
+                                            {% else %}{% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">
+                                        <span class="text-primary">Amount:</span>
+                                        ₹ {{ invoice.amount|floatformat:2 }}
+                                    </div>
+                                </td> 
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination -->
+                        <div class="card-footer d-flex justify-content-between align-items-center">
+                            <div class="text-muted">
+                            Showing {{ invoice_objs.start_index }} to {{ invoice_objs.end_index }} of {{ invoice_objs.paginator.count }} entries
+                            </div>
+                            {% if invoice_objs.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination pagination-primary">
+                                    <!-- First Page Link -->
+                                    {% if invoice_objs.number > 1 %}
+                                    <li class="page-item first">
+                                        <a href="?page=1&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}"
+                                            class="page-link">First</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item first disabled">
+                                        <span class="page-link">First</span>
+                                    </li>
+                                    {% endif %}
+                                    <!-- Previous Page Link -->
+                                    {% if invoice_objs.has_previous %}
+                                    <li class="page-item prev">
+                                        <a href="?page={{ invoice_objs.previous_page_number }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}"
+                                            class="page-link" aria-label="Previous"></a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item prev disabled">
+                                        <span class="page-link" aria-label="Previous"></span>
+                                    </li>
+                                    {% endif %}
+                                    <!-- Page Number Links (up to 3 pages around the current page) -->
+                                    {% for page in invoice_objs.paginator.page_range %}
+                                    {% if page >= invoice_objs.number|add:'-1' and page <= invoice_objs.number|add:'1' %} {% if page == invoice_objs.number %} <li class="page-item active">
+                                        <span class="page-link">{{ page }}</span>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item">
+                                            <a href="?page={{ page }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}"
+                                                class="page-link">{{ page }}</a>
+                                        </li>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% endfor %}
+                                        <!-- Next Page Link -->
+                                        {% if invoice_objs.has_next %}
+                                        <li class="page-item next">
+                                            <a href="?page={{ invoice_objs.next_page_number }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}"
+                                                class="page-link" aria-label="Next"></a>
+                                        </li>
+                                        {% else %}
+                                        <li class="page-item next disabled">
+                                            <span class="page-link" aria-label="Next"></span>
+                                        </li>
+                                        {% endif %}
+                                        <!-- Last Page Link -->
+                                        {% if invoice_objs.number < invoice_objs.paginator.num_pages %} <li class="page-item last">
+                                            <a href="?page={{ invoice_objs.paginator.num_pages }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}"
+                                                class="page-link">Last</a>
+                                            </li>
+                                        {% else %}
+                                        <li class="page-item last disabled">
+                                            <span class="page-link">Last</span>
+                                        </li>
+                                        {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center my-2">
+                            <div class="avatar bg-light-danger avatar-xl">
+                                <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                            </div>
+                            <p class="card-text fw-bolder">No data available.</p>
+                            <p class="card-text fw-bold">Invoices data will be shown here once they have been created.</p>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ✅ END Laptop View -->
+            <!-- ✅ END Desktop Table View -->
+            <!-- ✅ Mobile View (Visible only on small screens) -->
+            <div class="d-block d-md-none" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh;">            
+                <div class="row">
+                    <!-- Total Invoice -->
+                    <div class="col-4">
+                        <a href="{% url 'r-txn-invoices' %}" class="text-decoration-none">
+                        <div class="text-center p-25 text-white align-content-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: .5rem;">
+                            <i data-feather="trending-up" style="width: 24px; height: 24px; opacity: 0.9;"></i>
+                            <div class="mb-0 fw-bold">{{ total_invoice }}</div>
+                            <div class="mb-0 fw-bold" style="font-size: 0.7rem !important;">Total</div>
+                            
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Created Invoice -->
+                    <div class="col-4">
+                        <a href="{% url 'r-txn-invoices' %}?filter=created" class="text-decoration-none">
+                        <div class="text-center p-25 text-white align-content-center" style="background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%); border-radius: .5rem;">
+                            <i data-feather="clock" style="width: 24px; height: 24px; opacity: 0.9;"></i>
+                            <div class="mb-0 fw-bold">{{ created_invoice }}</div>
+                            <div class="mb-0 fw-bold" style="font-size: 0.7rem !important;">Created</div>
+                            
+                            </div>
+                        </a>
+                    </div>
+                    <!-- Dispatched Invoice -->
+                    <div class="col-4">
+                        <a href="{% url 'r-txn-invoices' %}?filter=dispatched" class="text-decoration-none">
+                        <div class="text-center p-25 text-white align-content-center" style="background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%); border-radius: .5rem;">
+                            <i data-feather="check-circle" style="width: 24px; height: 24px; opacity: 0.9;"></i>
+                            <div class="mb-0 fw-bold">{{ dispatched_invoice }}</div>
+                            <div class="mb-0 fw-bold" style="font-size: 0.7rem !important;">Dispatched</div>
+                            
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="container-xxl px-3">
+                    <!-- Header with Actions and Search -->
+                    <div class="card border-0 mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Invoices</h5>
+                        <div class="d-flex align-items-center gap-2">
+                        <a href="{% url 'c-txn-invoices' %}"
+                            class="btn btn-sm btn-icon btn-success rounded-circle shadow-sm"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Add Invoice">
+                            <i data-feather="plus-square" class="font-medium-2"></i>
+                        </a>
+                        {% if invoice_objs %}
+                        <button type="button" id="delTxnInvoicesMobile"
+                                class="btn btn-sm btn-icon btn-danger rounded-circle shadow-sm"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Selected">
+                            <i data-feather="trash-2" class="font-medium-2"></i>
+                        </button>
+                        {% endif %}
+                        </div>
+                    </div>
+
+                    {% if invoice_objs %}
+                    <!-- Search -->
+                    <div class="card-body pt-0">
+                        <div class="search-container position-relative">
+                        <div class="search-box position-relative">
+                            <i data-feather="search" class="text-primary position-absolute"
+                            style="left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px;"></i>
+                            <input type="text" id="searchTxnInvoicesMobile"
+                                class="form-control border-0 shadow-sm rounded-pill ps-5"
+                                placeholder="Search..."
+                                style="background-color: #f8fafc; transition: all 0.3s ease;"
+                                oninput="searchTableMobile('searchTxnInvoicesMobile', 'invoice-item-mobile')">
+                        </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    </div>
+                    {% if invoice_objs %}
+                    <!-- Invoice Items -->
+                    {% for invoice in invoice_objs %}
+                    <div class="card mb-3 border-0 shadow-lg rounded-4 invoice-item-mobile clickable-row position-relative overflow-hidden" 
+                        data-href="{% if invoice.status == 'created' %}{% url 'u-txn-invoices' invoice.id %}{% elif invoice.status == 'dispatched' %}{% url 'v-txn-invoices' invoice.id %}{% endif %}">
+                    
+                    <!-- Top accent bar -->
+                    <div class="position-absolute top-0 start-0 w-100" 
+                        style="height: 4px; background: linear-gradient(90deg, 
+                        {% if invoice.status == 'created' %}#4a00e0, #8e2de2{% elif invoice.status == 'dispatched' %}#ff9f43, #ffc107{% else %}#6c757d, #495057{% endif %});"></div>
+                    
+                    <div class="card-body">
+                        <!-- Header Section with Gradient Background -->
+                        <div class="d-flex justify-content-between align-items-center py-1 mb-25">
+                            <div class="d-flex align-items-center">
+                            <form method="post" class="form-check-primary me-1">
+                                {% csrf_token %}
+                                <input class="form-check-input" type="checkbox" name="checkedTxnInvoicesMobile"
+                                    value="{{invoice.id}}" data-bs-toggle="tooltip"
+                                    data-bs-placement="top" data-bs-original-title="Select invoice"
+                                    style="transform: scale(1.2);">
+                            </form> 
+                            <h6 class="fw-bold mb-0 text-dark">{{invoice.invoiceid}}</h6>             
+                            </div>
+                            <div style="border-right: 3px solid {% if invoice.created_at|is_within_24_hours %}#198754{% else %}#dc3545{% endif %};">
+                                {% if 'edit' in useruiacl.Transactions.Invoices %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-{% if invoice.status == 'created' %}primary{% elif invoice.status == 'dispatched' %}warning{% else %}danger{% endif %} dropdown-toggle status-badge {{invoice.status|lower}}" type="button" id="dropdownMenuButton{{invoice.id}}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        {{invoice.status|title}}
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton{{invoice.id}}">
+                                        {% if invoice.status == 'created' %}
+                                        <li><a class="dropdown-item status-update" href="#" data-invoice-id="{{invoice.id}}" data-status="dispatched">Dispatched</a></li>
+                                        {% else %}                                                                
+                                        <li><span class="dropdown-item disabled">No further status changes available</span></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                {% else %}
+                                <button class="btn btn-sm btn-{% if invoice.status == 'created' %}primary{% elif invoice.status == 'dispatched' %}warning{% else %}danger{% endif %} status-badge" type="button">
+                                    {{invoice.status|title}}
+                                </button>
+                                {% endif %}
+                                <div class="d-flex align-items-center">
+                                    <i data-feather="clock" class="me-25"></i>                                                    
+                                    <small class="align-items-center">{{ invoice.created_at|timesince }}</small>
+                                </div>
+                            </div>
+                        </div>  
+                        <!-- Content Sections -->
+                        <!-- Customer Section -->
+                        <div class="row g-2">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center mb-1">
+                                    <i data-feather="user" class="text-muted me-2" style="width: 14px; height: 14px;"></i>
+                                    <span class="text-muted small me-2">Name:</span>
+                                    <span class="fw-semibold">
+                                        {% if invoice.customer.name %}{{ invoice.customer.name }}{% else %}<span class="text-muted">-</span>{% endif %}
+                                    </span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                    <i data-feather="phone" class="text-muted me-2" style="width: 14px; height: 14px;"></i>
+                                    <span class="text-muted small me-2">Phone:</span>
+                                    <span class="fw-semibold">
+                                        {% if invoice.customer.phone %}{{invoice.customer.phone}}{% else %}<span class="text-muted">-</span>{% endif %}
+                                    </span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                    <i data-feather="hash" class="text-muted me-2" style="width: 14px; height: 14px;"></i>
+                                    <span class="text-muted small me-2">Reg No:</span>
+                                    <span class="fw-semibold">
+                                        {% if invoice.vehicle.registration_no %}{{ invoice.vehicle.registration_no }}{% else %}<span class="text-muted">-</span>{% endif %}
+                                    </span>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-1">
+                                    <i class="fas fa-rupee-sign text-muted me-2" width="14" height="14"></i>
+                                    <span class="text-muted small me-2">Amount:</span>
+                                    <span class="fw-semibold">
+                                        {{ invoice.amount|floatformat:0 }}
+                                    </span>
+                                    </div>
+                                </div>
+                                </div>
+                    </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center my-4">
+                    <div class="avatar bg-light-danger avatar-xl mx-auto mb-3">
+                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                    </div>
+                    <p class="card-text fw-bolder">No data available.</p>
+                    <p class="card-text fw-bold">Invoices data will be shown here once they have been created.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- ✅ END Mobile Card View -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- Custom Scripts -->
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+
+<script>
+// Mobile search functionality
+function searchTableMobile(inputId, targetClass) {
+    const searchValue = document.getElementById(inputId).value.toLowerCase();
+    const cards = document.querySelectorAll('.' + targetClass);
+
+    cards.forEach(function (card) {
+        const text = card.innerText.toLowerCase();
+        if (text.includes(searchValue)) {
+            card.style.display = "";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
+
+<script>
+    // Make table rows clickable
+    document.addEventListener('DOMContentLoaded', function() {
+        const rows = document.querySelectorAll('tr.clickable-row');
+        
+        rows.forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Don't navigate if clicking on a checkbox, button, or link
+                if (e.target.closest('input[type="checkbox"]') || 
+                    e.target.closest('button') || 
+                    e.target.closest('a') || 
+                    e.target.closest('.dropdown') ||
+                    e.target.closest('.dropdown-toggle')) {
+                    return;
+                }
+                
+                // Navigate to the URL specified in data-href attribute
+                const href = this.dataset.href;
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Initialize feather icons
+    try {
+        feather.replace();
+    } catch (error) {
+        console.error("Feather icons initialization failed:", error);
+    }
+        
+    // Handle delete button click for desktop
+    const delTxnInvoicesButton = document.getElementById("delTxnInvoices");
+    delTxnInvoicesButton?.addEventListener("click", function () {
+        let ids = [];
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        document.querySelectorAll('input[name="checkedTxnInvoices"]:checked').forEach(function (input) {
+            ids.push(input.value);
+        });
+        // Prepare data and URL for the AJAX request
+        const data = {
+            id: ids,
+            csrfmiddlewaretoken: csrfToken
+        };
+        const ajaxUrl = "{% url 'd-txn-job-sheets' %}";
+        
+        deleteConfirmation(data, ajaxUrl);
+    });
+
+    // Handle delete button click for mobile
+    const delTxnInvoicesMobileButton = document.getElementById("delTxnInvoicesMobile");
+    delTxnInvoicesMobileButton?.addEventListener("click", function () {
+        let ids = [];
+        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        document.querySelectorAll('input[name="checkedTxnInvoicesMobile"]:checked').forEach(function (input) {
+            ids.push(input.value);
+        });
+        // Prepare data and URL for the AJAX request
+        const data = {
+            id: ids,
+            csrfmiddlewaretoken: csrfToken
+        };
+        const ajaxUrl = "{% url 'd-txn-job-sheets' %}";
+        
+        deleteConfirmation(data, ajaxUrl);
+    });
+
+    // Make table rows clickable
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Don't navigate if clicking on:
+            // 1. Interactive elements
+            // 2. Form controls
+            // 3. Dropdowns or their children
+            // 4. Buttons or links
+            if (e.target.matches('a, button, input, select, textarea, [role="button"], [role="menuitem"], [role="option"]') || 
+                e.target.closest('a, button, input, select, textarea, .dropdown, .dropdown-menu, .dropdown-item, .form-check-input, .btn')) {
+                return;
+            }
+
+            // Get the closest clickable row in case the click is on a child element
+            const clickableRow = e.target.closest('.clickable-row');
+            const href = clickableRow ? clickableRow.dataset.href : null;
+            
+            // Only navigate if we have a valid href
+            if (href && href !== '#') {
+                window.location.href = href;
+            }
+        });
+    });
+});
+</script>
+{% include 'transactions/invoices/js-change-invoice-status.html' %}
+{% endblock %}

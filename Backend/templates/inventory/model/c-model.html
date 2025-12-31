@@ -1,0 +1,82 @@
+{% extends "index.html" %}
+
+{% block title %}c-inv-model{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-1">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0"><a href="{% url 'r-inventory' %}">Inventory</a></h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-inv-model' %}">List Model</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Add Model
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12">
+                    <div class="mb-1 breadcrumb-right">                        
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">                
+                <section id="c-inv-model">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-9">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'c-inv-model' %}">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 mb-1">
+                                                <label class="form-label" for="product_brand">Brand<span class="text-danger">*</span></label>
+                                                <select class="select2 form-select" name="product_brand" required>
+                                                    <option value="" disabled selected>Select Brand</option>
+                                                    {% for i in product_brands %}
+                                                        <option value="{{ i.id }}">{{ i.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-12 col-md-6 mb-1">
+                                                <label class="form-label" for="name">Name<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" name="name" required>
+                                            </div>
+                                            <div class="col-12 d-flex justify-content-between mt-2">
+                                                <button type="button" class="btn btn-outline-secondary waves-effect" onclick="window.history.back();">
+                                                    <i data-feather="x" class="me-25"></i>
+                                                    <span>Cancel</span>
+                                                </button>
+                                                <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                    <i data-feather="save" class="me-50"></i>
+                                                    <span>Save Model</span>
+                                                </button>
+                                            </div>
+                                        </div> 
+                                    </form>                               
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}{% endblock %}

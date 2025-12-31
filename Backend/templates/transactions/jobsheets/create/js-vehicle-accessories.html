@@ -1,0 +1,265 @@
+<script>
+    $(document).ready(function () {
+        // Initialize variables
+        let vehicleAccessories = [];
+        const vehicleAccessorySelect = $('#vehicleAccessory');
+        const $vehicleAccessoryForm = $('#vehicleAccessoryModal form');
+        const $saveBtn = $('#saveVehicleAccessoryBtn');
+        const vehicleType = '{{ vehicletype }}';  // Get vehicle type from template context
+
+        // Function to load vehicle accessories
+        function loadVehicleAccessories(selectAfterLoad = null) {
+            return new Promise((resolve) => {
+                if (!vehicleType) {
+                    console.warn('Vehicle type is not specified');
+                    vehicleAccessorySelect.empty();
+                    resolve();
+                    return;
+                }
+
+                // Get current selections before making the AJAX call
+                const currentSelections = vehicleAccessorySelect.val() || [];
+                
+                // If we're adding a new accessory, include it in the current selections
+                if (selectAfterLoad) {
+                    if (Array.isArray(selectAfterLoad)) {
+                        selectAfterLoad.forEach(id => {
+                            if (!currentSelections.includes(id)) {
+                                currentSelections.push(id);
+                            }
+                        });
+                    } else if (!currentSelections.includes(selectAfterLoad)) {
+                        currentSelections.push(selectAfterLoad);
+                    }
+                }
+
+                $.ajax({
+                    url: '{% url "list_vehicle_accessories" %}',
+                    type: 'GET',
+                    data: {
+                        vehicletype: vehicleType
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            vehicleAccessories = response.data || [];
+                            populateVehicleAccessorySelect(vehicleAccessories, currentSelections);
+                        } else {
+                            console.error('Error loading vehicle accessories:', response.message);
+                            toastr.error('Failed to load vehicle accessories');
+                        }
+                        resolve(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading vehicle accessories:', error);
+                        toastr.error('Failed to load vehicle accessories. Please refresh the page.');
+                        resolve();
+                    }
+                });
+            });
+        }
+
+        // Function to populate vehicle accessory select
+        function populateVehicleAccessorySelect(accessoryList, selectedValues = []) {
+            // Store current scroll position
+            const scrollTop = $(document).scrollTop();
+            
+            // Destroy existing Select2 instance if it exists
+            if ($.fn.select2 && vehicleAccessorySelect.hasClass('select2-hidden-accessible')) {
+                vehicleAccessorySelect.select2('destroy');
+            }
+
+            // Clear existing options
+            vehicleAccessorySelect.empty();
+
+            // Add new options
+            accessoryList.forEach(function(accessory) {
+                vehicleAccessorySelect.append($('<option>', {
+                    value: accessory.id,
+                    text: accessory.text
+                }));
+            });
+
+            // Reinitialize Select2
+            vehicleAccessorySelect.select2({
+                placeholder: 'Select Vehicle Accessory(s)',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('body'),
+                closeOnSelect: false,
+                dropdownCssClass: 'vehicle-accessory-select-dropdown',
+                templateResult: function (data) {
+                    if (data.loading) return data.text;
+                    return $('<div>').text(data.text);
+                },
+                templateSelection: function (data) {
+                    return data.text;
+                }
+            });
+
+            // Set selected values if provided
+            if (selectedValues && selectedValues.length > 0) {
+                vehicleAccessorySelect.val(selectedValues).trigger('change');
+            }
+
+            // Restore scroll position
+            $(document).scrollTop(scrollTop);
+
+            // Add custom "Add New" option to the dropdown
+            vehicleAccessorySelect.on('select2:open', function () {
+                setTimeout(function () {
+                    if ($('.select2-dropdown .add-new-vehicle-accessory-option').length === 0) {
+                        const addNewOption = $('<div class="select2-results__option select2-results__option--highlighted add-new-vehicle-accessory-option" style="color: #0d6efd; font-weight: bold; cursor: pointer;">+ Add New Vehicle Accessory</div>');
+                        $('.select2-dropdown .select2-results').prepend(addNewOption);
+                    }
+                }, 10);
+            });
+
+            // Handle click on the custom Add New option
+            $(document).off('click', '.add-new-vehicle-accessory-option').on('click', '.add-new-vehicle-accessory-option', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                vehicleAccessorySelect.select2('close');
+                $vehicleAccessoryForm[0].reset();
+                $vehicleAccessoryForm.find('.is-invalid').removeClass('is-invalid');
+                $vehicleAccessoryForm.find('.invalid-feedback').remove();
+                const modal = new bootstrap.Modal(document.getElementById('vehicleAccessoryModal'));
+                modal.show();
+                $('input', $vehicleAccessoryForm).first().focus();
+            });
+        }
+
+        // Handle form submission
+        $vehicleAccessoryForm.on('submit', function (e) {
+            e.preventDefault();
+            $vehicleAccessoryForm.find('.is-invalid').removeClass('is-invalid');
+            $vehicleAccessoryForm.find('.invalid-feedback').remove();
+
+            // Get the form data
+            const accessoryName = $('#vehicleAccessoryName').val().trim();
+
+            // Validate required fields
+            if (!accessoryName) {
+                $('#vehicleAccessoryName').addClass('is-invalid')
+                    .after('<div class="invalid-feedback">Accessory name is required</div>');
+                return;
+            }
+
+            if (!vehicleType) {
+                toastr.error('Vehicle type is not specified');
+                return;
+            }
+
+            const $submitBtn = $vehicleAccessoryForm.find('button[type="submit"]');
+            const originalBtnText = $submitBtn.html();
+            $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+            // Prepare form data
+            const formData = new FormData(this);
+            formData.append('vehicletype', vehicleType);
+            formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+            $.ajax({
+                url: '{% url "save_vehicle_accessory" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('vehicleAccessoryModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+
+                        // Get the new accessory ID and text from the response
+                        const newAccessoryId = response.data && response.data.id ? response.data.id.toString() : null;
+                        const newAccessoryText = response.data && response.data.text ? response.data.text : '';
+
+                        if (newAccessoryId && newAccessoryText) {
+                            // Get current selections
+                            const currentSelections = vehicleAccessorySelect.val() || [];
+
+                            // Add new accessory to the list if not already present
+                            if (!currentSelections.includes(newAccessoryId)) {
+                                currentSelections.push(newAccessoryId);
+                                
+                                // Add the new option to the select element
+                                const newOption = new Option(newAccessoryText, newAccessoryId, true, true);
+                                vehicleAccessorySelect.append(newOption);
+                                
+                                // Update the selection
+                                vehicleAccessorySelect.val(currentSelections).trigger('change');
+                                
+                                // Show success message
+                                toastr.success('Vehicle accessory added successfully');
+                            } else {
+                                // Just show a message if the accessory was already selected
+                                toastr.info('This vehicle accessory is already selected');
+                            }
+                            
+                            // Refresh the select2 to show the new option
+                            vehicleAccessorySelect.trigger('change');
+                        }
+                    } else {
+                        toastr.error(response.message || 'Failed to add vehicle accessory');
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = 'Failed to add vehicle accessory. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                        if (xhr.responseJSON.errors) {
+                            Object.entries(xhr.responseJSON.errors).forEach(([field, messages]) => {
+                                const $field = $(`[name="${field}"]`);
+                                $field.addClass('is-invalid');
+                                $field.next('.invalid-feedback').remove();
+                                $field.after(`<div class="invalid-feedback">${Array.isArray(messages) ? messages.join(' ') : messages}</div>`);
+                            });
+                        }
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function () {
+                    $submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize vehicle accessories when document is ready
+        loadVehicleAccessories();
+
+        // Initialize modal events
+        $('#vehicleAccessoryModal').on('hidden.bs.modal', function () {
+            $vehicleAccessoryForm[0].reset();
+            $vehicleAccessoryForm.find('.is-invalid').removeClass('is-invalid');
+            $vehicleAccessoryForm.find('.invalid-feedback').remove();
+        });
+
+        // Handle Enter key in form inputs
+        $vehicleAccessoryForm.on('keypress', 'input', function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $vehicleAccessoryForm.submit();
+            }
+        });
+    });
+</script>

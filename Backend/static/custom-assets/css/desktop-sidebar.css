@@ -1,0 +1,99 @@
+/* Desktop Sidebar - Icon-Label Layout */
+/* This file handles desktop sidebar styling to match mobile layout */
+
+@media (min-width: 992px) {
+    /* Make desktop sidebar use icon-label stacking like mobile */
+    .main-menu .main-menu-content .navigation-main .nav-item a {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0.8rem 0.4rem !important;
+        text-align: center !important;
+        min-height: 75px !important;
+        margin: 0.15rem 0.3rem !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
+    }
+    
+    .main-menu .main-menu-content .navigation-main .nav-item .icon-label-stack {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        gap: 1rem !important;
+    }
+    
+    .main-menu .main-menu-content .navigation-main .nav-item .icon-label-stack i {
+        font-size: 1.8rem !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+        display: block !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .main-menu .main-menu-content .navigation-main .nav-item .icon-label-stack .menu-title {
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1.2 !important;
+        text-align: center !important;
+        word-wrap: break-word !important;
+        max-width: 100% !important;
+        display: block !important;
+        letter-spacing: 0.025em !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Desktop hover effects */
+    .main-menu .main-menu-content .navigation-main .nav-item a:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        /* transform: translateY(-2px) !important; */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .main-menu .main-menu-content .navigation-main .nav-item a:hover .icon-label-stack i {
+        /* transform: scale(1.1) !important; */
+    }
+    
+    .main-menu .main-menu-content .navigation-main .nav-item.active > a {
+        background: rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Professional Desktop GMS Branding */
+    .main-menu .main-menu-content::after {
+        content: 'GMS' !important;
+        position: absolute !important;
+        bottom: 3rem !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        color: white !important;
+        font-weight: 800 !important;
+        font-size: 1.2rem !important;
+        letter-spacing: 0.15em !important;
+        text-align: center !important;
+        padding: 0.5rem 1rem !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border-radius: 4px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        transition: all 0.3s ease !important;
+        min-width: 60px !important;
+    }
+    
+    /* Center align icons in sidebar */
+    .main-menu .main-menu-content .navigation-main .nav-item .icon-label-stack i {
+        text-align: center !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}

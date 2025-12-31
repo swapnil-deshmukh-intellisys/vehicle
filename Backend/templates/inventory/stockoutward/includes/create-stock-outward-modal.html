@@ -1,0 +1,178 @@
+<div class="modal fade text-start" id="stockOutwardModal" tabindex="-1" aria-labelledby="stockOutwardModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <small class="modal-title" id="stockOutwardModalLabel">Stock Outward</small>
+        <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" id="stockOutwardForm" action="{% url 'r-inv-stock-outward' %}" enctype="multipart/form-data"
+          onsubmit="return submitStockOutwardForm(event)">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-1">
+                <label class="form-label" for="product">Product*</label>
+                <select class="form-select" name="product" id="stockOutwardProductSelect" required>
+                  <option value="" hidden selected>Select an option</option>
+                  {% for product in product_catalogues %}
+                  <option value="{{ product.id }}" data-part-number="{{ product.part_number|default:'' }}"
+                    data-code="{{ product.code|default:'' }}">{{ product.name }} | {{ product.brand.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="product-details mb-1" id="selected-product-details" style="display: none;">
+            <div class="row">
+              <div class="col-12">
+                <ul class="list-inline mb-0 py-25 px-50">
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-success mb-25">
+                      <i data-feather="credit-card" class="me-25"></i>
+                      <span id="product-mrp">MRP: 0</span>
+                    </span>
+                  </li>
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-warning mb-25">
+                      <span id="product-gst">GST: 0</span>
+                      <i data-feather="percent" class="ms-25"></i>
+                    </span>
+                  </li>
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-secondary mb-25">
+                      <span id="product-discount">Discount: 0</span>
+                      <i data-feather="percent" class="ms-25"></i>
+                    </span>
+                  </li>
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-info mb-25">
+                      <i data-feather="credit-card" class="me-25"></i>
+                      <span id="product-selling-price">Selling Price: 0</span>
+                    </span>
+                  </li>
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-primary mb-25">
+                      <i data-feather="credit-card" class="me-25"></i>
+                      <span id="product-purchase-price">Purchase Price: 0</span>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-8">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Name:</b><span id="product-name"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Brand:</b><span id="product-brand"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Code:</b><span id="product-code"></span>
+                  </li>
+                  <li>
+                    <b>Category:</b><span id="product-category"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Part Number:</b><span id="product-part-number"></span>
+                  </li>
+                  <li>
+                    <b>Available Stock:</b><span class="badge badge-light-secondary" id="product-stock">0</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Model:</b><span id="product-model"></span>
+                  </li>
+                  <li>
+                    <span class="badge" id="product-status"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Description:</b><span id="product-description"></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 col-md-3">
+              <div class="mb-1">
+                <label class="form-label" for="issued_to">Issued To*</label>
+                <input type="text" class="form-control" name="issued_to" required />
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="mb-1">
+                <label class="form-label" for="issued_date">Issued Date*</label>
+                <input type="date" class="form-control" name="issued_date" required />
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="mb-1">
+                <label class="form-label" for="reference_document">Reference Doc</label>
+                <input type="text" class="form-control" name="reference_document" />
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="mb-1">
+                <label class="form-label" for="quantity">Quantity*</label>
+                <input type="number" class="form-control" name="quantity" step="1" min="1" required />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="usage_purpose">Purpose</label>
+                <input type="text" class="form-control" name="usage_purpose" />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="location">Location</label>
+                <input type="text" class="form-control" name="location" />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="rack">Rack</label>
+                <input type="text" class="form-control" name="rack" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mb-1">
+                <label class="form-label" for="remarks">Remarks</label>
+                <textarea class="form-control" name="remarks"></textarea>
+              </div>
+            </div>
+            <div class="col-12 text-end">
+              <div class="mb-1">
+                <button type="submit" class="btn btn-sm btn-success" id="stockOutwardSubmitBtn">
+                  <span class="btn-text">Submit</span>
+                  <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

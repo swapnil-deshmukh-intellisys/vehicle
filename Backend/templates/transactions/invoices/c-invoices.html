@@ -1,0 +1,1515 @@
+{% extends "index.html" %}
+
+{% block title %}c-txn-invoices{% endblock %}
+
+{% block style %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<style>
+    /* Responsive Styles */
+    .divider-text {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .divider-text .btn {
+        margin: 0.2rem 0;
+        white-space: nowrap;
+    }
+    
+    .divider-text .fw-bold {
+        white-space: nowrap;
+        margin-right: 0.5rem;
+    }
+    
+    /* Responsive Tables */
+    .table-responsive {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+    }
+    
+    .table {
+        min-width: 600px; /* Ensures table doesn't get too narrow */
+    }
+    
+    .table thead th {
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        z-index: 1;
+    }
+    
+    .table td, .table th {
+        vertical-align: middle;
+    }
+    
+    /* Hide default date format placeholder */
+    input[type="date"].empty-date:not(:focus):before {
+        content: attr(placeholder);
+        color: #6e6b7b;
+        width: 100%;
+    }
+    
+    input[type="date"].empty-date:not(:focus)::-webkit-datetime-edit {
+        color: transparent;
+    }
+    
+    input[type="date"].empty-date:focus::-webkit-datetime-edit {
+        color: #6e6b7b;
+    }
+    
+    /* Select2 Customization */
+    .select2-container--default .select2-selection--single {
+        height: 31px;
+        font-size: 0.875rem;
+        border: 1px solid #d8d6de;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 31px;
+        padding-left: 8px;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 30px;
+    }
+    
+    .select2-dropdown {
+        border: 1px solid #d8d6de;
+        border-radius: 0.357rem;
+        box-shadow: 0 5px 25px rgba(34, 41, 47, 0.1);
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .select2-dropdown-large {
+        min-width: 250px !important;
+    }
+    
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1px solid #d8d6de;
+        border-radius: 0.357rem;
+        padding: 0.438rem 1rem;
+        margin-bottom: 8px;
+    }
+    
+    .select2-results__option {
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid #f8f8f8;
+    }
+    
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: #7367f0;
+    }
+    
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: #f8f8f8;
+    }
+    
+    /* Make dropdown list appear above other elements */
+    .select2-container--open {
+        z-index: 9999 !important;
+    }
+    
+    .select2-dropdown {
+        z-index: 9999 !important;
+    }
+    
+    .select2-results {
+        max-height: 300px !important;
+        overflow-y: auto !important;
+    }
+    
+    .select2-results__options {
+        max-height: 300px !important;
+        overflow-y: auto !important;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">Invoices</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    {% if jobcard_obj %}                                     
+                                    <li class="breadcrumb-item"><a href="{%url 'r-txn-job-sheets' %}">Jobcards</a>
+                                    </li>
+                                    {% else %}                                     
+                                    <li class="breadcrumb-item"><a href="{%url 'r-txn-invoices' %}">Invoices</a>
+                                    </li>
+                                    {% endif %}
+                                    <li class="breadcrumb-item active">Create Invoices
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body"> 
+                <section  id="c-txn-invoices">
+                    <div class="row">
+                        <div class="col-xl-9 col-md-8 col-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="post" id="customerSearchForm">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 mb-1">
+                                                <div class="row d-flex align-items-end">
+                                                    <div class="col-md-8 mb-1">                                                  
+                                                        <label class="form-label" for="phone">Phone <span class="text-danger">*</span></label>
+                                                        <div class="input-group input-group-merge">
+                                                            <span class="input-group-text"><i data-feather='smartphone'></i></span>
+                                                            <input type="text" class="form-control" name="phone" id="phone" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" placeholder="Enter phone to search" required/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4 mb-1">
+                                                        <button class="btn btn-icon btn-gradient-primary" type="submit" id="searchCustomerBtn" title="Search">
+                                                            <i data-feather="search"></i>
+                                                        </button>
+                                                        <button class="btn btn-icon btn-gradient-info" type="button" data-bs-toggle="modal" data-bs-target="#c-prf-customers-modal">
+                                                            <i data-feather="plus-square"></i>
+                                                        </button>
+                                                    </div>
+                                                </div> 
+
+                                            </div>
+                                        </div>
+                                    </form>
+                                
+                                    <form method="post" action="{% url 'c-txn-invoices' %}{% if jobcard_obj %}?jobcard_id={{ jobcard_obj.id }}{% endif %}">
+                                        {% csrf_token %}
+                                        <div class="row"> 
+                                            <input type="hidden" name="customerid" id="customerId">
+                                            <div class="col-12 col-md-4 mb-1">  
+                                                <label class="form-label" for="customer">Customer<span class="text-danger">*</span></label>
+                                                <div class="input-group input-group-merge">
+                                                    <span class="input-group-text"><i data-feather='user'></i></span>
+                                                    <input type="text" class="form-control" name="customername" id="customerName" required>
+                                                </div> 
+                                                <small class="text-muted">Search phone for customer</small>
+                                            </div>
+                                            <div class="col-12 col-md-8 mb-1">    
+                                                <label class="form-label" for="vehicle">Vehicle<span class="text-danger">*</span></label>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="input-group input-group-merge me-2" style="flex: 1;">
+                                                        <!-- <span class="input-group-text">&#x1F3CD;</span> -->
+                                                        <select class="form-select border-start-0 select2-searchable" name="vehicle" id="vehicleSelect" required>
+                                                            <option value=""></option>
+                                                        </select>
+                                                    </div>
+                                                    <button class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#c-prf-vehicles-modal" id="addVehicleButton" disabled style="white-space: nowrap;">
+                                                        <i data-feather="plus"></i>
+                                                        Add Vehicles
+                                                    </button>
+                                                </div>
+                                                <small class="text-muted">Search phone to load vehicles</small>  
+                                            </div>
+                                            <div class="col-12 col-md-4 mb-1" id="invoicedatediv" style="display: none;">  
+                                                <label class="form-label" for="customer">Invoice Date<span class="text-danger">*</span></label>                                                
+                                                <input type="date" class="form-control" name="invoicedate" id="invoicedate">
+                                            </div>
+                                            <div class="col-12 col-md-4 mb-1" id="ponumberdiv" style="display: none;">  
+                                                <label class="form-label" for="pono">PO No.</label>                                                
+                                                <input type="text" class="form-control" name="pono">
+                                            </div>
+                                            <div class="col-12 col-md-4 mb-1" id="podatediv" style="display: none;">  
+                                                <label class="form-label" for="podate">PO Date</label>
+                                                <input type="date" class="form-control empty-date" name="podate" id="podate">
+                                            </div>
+                                            <div class="col-12 mb-1" id="commentsdiv">  
+                                                <label class="form-label" for="comments">Comments</label>
+                                                <textarea class="form-control" name="comments" id="comments" rows="1"></textarea>
+                                            </div>                                             
+                                            
+                                            <div class="col-12 mb-1">                                                                                                
+                                                <div class="divider divider-start">
+                                                    <div class="divider-text d-flex align-items-center">
+                                                        <span class="fw-bold">Services:</span>                                                         
+                                                        <button class="btn btn-sm btn-outline-primary waves-effect" data-repeater-create="fromdb-service" type="button">
+                                                            <i data-feather='list' class="me-25"></i>
+                                                            <span>Select Service</span>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-success waves-effect" data-repeater-create="fromuser-service" type="button">
+                                                            <i data-feather='plus' class="me-25"></i>
+                                                            <span>Add Service</span>
+                                                        </button>
+                                                    </div>
+                                                </div> 
+                                                <div class="table-responsive">
+                        <table class="table mb-0 table-sm table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Qty</th>
+                                                            <th>Value</th>
+                                                            <th>Tax (%)</th>
+                                                            <th>Discount (%)</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody data-repeater-list="fromdb-service" id="fromdb-service-tbody">
+                                                        {% for svc in jobcard_obj.estimate.estimate_services.all %}
+                                                            {% if svc.service_source == 'service' %}
+                                                            <tr data-repeater-item>
+                                                                <td>
+                                                                    <select class="form-select form-select-sm select2-searchable" name="fromdb_servicename" required>
+                                                                        <option value="" hidden>Select service</option>
+                                                                        {% for i in service_objs %}
+                                                                            <option value="{{ i.id }}" {% if i.id == svc.service_id %}selected{% endif %}>{{ i.name }}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </td>
+                                                                <td><input type="number" name="fromdb_servicequantity" class="form-control form-control-sm" value="{{ svc.quantity|default:'1' }}" min="1" required></td>
+                                                                <td><input type="number" name="fromdb_servicevalue" class="form-control form-control-sm" value="{{ svc.service_value }}" required></td>
+                                                                <td><input type="number" name="fromdb_servicetax" class="form-control form-control-sm" value="{{ svc.service_tax }}" required></td>
+                                                                <td><input type="number" name="fromdb_servicediscount" class="form-control form-control-sm" value="{{ svc.service_discount }}" required></td>
+                                                                <td>
+                                                                    <button type="button" data-repeater-delete="fromdb-service" class="btn btn-icon rounded-circle btn-flat-danger waves-effect">
+                                                                        <i data-feather='trash-2'></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </tbody>
+                                                    <tbody data-repeater-list="fromuser-service" id="fromuser-service-tbody">
+                                                        {% for svc in jobcard_obj.estimate.estimate_services.all %}
+                                                            {% if svc.service_source == 'external' %}
+                                                            <tr data-repeater-item>
+                                                                <td><input type="text" name="fromuser_servicename" class="form-control form-control-sm" value="{{ svc.service_name }}" required></td>
+                                                                <td><input type="number" name="fromuser_servicequantity" class="form-control form-control-sm" value="{{ svc.quantity|default:'1' }}" min="1" required></td>
+                                                                <td><input type="number" name="fromuser_servicevalue" class="form-control form-control-sm" value="{{ svc.service_value }}" required></td>
+                                                                <td><input type="number" name="fromuser_servicetax" class="form-control form-control-sm" value="{{ svc.service_tax }}" required></td>
+                                                                <td><input type="number" name="fromuser_servicediscount" class="form-control form-control-sm" value="{{ svc.service_discount }}" required></td>
+                                                                <td>
+                                                                    <button type="button" data-repeater-delete="fromuser-service" class="btn btn-icon rounded-circle btn-flat-danger waves-effect">
+                                                                        <i data-feather='trash-2'></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </tbody>
+                                                                        </table>
+                    </div>
+                                            </div>                                            
+                                            <div class="col-12 mb-1">                                                                                                
+                                                <div class="divider divider-start">
+                                                    <div class="divider-text d-flex align-items-center">
+                                                        <span class="fw-bold">Parts:</span>                                                         
+                                                        <button class="btn btn-sm btn-outline-primary waves-effect" data-repeater-create="fromdb-part" type="button">
+                                                            <i data-feather='list' class="me-25"></i>
+                                                            <span>Select Part</span>
+                                                        </button>
+                                                        <button class="btn btn-sm btn-outline-success waves-effect" data-repeater-create="fromuser-part" type="button">
+                                                            <i data-feather='plus' class="me-25"></i>
+                                                            <span>Add Part</span>
+                                                        </button>
+                                                    </div>
+                                                </div> 
+                                                <div class="table-responsive">
+                        <table class="table mb-0 table-sm table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Qty</th>
+                                                            <th>Value</th>
+                                                            <th>Tax (%)</th>
+                                                            <th>Discount (%)</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody data-repeater-list="fromdb-part" id="fromdb-part-tbody">
+                                                        {% for part in jobcard_obj.estimate.estimate_product_catalogues.all %}
+                                                            {% if part.part_source == 'inventory' %}
+                                                            <tr data-repeater-item>
+                                                                <td>
+                                                                    <select class="form-select form-select-sm select2-searchable" name="fromdb_partname" required>
+                                                                        <option value="" hidden>Select part</option>
+                                                                        {% for i in product_catalogues_objs %}
+                                                                            <option value="{{ i.id }}" {% if i.id == part.part_id %}selected{% endif %}>{{ i.name }}</option>
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </td>
+                                                                <td><input type="number" name="fromdb_partquantity" class="form-control form-control-sm" value="{{ part.quantity|default:'1' }}" min="1" required></td>
+                                                                <td><input type="number" name="fromdb_partvalue" class="form-control form-control-sm" value="{{ part.part_value }}" required></td>
+                                                                <td><input type="number" name="fromdb_parttax" class="form-control form-control-sm" value="{{ part.part_tax }}" required></td>
+                                                                <td><input type="number" name="fromdb_partdiscount" class="form-control form-control-sm" value="{{ part.part_discount }}" required></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-icon rounded-circle btn-flat-danger waves-effect delete-part-btn">
+                                                                        <i data-feather='trash-2'></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            {% endif %}
+                                                        {% endfor %}                                                          
+                                                    </tbody>
+                                                    <tbody data-repeater-list="fromuser-part" id="fromuser-part-tbody">
+                                                        {% for part in jobcard_obj.estimate.estimate_product_catalogues.all %}
+                                                            {% if part.part_source == 'external' %}
+                                                            <tr data-repeater-item>
+                                                                <td><input type="text" name="fromuser_partname" class="form-control form-control-sm" value="{{ part.part_name }}" required></td>
+                                                                <td><input type="number" name="fromuser_partquantity" class="form-control form-control-sm" value="{{ part.quantity|default:'1' }}" min="1" required></td>
+                                                                <td><input type="number" name="fromuser_partvalue" class="form-control form-control-sm" value="{{ part.part_value }}" required></td>
+                                                                <td><input type="number" name="fromuser_parttax" class="form-control form-control-sm" value="{{ part.part_tax }}" required></td>
+                                                                <td><input type="number" name="fromuser_partdiscount" class="form-control form-control-sm" value="{{ part.part_discount }}" required></td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-icon rounded-circle btn-flat-danger waves-effect delete-user-part-btn">
+                                                                        <i data-feather='trash-2'></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            {% endif %}
+                                                        {% endfor %}                                                                                                           
+                                                    </tbody>
+                                                                        </table>
+                    </div>
+                                            </div>
+                                            <!-- Hidden field to store the invoice total amount -->
+                                            <input type="hidden" name="amount" id="invoice_total_amount" value="0">
+                                            
+                                            <div class="col-12 text-center">
+                                                <button type="submit" class="btn btn-sm btn-primary me-1 waves-effect waves-float waves-light">Submit</button>
+                                                <button type="reset" class="btn btn-sm btn-outline-secondary waves-effect">Reset</button>
+                                            </div>
+                                        </div> 
+                                    </form>    
+                                
+                                    <!-- Create Customers Modal -->
+                                    <div class="modal fade text-start" id="c-prf-customers-modal" tabindex="-1" aria-labelledby="c-prf-customers-modal-label" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <small class="modal-title" id="c-prf-customers-modal-label">Add Customer</small>
+                                                    <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post" id="customerForm">
+                                                        {% csrf_token %}
+                                                        <div class="row">                                  
+                                                            <div class="col-12 col-md-4 mb-1">
+                                                                <label class="form-label" for="phone">Phone<span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control" name="phone" id="modalPhone" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required/>
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="name">Name<span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control" name="name" required>
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">
+                                                                <label class="form-label" for="email">Email</label>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">@</span>                                                 
+                                                                    <input type="email" class="form-control trimwhitespace" name="email" />
+                                                                </div>
+                                                            </div> 
+                                                            <div class="col-12 col-md-6 mb-1">                                                                
+                                                                <label class="form-label" for="gst">GST</label>
+                                                                <input type="text" class="form-control" name="gst">
+                                                            </div>   
+                                                            <div class="col-12 col-md-6 mb-1">
+                                                                <label class="form-label" for="pincode">Pincode</label>
+                                                                <input type="text" class="form-control" name="pincode" pattern="[0-9]{6}" title="Please enter a 6-digit pincode" />
+                                                            </div>
+                                                            <div class="col-12 mb-1">                                                                
+                                                                <label class="form-label" for="address">Address</label>
+                                                                <textarea class="form-control" name="address"></textarea>
+                                                            </div>
+                                                            <div class="col-12 text-end">                                                 
+                                                                <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>    
+                                                </div>                                                 
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Create Customers Modal --> 
+
+                                    <!-- Create Vehicle Modal -->
+                                    <div class="modal fade text-start" id="c-prf-vehicles-modal" tabindex="-1" aria-labelledby="c-prf-vehicles-modal-label" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <small class="modal-title" id="c-prf-vehicles-modal-label">Create Vehicle</small>
+                                                    <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post" id="vehicleForm" enctype="multipart/form-data" data-url="{% url 'c-prf-vehicles' 0 %}">
+                                                        {% csrf_token %}
+                                                        <div class="row">                                  
+                                                            <div class="col-12 col-md-4 mb-1">
+                                                                <label class="form-label" for="model">Model<span class="text-danger">*</span></label>
+                                                                <input type="text" class="form-control" name="model" required/>
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="make">Make</label>
+                                                                <input type="text" class="form-control" name="make">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="license_plate_no">License Plate No.</label>
+                                                                <input type="text" class="form-control" name="license_plate_no">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="external_bikeid">External Bikeid</label>
+                                                                <input type="text" class="form-control" name="external_bikeid">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="registration_no">Registration No.</label>
+                                                                <input type="text" class="form-control" name="registration_no">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="year_of_manufacture">Year Of Manufacture</label>
+                                                                <input type="text" class="form-control" name="year_of_manufacture" placeholder="e.g. 2025" pattern="^(19\\d{2}|20[0-1]\\d|202[0-5])$" title="Enter a valid 4-digit year between 1900 and 2025" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="fuel_type">Fuel Type</label>
+                                                                <input type="text" class="form-control" name="fuel_type">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="transmission_type">Transmission Type</label>
+                                                                <input type="text" class="form-control" name="transmission_type">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="engine_no">Engine No.</label>
+                                                                <input type="text" class="form-control" name="engine_no">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="chassis_no">Chassis No.</label>
+                                                                <input type="text" class="form-control" name="chassis_no">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="vin_no">Vin No.</label>
+                                                                <input type="text" class="form-control" name="vin_no">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="color">Color</label>
+                                                                <input type="text" class="form-control" name="color">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="reg_state">Registration State</label>
+                                                                <input type="text" class="form-control" name="reg_state">
+                                                            </div>
+                                                            <div class="col-12 col-md-4 mb-1">                                                                
+                                                                <label class="form-label" for="reg_exp">Registration Expiry</label>
+                                                                <input type="date" class="form-control" name="reg_exp">
+                                                            </div>
+                                                            <div class="col-12 mb-1">
+                                                                <label class="form-label" for="upload_image">Upload Image</label>
+                                                                <input type="file" class="form-control" name="upload_image" id="c-prf-vehicles-img" 
+                                                                    accept="image/*" 
+                                                                    onchange="validateImage(['image/jpeg', 'image/png'], 200, 200, 'c-prf-vehicles-img', 'c-prf-vehicles-img-msg', 'c-prf-vehicles-img-subbtn')">
+                                                                <small id="c-prf-vehicles-img-msg" class="form-text"></small>
+                                                            </div>
+                                                            <div class="col-12 text-end">                                                            
+                                                                <button type="submit" class="btn btn-sm btn-success" id="c-prf-vehicles-img-subbtn">Submit</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>    
+                                                </div>                                                 
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Create Vehicle Modal -->                              
+                                </div>                                                               
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-4 col-12">
+                            <div class="card">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h4 class="fw-bolder text-primary mb-0">Invoice Summary</h4>
+                                    </div>
+                                    
+                                    <div class="invoice-summary">
+                                        <!-- <div class="row mb-2 border-bottom pb-2">
+                                            <div class="col-6">
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-muted">Value</span>
+                                                    <span class="fw-bold">INR 100000.00</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-muted">Discount</span>
+                                                    <span class="fw-bold">INR 0.00</span>
+                                                </div>
+                                            </div>
+                                        </div> -->
+                                        
+                                        <div class="row g-0">
+                                            <div class="col-12">
+                                                <span class="text-muted">Subtotal:</span>
+                                                <span class="fw-bold float-end" id="summary-subtotal">INR 0.00</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-0 mt-1">
+                                            <div class="col-12">
+                                                <span class="text-muted">Discount:</span>
+                                                <span class="fw-bold float-end" id="summary-discount">INR 0.00</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-0 mt-1">
+                                            <div class="col-12">
+                                                <span class="text-muted">Taxable Amount:</span>
+                                                <span class="fw-bold float-end" id="summary-taxable">INR 0.00</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-0 mt-1">
+                                            <div class="col-12">
+                                                <span class="text-muted">Tax:</span>
+                                                <span class="fw-bold float-end" id="summary-tax">INR 0.00</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row g-0 mt-3 pt-2 border-top">
+                                            <div class="col-12">
+                                                <span class="text-primary fw-bold">Invoice Total:</span>
+                                                <span class="fs-5 fw-bolder text-dark float-end" id="summary-total">INR 0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize feather icons
+        feather.replace();
+        
+        // Ensure feather icons are refreshed after DOM updates
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    feather.replace();
+                }
+            });
+        });
+        
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // -----------------------Prload Variables -----------------------
+        const prloadInvoicePhone = `{{jobcard_obj.customer.phone}}`
+        const prloadInvoiceCustomerId = parseInt(`{{ jobcard_obj.customer.id|default:"0" }}`);
+        const prloadInvoiceName = `{{jobcard_obj.customer.name}}`
+        const prloadInvoiceVehicleId = parseInt(`{{ jobcard_obj.vehicle.id|default:"0" }}`);
+
+        // ----------------------- Variables -----------------------
+        const customerSearchForm = document.getElementById('customerSearchForm');
+        const customerName = document.getElementById('customerName');
+        const customerId = document.getElementById('customerId');
+        const vehicleSelect = document.getElementById('vehicleSelect'); // Vehicle select element
+        const vehicleForm = document.getElementById('vehicleForm');
+        const customerForm = document.getElementById('customerForm');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const searchUrl = "{% url 's-prf-customers-vehicles' %}";
+        const createCustomerUrl = "{% url 'c-prf-customers' %}";
+        const addVehicleButton = document.querySelector('button[data-bs-toggle="modal"][data-bs-target="#c-prf-vehicles-modal"]'); // Button reference
+    
+        // ----------------------- Common Functions -----------------------
+    
+        /**
+         * Show toast notification
+         * @param {string} type - success, info, warning, error
+         * @param {string} message - Message to display
+         */
+        const showToast = (type, message) => {
+            toastr[type](message, type.toUpperCase(), {
+                closeButton: true,
+                tapToDismiss: false,
+                progressBar: true,
+                showMethod: 'fadeIn',
+                hideMethod: 'fadeOut',
+                timeOut: 3000
+            });
+        };
+    
+        /**
+         * Update vehicle form action URL based on selected customer ID
+         * @param {number} IDCustomer 
+         */
+        const updateVehicleFormAction = (IDCustomer) => {
+            const baseActionUrl = vehicleForm.dataset.url; // Example: /c-prf-vehicles/0/
+            const updatedUrl = baseActionUrl.replace(/\/\d+\/?$/, `/${IDCustomer}/`);
+            vehicleForm.setAttribute('action', updatedUrl);  // Set the action attribute
+        };
+    
+        /**
+         * Populate the vehicle select options dynamically
+         * @param {Array} vehicles 
+         */
+        const updateVehicleOptions = (vehicles) => {
+            vehicleSelect.innerHTML = ''; // Reset options
+            
+            if (vehicles && vehicles.length > 0) {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Vehicle';
+                vehicleSelect.appendChild(defaultOption);
+
+                vehicles.forEach(vehicle => {
+                    const option = document.createElement('option');
+                    option.value = vehicle.id;
+                    option.textContent = `${vehicle.license_plate_no} - ${vehicle.jobcardbrand} - ${vehicle.jobcardmodel}`;
+
+                    if (prloadInvoiceVehicleId === vehicle.id) {
+                        option.selected = true;
+                    }
+
+                    vehicleSelect.appendChild(option);
+                });
+
+                //vehicleSelect.disabled = false; // Enable select if vehicles are found
+            } else {
+                const noVehiclesOption = document.createElement('option');
+                noVehiclesOption.value = '';
+                noVehiclesOption.textContent = '';
+                vehicleSelect.appendChild(noVehiclesOption);
+                //vehicleSelect.disabled = true; // Disable select if no vehicles
+            }
+        };
+    
+        /**
+         * Toggle invoice date row visibility and required field
+         * @param {boolean} isCustomerFound
+         */
+         const toggleInvoiceDateRow = (isCustomerFound) => {        
+            const invoiceDateDiv = document.getElementById('invoicedatediv');
+            const ponumberDiv = document.getElementById('ponumberdiv');
+            const podateDiv = document.getElementById('podatediv');
+            const invoiceDateInput = document.getElementById('invoicedate');
+            if (isCustomerFound) {
+                // Set current date as default value
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const formattedDate = `${year}-${month}-${day}`;
+                invoiceDateInput.value = formattedDate;
+                
+                // Show the date fields
+                invoiceDateDiv.style.display = 'block';
+                ponumberDiv.style.display = 'block';
+                podateDiv.style.display = 'block';
+                invoiceDateInput.setAttribute('required', 'required');
+            } else {
+                invoiceDateDiv.style.display = 'none';
+                ponumberDiv.style.display = 'none';
+                podateDiv.style.display = 'none';
+                invoiceDateInput.removeAttribute('required');
+            }
+        };
+    
+        /**
+         * Enable/Disable Add Vehicle button based on customer existence
+         * @param {boolean} isCustomerFound
+         */
+        const toggleAddVehicleButton = (isCustomerFound) => {
+            if (addVehicleButton) {
+                if (isCustomerFound) {
+                    addVehicleButton.disabled = false; // Enable button
+                } else {
+                    addVehicleButton.disabled = true; // Disable button
+                }
+            }
+        };
+    
+        // ----------------------- API Handlers -----------------------
+    
+        /**
+         * Search customer by phone number
+         * @param {string} phone 
+         */
+        const handleCustomerSearch = async (phone) => {
+            try {
+                const response = await fetch(searchUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ phone })
+                });
+    
+                const data = await response.json();
+    
+                if (data.status) {
+                    // showToast('success', data.message);
+
+                    if (prloadInvoiceCustomerId === data.data.id) {
+                        customerName.value = prloadInvoiceName;
+                        customerId.value = prloadInvoiceCustomerId;
+                    } else {
+                        customerName.value = data.data.name;
+                        customerId.value = data.data.id;
+                    }
+
+                    updateVehicleFormAction(data.data.id);
+    
+                    // Fetch and update vehicle options for the customer
+                    updateVehicleOptions(data.data.vehicles);
+    
+                    // Show the invoice date row and make it required
+                    toggleInvoiceDateRow(true);
+                    // Enable the Add Vehicle button
+                    toggleAddVehicleButton(true);
+                } else {
+                    showToast('info', data.message);
+                    customerName.value = '';
+                    customerId.value = '';
+                    document.getElementById('modalPhone').value = phone;
+                    // Remove the action attribute from the vehicle form if customer is not found
+                    vehicleForm.removeAttribute('action');
+                    vehicleSelect.innerHTML = `<option value=""></option>`; // Reset vehicle select
+                    //vehicleSelect.disabled = true; // Disable if no customer found
+                    
+                    // Hide the invoice date row and remove the required attribute
+                    toggleInvoiceDateRow(false);
+                    // Disable the Add Vehicle button
+                    toggleAddVehicleButton(false);
+                }
+            } catch (error) {
+                showToast('error', `Something went wrong: ${error}`);
+            }
+        };
+
+        /**
+         * Create a new customer
+         * @param {FormData} formData 
+         */
+        const handleCustomerCreate = async (formData) => {
+            try {
+                const response = await fetch(createCustomerUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    showToast('success', data.message);
+
+                    // Close and reset modal
+                    const customerModal = bootstrap.Modal.getInstance(document.getElementById('c-prf-customers-modal'));
+                    customerModal.hide();
+                    customerForm.reset();
+                } else {
+                    showToast('error', data.message);
+                }
+            } catch (error) {
+                showToast('error', `Something went wrong: ${error}`);
+            }
+        };
+
+        /**
+         * Create a new vehicle
+         * @param {FormData} formData 
+         */
+        const handleVehicleCreate = async (formData) => {
+            try {
+                const response = await fetch(vehicleForm.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    showToast('success', data.message);
+
+                    // Close and reset modal
+                    const vehicleModal = bootstrap.Modal.getInstance(document.getElementById('c-prf-vehicles-modal'));
+                    vehicleModal.hide();
+                    vehicleForm.reset();
+                } else {
+                    showToast('error', data.message);
+                }
+            } catch (error) {
+                showToast('error', `Something went wrong: ${error}`);
+            }
+        };
+
+    
+        // ----------------------- Event Listeners -----------------------
+    
+        // Customer search on page load 
+        if (prloadInvoicePhone) {
+            const phone = document.getElementById('phone');
+            phone.value = prloadInvoicePhone;
+            handleCustomerSearch(prloadInvoicePhone);
+        } 
+        
+        // Customer search form submit
+        customerSearchForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value.trim();
+            if (phone) handleCustomerSearch(phone);
+        });
+    
+        // Add new customer form submit
+        customerForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(customerForm);
+            handleCustomerCreate(formData);
+        });
+    
+        // Add new vehicle form submit
+        vehicleForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(vehicleForm);
+            handleVehicleCreate(formData);
+        });
+
+        // ----------------------- Part Repeter -----------------------
+        
+        function initRepeater(listSelector, createSelector, deleteAttr) {
+            const list = $(`[data-repeater-list="${listSelector}"]`);
+
+            // Save a clean template and remove all initial rows
+            const template = list.find('[data-repeater-item]').first().clone(true);
+            template.find('input, select').val('').removeAttr('required');
+            // list.empty();
+
+            // Add new row
+            $(`[data-repeater-create="${createSelector}"]`).on('click', function () {
+                const newItem = template.clone(true);
+                newItem.find('input, select').each(function () {
+                    $(this).val('');
+                    $(this).attr('required', 'required');
+                });
+                list.append(newItem);
+                feather.replace(); // Refresh feather icons
+            });
+
+            // Delete row
+            $(document).on('click', `[data-repeater-delete="${deleteAttr}"]`, function () {
+                const item = $(this).closest('[data-repeater-item]');
+                item.find('input, select').val('').removeAttr('required'); // Clear values and remove required
+                item.remove();
+            });
+        }
+
+        // Remove the default repeater initialization to prevent duplicate row creation
+        // initRepeater('fromdb-service', 'fromdb-service', 'fromdb-service');
+        // initRepeater('fromuser-service', 'fromuser-service', 'fromuser-service');
+        // initRepeater('fromdb-part', 'fromdb-part', 'fromdb-part');
+        // initRepeater('fromuser-part', 'fromuser-part', 'fromuser-part');
+        
+        // Custom implementation for Add Service button
+        document.querySelector('button[data-repeater-create="fromdb-service"]').addEventListener('click', function(e) {
+            // Prevent any default behavior that might be causing duplicate rows
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Create a new row for service
+            const serviceList = document.querySelector('#fromdb-service-tbody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-repeater-item', '');
+            newRow.innerHTML = `
+                <td>
+                    <select class="form-select form-select-sm" name="fromdb_servicename" required>
+                        <option value="" hidden selected>Select service</option>
+                        {% for i in service_objs %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromdb_servicequantity" value="1" min="1" placeholder="Qty" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromdb_servicevalue" step="1" min="0" placeholder="Enter Service Value" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromdb_servicetax" step="0.01" min="0" placeholder="Enter Service Tax" required>
+                </td>
+                <td>                                                                
+                    <input type="number" class="form-control form-control-sm" name="fromdb_servicediscount" step="0.01" min="0" placeholder="Enter Service Discount" required>
+                </td>
+                <td>
+                    <button class="btn btn-icon rounded-circle btn-flat-danger waves-effect delete-service-btn" type="button">
+                        <i data-feather='trash-2'></i>
+                    </button>
+                </td>
+            `;
+            serviceList.appendChild(newRow);
+            // Initialize feather icons for the new row
+            feather.replace();
+            // Add event listener to delete button
+            newRow.querySelector('.delete-service-btn').addEventListener('click', function() {
+                newRow.remove();
+                updateInvoiceSummary();
+            });
+        });
+        
+        // Custom implementation for Add Addon-Service button
+        document.querySelector('button[data-repeater-create="fromuser-service"]').addEventListener('click', function(e) {
+            // Prevent any default behavior that might be causing duplicate rows
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Create a new row for addon service
+            const addonServiceList = document.querySelector('#fromuser-service-tbody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-repeater-item', '');
+            newRow.innerHTML = `
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="fromuser_servicename" placeholder="Enter Service Name" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromuser_servicequantity" value="1" min="1" placeholder="Qty" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromuser_servicevalue" step="1" min="0" placeholder="Enter Service Value" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromuser_servicetax" step="0.01" min="0" placeholder="Enter Service Tax" required>
+                </td>
+                <td>                                                                
+                    <input type="number" class="form-control form-control-sm" name="fromuser_servicediscount" step="0.01" min="0" placeholder="Enter Service Discount" required>
+                </td>
+                <td>
+                    <button class="btn btn-icon rounded-circle btn-flat-danger waves-effect delete-addon-service-btn" type="button">
+                        <i data-feather='trash-2'></i>
+                    </button>
+                </td>
+            `;
+            addonServiceList.appendChild(newRow);
+            // Initialize feather icons for the new row
+            feather.replace();
+            // Add event listener to delete button
+            newRow.querySelector('.delete-addon-service-btn').addEventListener('click', function() {
+                newRow.remove();
+                updateInvoiceSummary();
+            });
+        });
+        
+        // Function to calculate and update invoice summary
+        function updateInvoiceSummary() {
+            let subtotal = 0;
+            let taxAmount = 0;
+            let discountAmount = 0;
+            let taxableAmount = 0;
+            
+            // Calculate service amounts
+            // From database services
+            document.querySelectorAll('#fromdb-service-tbody tr').forEach(row => {
+                const valueInput = row.querySelector('input[name="fromdb_servicevalue"]');
+                const taxInput = row.querySelector('input[name="fromdb_servicetax"]');
+                const discountInput = row.querySelector('input[name="fromdb_servicediscount"]');
+                const quantityInput = row.querySelector('input[name="fromdb_servicequantity"]');
+                
+                if (valueInput && taxInput && discountInput && quantityInput) {
+                    const value = parseFloat(valueInput.value) || 0;
+                    const tax = parseFloat(taxInput.value) || 0;
+                    const discount = parseFloat(discountInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    
+                    // Calculate individual values with quantity
+                    const totalValue = value * quantity;
+                    const discountValue = totalValue * (discount / 100);
+                    const taxableValue = totalValue - discountValue;
+                    const taxValue = taxableValue * (tax / 100);
+                    
+                    // Add to totals
+                    subtotal += totalValue;
+                    discountAmount += discountValue;
+                    taxableAmount += taxableValue;
+                    taxAmount += taxValue;
+                }
+            });
+            
+            // From user services
+            document.querySelectorAll('#fromuser-service-tbody tr').forEach(row => {
+                const valueInput = row.querySelector('input[name="fromuser_servicevalue"]');
+                const taxInput = row.querySelector('input[name="fromuser_servicetax"]');
+                const discountInput = row.querySelector('input[name="fromuser_servicediscount"]');
+                const quantityInput = row.querySelector('input[name="fromuser_servicequantity"]');
+                
+                if (valueInput && taxInput && discountInput && quantityInput) {
+                    const value = parseFloat(valueInput.value) || 0;
+                    const tax = parseFloat(taxInput.value) || 0;
+                    const discount = parseFloat(discountInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    
+                    // Calculate individual values with quantity
+                    const totalValue = value * quantity;
+                    const discountValue = totalValue * (discount / 100);
+                    const taxableValue = totalValue - discountValue;
+                    const taxValue = taxableValue * (tax / 100);
+                    
+                    // Add to totals
+                    subtotal += totalValue;
+                    discountAmount += discountValue;
+                    taxableAmount += taxableValue;
+                    taxAmount += taxValue;
+                }
+            });
+            
+            // Calculate part amounts
+            // From database parts
+            document.querySelectorAll('#fromdb-part-tbody tr').forEach(row => {
+                const valueInput = row.querySelector('input[name="fromdb_partvalue"]');
+                const taxInput = row.querySelector('input[name="fromdb_parttax"]');
+                const discountInput = row.querySelector('input[name="fromdb_partdiscount"]');
+                const quantityInput = row.querySelector('input[name="fromdb_partquantity"]');
+                
+                if (valueInput && taxInput && discountInput && quantityInput) {
+                    const value = parseFloat(valueInput.value) || 0;
+                    const tax = parseFloat(taxInput.value) || 0;
+                    const discount = parseFloat(discountInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    
+                    // Calculate individual values with quantity
+                    const totalValue = value * quantity;
+                    const discountValue = totalValue * (discount / 100);
+                    const taxableValue = totalValue - discountValue;
+                    const taxValue = taxableValue * (tax / 100);
+                    
+                    // Add to totals
+                    subtotal += totalValue;
+                    discountAmount += discountValue;
+                    taxableAmount += taxableValue;
+                    taxAmount += taxValue;
+                }
+            });
+            
+            // From user parts
+            document.querySelectorAll('#fromuser-part-tbody tr').forEach(row => {
+                const valueInput = row.querySelector('input[name="fromuser_partvalue"]');
+                const taxInput = row.querySelector('input[name="fromuser_parttax"]');
+                const discountInput = row.querySelector('input[name="fromuser_partdiscount"]');
+                const quantityInput = row.querySelector('input[name="fromuser_partquantity"]');
+                
+                if (valueInput && taxInput && discountInput && quantityInput) {
+                    const value = parseFloat(valueInput.value) || 0;
+                    const tax = parseFloat(taxInput.value) || 0;
+                    const discount = parseFloat(discountInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+                    
+                    // Calculate individual values with quantity
+                    const totalValue = value * quantity;
+                    const discountValue = totalValue * (discount / 100);
+                    const taxableValue = totalValue - discountValue;
+                    const taxValue = taxableValue * (tax / 100);
+                    
+                    // Add to totals
+                    subtotal += totalValue;
+                    discountAmount += discountValue;
+                    taxableAmount += taxableValue;
+                    taxAmount += taxValue;
+                }
+            });
+            
+            // Calculate total
+            const totalAmount = taxableAmount + taxAmount;
+            
+            // Format currency values
+            const formatCurrency = (value) => {
+                return 'INR ' + value.toFixed(2);
+            };
+            
+            // Update summary display
+            document.getElementById('summary-subtotal').textContent = formatCurrency(subtotal);
+            document.getElementById('summary-discount').textContent = formatCurrency(discountAmount);
+            document.getElementById('summary-taxable').textContent = formatCurrency(taxableAmount);
+            document.getElementById('summary-tax').textContent = formatCurrency(taxAmount);
+            document.getElementById('summary-total').textContent = formatCurrency(totalAmount);
+            
+            // Update the hidden input field with the total amount (without currency symbol)
+            document.getElementById('invoice_total_amount').value = totalAmount.toFixed(2);
+            
+            // Show/hide invoice view icon based on total amount
+            const invoiceViewIcon = document.getElementById('invoice-view-icon');
+            if (invoiceViewIcon) {
+                if (totalAmount <= 0) {
+                    invoiceViewIcon.style.display = 'none';
+                } else {
+                    invoiceViewIcon.style.display = 'block';
+                }
+            }
+        }
+        
+        // Add event listeners to update summary when values change
+        document.addEventListener('input', function(e) {
+            if (e.target && (e.target.name.includes('value') || e.target.name.includes('tax') || e.target.name.includes('discount') || e.target.name.includes('quantity'))) {
+                updateInvoiceSummary();
+            }
+        });
+        
+        // Calculate summary on page load
+        updateInvoiceSummary();
+        
+        // Custom implementation for Add From Inventory button (parts)
+        document.querySelector('button[data-repeater-create="fromdb-part"]').addEventListener('click', function(e) {
+            // Prevent any default behavior that might be causing duplicate rows
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Create a new row for part from inventory
+            const partList = document.querySelector('#fromdb-part-tbody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-repeater-item', '');
+            newRow.innerHTML = `
+                <td>
+                    <select class="form-select form-select-sm select2-searchable" name="fromdb_partname" required>
+                        <option value="" hidden selected>Select part</option>
+                        {% for i in product_catalogues_objs %}
+                        <option value="{{i.id}}">{{i.name}}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromdb_partquantity" value="1" min="1" placeholder="Qty" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromdb_partvalue" step="1" min="0" placeholder="Enter Part Value" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromdb_parttax" step="0.01" min="0" placeholder="Enter Part Tax" required>
+                </td>
+                <td>                                                                
+                    <input type="number" class="form-control form-control-sm" name="fromdb_partdiscount" step="0.01" min="0" placeholder="Enter Part Discount" required>
+                </td>
+                <td>
+                    <button class="btn btn-icon rounded-circle btn-flat-danger waves-effect delete-part-btn" type="button">
+                        <i data-feather='trash-2'></i>
+                    </button>
+                </td>
+            `;
+            partList.appendChild(newRow);
+            // Initialize feather icons for the new row
+            feather.replace();
+            // Initialize Select2 for the new dropdown
+            initPartSelect2();
+            // Add event listener to delete button
+            newRow.querySelector('.delete-part-btn').addEventListener('click', function() {
+                newRow.remove();
+                updateInvoiceSummary();
+            });
+        });
+        
+        // Custom implementation for Add Part button (user parts)
+        document.querySelector('button[data-repeater-create="fromuser-part"]').addEventListener('click', function(e) {
+            // Prevent any default behavior that might be causing duplicate rows
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Create a new row for user part
+            const userPartList = document.querySelector('#fromuser-part-tbody');
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-repeater-item', '');
+            newRow.innerHTML = `
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="fromuser_partname" placeholder="Enter Part Name" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromuser_partquantity" value="1" min="1" placeholder="Qty" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromuser_partvalue" step="1" min="0" placeholder="Enter Part Value" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="fromuser_parttax" step="0.01" min="0" placeholder="Enter Part Tax" required>
+                </td>
+                <td>                                                                
+                    <input type="number" class="form-control form-control-sm" name="fromuser_partdiscount" step="0.01" min="0" placeholder="Enter Part Discount" required>
+                </td>
+                <td>
+                    <button class="btn btn-icon rounded-circle btn-flat-danger waves-effect delete-user-part-btn" type="button">
+                        <i data-feather='trash-2'></i>
+                    </button>
+                </td>
+            `;
+            userPartList.appendChild(newRow);
+            // Initialize feather icons for the new row
+            feather.replace();
+            // Add event listener to delete button
+            newRow.querySelector('.delete-user-part-btn').addEventListener('click', function() {
+                newRow.remove();
+                updateInvoiceSummary();
+            });
+        });
+        // All repeaters are now handled with custom implementations
+        
+        // Add event listeners for delete buttons using event delegation
+        document.addEventListener('click', function(event) {
+            // Handle service delete buttons
+            if (event.target.closest('[data-repeater-delete="fromdb-service"]')) {
+                const button = event.target.closest('[data-repeater-delete="fromdb-service"]');
+                const row = button.closest('[data-repeater-item]');
+                if (row) {
+                    row.remove();
+                    updateInvoiceSummary();
+                }
+            }
+            
+            // Handle addon service delete buttons
+            if (event.target.closest('[data-repeater-delete="fromuser-service"]')) {
+                const button = event.target.closest('[data-repeater-delete="fromuser-service"]');
+                const row = button.closest('[data-repeater-item]');
+                if (row) {
+                    row.remove();
+                    updateInvoiceSummary();
+                }
+            }
+            
+            // Handle part delete buttons
+            if (event.target.closest('.delete-part-btn')) {
+                const button = event.target.closest('.delete-part-btn');
+                const row = button.closest('[data-repeater-item]');
+                if (row) {
+                    row.remove();
+                    updateInvoiceSummary();
+                }
+            }
+            
+            // Handle user part delete buttons
+            if (event.target.closest('.delete-user-part-btn')) {
+                const button = event.target.closest('.delete-user-part-btn');
+                const row = button.closest('[data-repeater-item]');
+                if (row) {
+                    row.remove();
+                    updateInvoiceSummary();
+                }
+            }
+        });
+        
+
+        // ----------------------- Auto-populate Fields ----------------------- //
+        
+        document.addEventListener('change', function (e) {
+            // For inventory parts
+            if (e.target && e.target.matches('select[name="fromdb_partname"]')) {
+                const productId = e.target.value;
+                const row = e.target.closest('tr');
+
+                if (productId) {
+                    fetch(`/g-inv-current-stock/${productId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status) {
+                                // Set values
+                                const valueInput = row.querySelector('input[name="fromdb_partvalue"]');
+                                const taxInput = row.querySelector('input[name="fromdb_parttax"]');
+                                const discountInput = row.querySelector('input[name="fromdb_partdiscount"]');
+                                
+                                valueInput.value = data.data.price || 0;
+                                taxInput.value = data.data.gst || 0;
+                                discountInput.value = data.data.discount || 0;
+                                
+                                // Trigger change events to update calculations
+                                valueInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                taxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                discountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                
+                                // Update invoice summary
+                                updateInvoiceSummary();
+                            } else {
+                                // Set default values
+                                row.querySelector('input[name="fromdb_partvalue"]').value = 0;
+                                row.querySelector('input[name="fromdb_parttax"]').value = 0;
+                                row.querySelector('input[name="fromdb_partdiscount"]').value = 0;
+                                showToast('info', data.message || 'Unable to fetch product details');
+                            }
+                        })
+                        .catch(error => {
+                            showToast('error', `Something went wrong: ${error}`);
+                        });
+                }
+            }
+
+            // For inventory service
+            if (e.target && e.target.matches('select[name="fromdb_servicename"]')) {
+                const serviceId = e.target.value;
+                const row = e.target.closest('tr');
+
+                if (serviceId) {
+                    fetch(`/g-inv-service/${serviceId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status) {
+                                // Set values
+                                const valueInput = row.querySelector('input[name="fromdb_servicevalue"]');
+                                const taxInput = row.querySelector('input[name="fromdb_servicetax"]');
+                                const discountInput = row.querySelector('input[name="fromdb_servicediscount"]');
+                                
+                                valueInput.value = data.data.price || 0;
+                                taxInput.value = data.data.gst || 0;
+                                discountInput.value = data.data.discount || 0;
+                                
+                                // Trigger change events to update calculations
+                                valueInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                taxInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                discountInput.dispatchEvent(new Event('input', { bubbles: true }));
+                                
+                                // Update invoice summary
+                                updateInvoiceSummary();
+                            } else {
+                                // Set default values
+                                row.querySelector('input[name="fromdb_servicevalue"]').value = 0;
+                                row.querySelector('input[name="fromdb_servicetax"]').value = 0;
+                                row.querySelector('input[name="fromdb_servicediscount"]').value = 0;
+                                showToast('info', data.message || 'Unable to fetch service details');
+                            }
+                        })
+                        .catch(error => {
+                            showToast('error', `Something went wrong: ${error}`);
+                        });
+                }
+            }
+        });
+
+    });
+    
+    // Load Select2 JavaScript
+    $.getScript('https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', function() {
+        // Initialize Select2 for service dropdowns
+        $('select[name="fromdb_servicename"]').select2({
+            placeholder: 'Select service',
+            allowClear: true,
+            width: '100%',
+            dropdownCssClass: 'select2-dropdown-large',
+            templateResult: formatOption
+        });
+        
+        // Initialize Select2 for parts dropdowns
+        $('select[name="fromdb_partname"]').select2({
+            placeholder: 'Select part',
+            allowClear: true,
+            width: '100%',
+            dropdownCssClass: 'select2-dropdown-large',
+            templateResult: formatOption
+        });
+        
+        // Initialize Select2 for vehicle dropdown
+        $('#vehicleSelect').select2({
+            placeholder: 'Select vehicle',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        // Function to format the dropdown options
+        function formatOption(option) {
+            if (!option.id) return option.text;
+            return $('<span>' + option.text + '</span>');
+        }
+        
+        // Function to initialize Select2 for service dropdowns
+        function initServiceSelect2() {
+            $('select[name="fromdb_servicename"]:not(.select2-hidden-accessible)').select2({
+                placeholder: 'Select service',
+                allowClear: true,
+                width: '100%',
+                dropdownCssClass: 'select2-dropdown-large',
+                templateResult: formatOption
+            });
+            
+            $('select[name="fromuser_servicename"]:not(.select2-hidden-accessible)').select2({
+                placeholder: 'Enter service name',
+                allowClear: true,
+                width: '100%',
+                tags: true,
+                createTag: function(params) {
+                    return {
+                        id: params.term,
+                        text: params.term,
+                        newOption: true
+                    };
+                },
+                dropdownCssClass: 'select2-dropdown-large',
+                templateResult: formatOption
+            }).on('select2:open', function() {
+                // Ensure the dropdown is visible
+                $('.select2-results__options').css('max-height', '300px');
+                $('.select2-dropdown').css('z-index', '9999');
+            });
+        }
+        
+        // Function to initialize Select2 for parts dropdowns
+        function initPartSelect2() {
+            $('select[name="fromdb_partname"]:not(.select2-hidden-accessible)').select2({
+                placeholder: 'Select part',
+                allowClear: true,
+                width: '100%',
+                dropdownCssClass: 'select2-dropdown-large',
+                templateResult: formatOption
+            }).on('select2:open', function() {
+                // Ensure the dropdown is visible
+                $('.select2-results__options').css('max-height', '300px');
+                $('.select2-dropdown').css('z-index', '9999');
+            });
+            
+            $('select[name="fromuser_partname"]:not(.select2-hidden-accessible)').select2({
+                placeholder: 'Enter part name',
+                allowClear: true,
+                width: '100%',
+                tags: true,
+                createTag: function(params) {
+                    return {
+                        id: params.term,
+                        text: params.term,
+                        newOption: true
+                    };
+                },
+                dropdownCssClass: 'select2-dropdown-large',
+                templateResult: formatOption
+            }).on('select2:open', function() {
+                // Ensure the dropdown is visible
+                $('.select2-results__options').css('max-height', '300px');
+                $('.select2-dropdown').css('z-index', '9999');
+            });
+        }
+        
+        // Initialize all dropdowns on page load
+        initServiceSelect2();
+        initPartSelect2();
+        
+        // Add event listeners for new rows
+        $(document).on('click', '[data-repeater-create="fromdb-service"], [data-repeater-create="fromuser-service"]', function() {
+            setTimeout(initServiceSelect2, 100);
+        });
+        
+        $(document).on('click', '[data-repeater-create="fromdb-part"], [data-repeater-create="fromuser-part"]', function() {
+            setTimeout(initPartSelect2, 100);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "index.html" %}
+
+{% block title %}u-accounts-servicetype{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-servicetype' %}">List Service Type</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Update Service Type
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="post" action="{% url 'u-accounts-servicetype' servicetype_obj.id %}">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                            <label for="name">Name<span class="text-danger">*</span></label>
+                                            <input type="text" id="name" name="name" class="form-control" value="{{servicetype_obj.name}}" placeholder="Name" required>
+                                        </div>
+                                        <div class="col-12 mb-1">
+                                            <label for="status">Status<span class="text-danger">*</span></label>
+                                            <select id="status" name="status" class="form-select" required>
+                                                <option value="">Select Status</option>
+                                                <option value="active" {% if servicetype_obj.status == 'active' %}selected{% endif %}>Active</option>
+                                                <option value="inactive" {% if servicetype_obj.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                            <button type="reset" class="btn btn-outline-secondary">Reset</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}{% endblock %}

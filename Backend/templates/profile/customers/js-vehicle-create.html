@@ -1,0 +1,63 @@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize feather icons
+        feather.replace();  
+
+        //create vehicle for this customer
+        const vehicleForm = document.getElementById('vehicleForm');
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        /**
+         * Create a new vehicle
+         * @param {FormData} formData 
+         */
+        const handleVehicleCreate = async (formData) => {
+            try {
+                const response = await fetch(vehicleForm.action, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status) {
+                    // Close and reset modal
+                    const vehicleModal = bootstrap.Modal.getInstance(document.getElementById('c-prf-vehicles-modal'));
+                    vehicleModal.hide();
+                    vehicleForm.reset();
+                    toastr.success(data.message, 'Success!', {
+                        timeOut: 2000,
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: 'toast-top-right',
+                        onHidden: function() {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    // Check if it's a duplicate registration number error
+                    if (data.message && data.message.includes('already exists')) {
+                        toastr.warning(data.message, 'Duplicate Vehicle', {
+                            timeOut: 5000,
+                            closeButton: true,
+                            progressBar: true
+                        });
+                    } else {
+                        toastr.error(data.message || 'Failed to add vehicle');
+                    }
+                }
+            } catch (error) {
+                toastr.error(`Something went wrong: ${error}`);
+            }
+        };
+
+        // Add new vehicle form submit
+        vehicleForm?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(vehicleForm);
+            handleVehicleCreate(formData);
+        });
+
+    });
+</script>

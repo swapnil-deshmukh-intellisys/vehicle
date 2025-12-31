@@ -1,0 +1,1311 @@
+{% extends "index.html" %}
+{% load static %}
+{% load humanize %}
+{% block title %}Dashboard{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" type="text/css" href="{% static 'app-assets/fonts/inter/inter.css' %}">{# Local Inter font #}
+<style>
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        min-height: 100vh;
+    }
+    .assets-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .asset-card {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .asset-card.licenses { 
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+        border-top: 3px solid #ff9f43; 
+    }
+    .asset-card.accessories { 
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+        border-top: 3px solid #ea5455; 
+    }
+    .asset-card.consumables { 
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+        border-top: 3px solid #00cfe8; 
+    }
+    .asset-card.users { 
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        height: 100px;
+        position: relative;
+        overflow: hidden;
+        border-top: 3px solid #28c76f; 
+    }
+    .asset-card.accessories { border-top-color: #ea5455; }
+    .asset-card.consumables { border-top-color: #00cfe8; }
+    .asset-card.users { border-top-color: #28c76f; }
+
+    .asset-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px -3px rgba(0, 0, 0, 0.06);
+    }
+
+    .asset-card .card-body {
+        padding: 0;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .asset-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+        font-size: 1.25rem;
+        color: white;
+        background: #7367f0;
+        box-shadow: 0 3px 10px rgba(115, 103, 240, 0.2);
+        transition: all 0.2s ease;
+    }
+
+    .asset-card:hover .asset-icon {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(115, 103, 240, 0.3);
+    }
+    .asset-icon.licenses { 
+        background: #ff9f43;
+        box-shadow: 0 4px 12px rgba(255, 159, 67, 0.2);
+    }
+    .asset-icon.accessories { 
+        background: #ea5455;
+        box-shadow: 0 4px 12px rgba(234, 84, 85, 0.2);
+    }
+    .asset-icon.consumables { 
+        background: #00cfe8;
+        box-shadow: 0 4px 12px rgba(0, 207, 232, 0.2);
+    }
+    .asset-icon.users { 
+        background: #28c76f;
+        box-shadow: 0 4px 12px rgba(40, 199, 111, 0.2);
+    }
+
+    .asset-number {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2c2c2c;
+        margin: 0;
+        line-height: 1.2;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .asset-title {
+        font-size: 0.65rem;
+        font-weight: 500;
+        color: #6e6b7b;
+        margin: 0.25rem 0 0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        opacity: 0.9;
+    }
+
+    .asset-subtitle {
+        font-size: 0.6rem;
+        color: #b4b7bd;
+        margin: 0.25rem 0 0;
+        line-height: 1.3;
+        flex-grow: 1;
+    }
+
+    .asset-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto;
+        padding-top: 0.5rem;
+    }
+
+    .asset-link {
+        color: #7367f0;
+        font-weight: 500;
+        font-size: 0.6rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.15s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .asset-link i {
+        margin-left: 0.25rem;
+        transition: transform 0.2s ease;
+        font-size: 0.7rem;
+    }
+
+    .asset-link:hover {
+        color: #5d52cc;
+    }
+
+    .asset-link:hover i {
+        transform: translateX(2px);
+    }
+
+    .asset-badge {
+        background: rgba(115, 103, 240, 0.08);
+        color: #7367f0;
+        padding: 0.15rem 0.4rem;
+        border-radius: 12px;
+        font-size: 0.55rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        border: 1px solid rgba(115, 103, 240, 0.15);
+    }
+
+    .asset-card.licenses .asset-badge { 
+        background: rgba(255, 159, 67, 0.08); 
+        color: #ff9f43; 
+        border-color: rgba(255, 159, 67, 0.15);
+    }
+    .asset-card.accessories .asset-badge { 
+        background: rgba(234, 84, 85, 0.08); 
+        color: #ea5455; 
+        border-color: rgba(234, 84, 85, 0.15);
+    }
+    .asset-card.consumables .asset-badge { 
+        background: rgba(0, 207, 232, 0.08); 
+        color: #00cfe8; 
+        border-color: rgba(0, 207, 232, 0.15);
+    }
+    .asset-card.users .asset-badge { 
+        background: rgba(40, 199, 111, 0.08); 
+        color: #28c76f; 
+        border-color: rgba(40, 199, 111, 0.15);
+    }
+    .feature-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .feature-card .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f3f4f6;
+        background-color: white;
+    }
+    .feature-card .card-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .feature-card .card-body {
+        padding: 20px 24px;
+    }
+    .chart-container {
+        height: 200px;
+        width: 100%;
+    }
+
+    .stat-card {
+        background-color: white;
+        border-radius: 8px;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e5e7eb;
+        height: 100%;
+    }
+    
+    .stat-title {
+        font-size: 0.7rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .label-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    .label-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+    }
+    .label-item i {
+        margin-right: 0.5rem;
+    }
+</style>
+
+<style>
+.summary-card {
+    padding: 0.75rem;
+    border-radius: 8px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.gradient-purple {
+    background: linear-gradient(135deg, #8a5cf6c9, #8b5cf6);
+}
+
+.gradient-blue {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.gradient-green {
+    background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.gradient-orange {
+    background: linear-gradient(135deg, #f97316, #fb923c);
+}
+
+.summary-icon {
+    width: 18px;
+    height: 18px;
+    stroke: #ffffffcc;
+}
+
+.summary-card h6 {
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+    color: #ffffffcc;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.summary-card h4 {
+    font-size: 1.4rem;
+    margin-bottom: 0.15rem;
+    font-weight: 600;
+}
+
+.summary-card small {
+    font-size: 0.6rem;
+    color: #ffffff99;
+}
+
+
+</style>
+
+
+    <style>
+        .veh-chart-container {
+            width: 100%;
+            height: 280px;
+            margin: 1rem 0;
+        }
+        .veh-chart-container canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+
+    <style>
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chart-title-flex {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .filter-dropdown {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background-color: #fff;
+        }
+
+        .asset-link:hover {
+            color: #5d52cc;
+        }
+
+        .asset-link:hover i {
+            transform: translateX(2px);
+        }
+
+        .asset-badge {
+            background: rgba(115, 103, 240, 0.08);
+            color: #7367f0;
+            padding: 0.15rem 0.4rem;
+            border-radius: 12px;
+            font-size: 0.55rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            border: 1px solid rgba(115, 103, 240, 0.15);
+        }
+
+        .asset-card.licenses .asset-badge { 
+            background: rgba(255, 159, 67, 0.08); 
+            color: #ff9f43; 
+            border-color: rgba(255, 159, 67, 0.15);
+        }
+        .asset-card.accessories .asset-badge { 
+            background: rgba(234, 84, 85, 0.08); 
+            color: #ea5455; 
+            border-color: rgba(234, 84, 85, 0.15);
+        }
+        .asset-card.consumables .asset-badge { 
+            background: rgba(0, 207, 232, 0.08); 
+            color: #00cfe8; 
+            border-color: rgba(0, 207, 232, 0.15);
+        }
+        .asset-card.users .asset-badge { 
+            background: rgba(40, 199, 111, 0.08); 
+            color: #28c76f; 
+            border-color: rgba(40, 199, 111, 0.15);
+        }
+        .feature-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        .feature-card .card-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            background-color: white;
+        }
+        .feature-card .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0;
+        }
+        .feature-card .card-body {
+            padding: 0.75rem 1rem;
+        }
+        .chart-container {
+            height: 200px;
+            width: 100%;
+        }
+
+        .veh_exp_chart-card {
+            width: 100%;
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            margin: 1rem 0;
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .veh_exp_chart-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+    </style>
+
+
+
+{% endblock %}
+
+{% block content %}
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h4 class="content-header-title">Dashboard</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            
+            
+            <section id="modal-examples">
+                <div class="row g-1 mb-4 flex-nowrap overflow-auto">
+                    <div class="col-md-3 d-flex">
+                        <div class="summary-card w-100 gradient-purple">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6>Open Jobcard</h6>
+                                <i data-feather="file-text" class="summary-icon"></i>
+                            </div>
+                            <h4 class="text-white">{{ open_jobcard_count }}</h4>
+                            <small class="text-white"><i class="fas fa-external-link-alt"></i> <a href="{% url 'r-txn-job-sheets' %}?filter=open" class="text-white">Click to View</a></small>
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex">
+                        <div class="summary-card w-100 gradient-blue">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6>Revenue</h6>
+                                <i data-feather="bar-chart-2" class="summary-icon"></i>
+                            </div>
+                            <h4 class="text-white">₹ {{ revenue|intcomma }}</h4>
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex">
+                        <div class="summary-card w-100 gradient-green">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6>Purchase</h6>
+                                <i data-feather="shopping-cart" class="summary-icon"></i>
+                            </div>
+                            <h4 class="text-white">₹ {{ purchase|intcomma }}</h4>
+                            <!-- <small class="text-white">100% <i class="fas fa-arrow-up"></i> *Last 30 Days</small> -->
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex">
+                        <div class="summary-card w-100 gradient-orange">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6>Pending Balance</h6>
+                                <i data-feather="credit-card" class="summary-icon"></i>
+                            </div>
+                            <h4 class="text-white">₹ {{ pending_balance|intcomma }}</h4>
+                            <!-- <small class="text-white">0% <i class="fas fa-arrow-down"></i> *Till Date</small> -->
+                            
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
+                        <h4 class="mb-2">Revenue</h4>
+                        <div>
+                            <select class="form-select form-select-sm" id="filterSelect">
+                                <option value="weekly" selected>Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="sixMonths">6 Months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="rev-chart-container" style="height:300px;">
+                        <canvas id="mainRevenueChart"></canvas>
+                    </div>
+                </div>
+
+                 <div class="row match-height" >
+                    <div class="col-12 col-md-6 mb-2" >
+                        <div class="veh-chart-container" style="height:300px;position: relative;">
+                            <div class="chart-title">Vehicle (Make Wise)</div>
+                            <canvas id="twoWheelerPieChart"></canvas>
+                        </div>
+                    </div>
+                    {% if 'Inventory' in useruiacl %}
+                    <div class="col-12 col-md-6 mb-2">
+                        <div class="card h-100">
+                            <div class="card-header pb-1">
+                                <h4 class="card-title mb-0">Inventory Stock Summary</h4>
+                            </div>
+                            <div class="card-body">
+                               <div class="label-list mb-2">
+                                    <div class="label-item text-warning">
+                                        <i class="fas fa-box"></i> Current Stock:
+                                        <span class="fw-bold">{{ product_catalogues_count|default:0 }}</span>
+                                    </div>
+                                    <div class="label-item text-danger">
+                                        <i class="fas fa-truck"></i> Stock Inward:
+                                        <span class="fw-bold">{{ stock_inwards_count|default:0 }}</span>
+                                    </div>
+                                    <div class="label-item text-indigo">
+                                        <i class="fas fa-truck"></i> Stock Outward:
+                                        <span class="fw-bold">{{ stock_outwards_count|default:0 }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="chart-container">
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div class="col-12 col-md-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header pb-1">
+                                <h4 class="card-title mb-0">Inventory Metadata Distribution</h4>
+                            </div>
+                            <div class="card-body">
+                               
+                                <div class="label-list mb-2">
+                                    <div class="label-item text-info">
+                                        <i class="fas fa-user-tie"></i> Suppliers:
+                                        <span class="fw-bold">{{ suppliers_count|default:0 }}</span>
+                                    </div>
+                                    <div class="label-item text-success">
+                                        <i class="fas fa-layer-group"></i> Categories:
+                                        <span class="fw-bold">{{ product_categories_count|default:0 }}</span>
+                                    </div>
+                                    <div class="label-item text-secondary">
+                                        <i class="fas fa-tags"></i> Brands:
+                                        <span class="fw-bold">{{ product_brands_count|default:0 }}</span>
+                                    </div>
+                                    <div class="label-item text-purple">
+                                        <i class="fas fa-cubes"></i> Models:
+                                        <span class="fw-bold">{{ product_model_count|default:0 }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="chart-container">
+                                    <canvas id="donutChart"></canvas>
+                                </div> 
+                            </div>
+                        </div>
+                    </div> -->
+                    {% endif %}
+                    <!-- <div class="col-12 col-md-6 mb-2">
+                        <div class="veh_exp_chart-card"  style="height:300px;">
+                            <div class="card-header-flex">
+                                <h5 class="chart-title-flex">Income vs Expense</h5>
+                                <select id="timeFilter" class="filter-dropdown">
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="year">This Year</option>
+                            </select>
+                            <div class="chart-wrapper">
+                                <canvas id="incomeExpenseDonut"></canvas>
+                            </div>
+                        </div>
+                    </div> -->
+                    
+                 </div>
+                
+                <div class="row match-height mt-1">
+                    <!-- {% if 'Invoices' in useruiacl.Transactions %}
+                    <div class="col-12 col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header pb-1">
+                                <h4 class="card-title mb-0">Invoice Summary</h4>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="chart-container" style="height: 150px;">
+                                    <canvas id="invoiceChart"></canvas>
+                                </div>
+                                <div class="row g-1 m-0">
+                                    <div class="col-6 p-1">
+                                        <div class="border rounded p-1 text-center">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-success"><i class="fas fa-money-bill-wave"></i></span>
+                                                <h6 class="my-0 fw-bold">{{ invoice_counts.created|default:0 }}</h6>
+                                                <small class="text-muted">Created</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 p-1">
+                                        <div class="border rounded p-1 text-center">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-warning"><i class="fas fa-hourglass-half"></i></span>
+                                                <h6 class="my-0 fw-bold">{{ invoice_counts.dispatched|default:0 }}</h6>
+                                                <small class="text-muted">Dispatched</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 p-1">
+                                        <div class="border rounded p-1 text-center">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-danger"><i class="fas fa-file-invoice-dollar"></i></span>
+                                                <h6 class="my-0 fw-bold">{{ invoice_counts.payment_pending|default:0 }}</h6>
+                                                <small class="text-muted">Pending</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 p-1">
+                                        <div class="border rounded p-1 text-center">
+                                            <div class="d-flex flex-column">
+                                                <span class="text-info"><i class="fas fa-check-circle"></i></span>
+                                                <h6 class="my-0 fw-bold">{{ invoice_counts.complete|default:0 }}</h6>
+                                                <small class="text-muted">Complete</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if 'Estimates' in useruiacl.Transactions %}
+                    <div class="col-12 col-md-4 mb-4">
+                        <div class="card border">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-light-primary p-2 rounded me-3">
+                                        <i class="fas fa-file-invoice text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">Estimates</h6>
+                                        <h4 class="mb-0 fw-bold">{{ estimate_count|default:0 }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %} -->
+                    <!-- Bookings Card -->
+                    <div class="col-12 col-md-4 mb-4">
+                        <div class="card border h-100">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center gap-2">
+                                <h6 class="mb-0 d-flex align-items-center">
+                                    <i class="fas fa-calendar-check me-2 text-primary"></i>Bookings
+                                </h6>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-primary">{{ total_bookings|default:0 }} Total</span>
+                                </div>
+                            </div>
+                            <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                                <ul class="list-group list-group-flush">
+                                    {% for status in booking_statuses %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span class="text-truncate" title="{{ status.name }}">
+                                            {% if status.code == 'booking_confirmed' %}
+                                                <i class="fas fa-calendar-check text-info me-2"></i>
+                                            {% elif status.code == 'pickup_assigned' or status.code == 'bike_picked_up' or status.code == 'bike_reached_garage' %}
+                                                <i class="fas fa-motorcycle text-primary me-2"></i>
+                                            {% elif 'mechanic' in status.code or 'job_card' in status.code %}
+                                                <i class="fas fa-user-cog text-warning me-2"></i>
+                                            {% elif 'estimate' in status.code %}
+                                                <i class="fas fa-file-invoice-dollar text-info me-2"></i>
+                                            {% elif 'work' in status.code or 'rework' in status.code or 'progress' in status.code %}
+                                                <i class="fas fa-tools text-warning me-2"></i>
+                                            {% elif 'completed' in status.code or 'delivered' in status.code %}
+                                                <i class="fas fa-check-circle text-success me-2"></i>
+                                            {% elif 'payment' in status.code %}
+                                                <i class="fas fa-money-bill-wave text-{% if 'pending' in status.code %}danger{% else %}success{% endif %} me-2"></i>
+                                            {% elif 'feedback' in status.code %}
+                                                <i class="fas fa-comment-alt text-info me-2"></i>
+                                            {% elif 'scheduled' in status.code %}
+                                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                            {% else %}
+                                                <i class="fas fa-circle text-secondary me-2"></i>
+                                            {% endif %}
+                                            {{ status.name }}
+                                        </span>
+                                        <span class="badge 
+                                            {% if status.count == 0 %}
+                                                bg-danger
+                                            {% else %}
+                                                bg-success
+                                            {% endif %}
+                                            rounded-pill">
+                                            {{ status.count|default:0 }}
+                                        </span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div> 
+                </div>
+                
+            </section>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Initialize Feather Icons
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof feather !== 'undefined') {
+            feather.replace({
+                width: 14,
+                height: 14
+            });
+        }
+    });
+const chartDataSets = {
+    weekly: {
+        labels: {{ chart_data.weekly.labels|safe }},
+        jobs: {{ chart_data.weekly.jobs|safe }},
+        revenue: {{ chart_data.weekly.revenue|safe }}
+    },
+    monthly: {
+        labels: {{ chart_data.monthly.labels|safe }},
+        jobs: {{ chart_data.monthly.jobs|safe }},
+        revenue: {{ chart_data.monthly.revenue|safe }}
+    },
+    sixMonths: {
+        labels: {{ chart_data.sixMonths.labels|safe }},
+        jobs: {{ chart_data.sixMonths.jobs|safe }},
+        revenue: {{ chart_data.sixMonths.revenue|safe }}
+    }
+};
+
+const mainChartCtx = document.getElementById('mainRevenueChart').getContext('2d');
+const mainRevenueChart = new Chart(mainChartCtx, {
+    type: 'bar',
+    data: {
+        labels: chartDataSets.weekly.labels,
+        datasets: [
+            { label: 'Jobs', data: chartDataSets.weekly.jobs, backgroundColor: '#6b7280', borderRadius: 6, barThickness: 20, yAxisID: 'y' },
+            { label: 'Revenue', type: 'line', data: chartDataSets.weekly.revenue, borderColor: '#f97316', backgroundColor: 'rgba(249, 115, 22, 0.2)', borderWidth: 2, tension: 0.4, fill: false, yAxisID: 'y1' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: {
+            y: { type: 'linear', position: 'left', beginAtZero: true, title: { display: true, text: 'Jobs' } },
+            y1: { type: 'linear', position: 'right', beginAtZero: true, title: { display: true, text: 'Revenue (₹)' }, grid: { drawOnChartArea: false } }
+        }
+    }
+});
+
+// Dropdown filter change event
+document.getElementById('filterSelect').addEventListener('change', function() {
+    const filter = this.value;
+    const dataSet = chartDataSets[filter];
+    mainRevenueChart.data.labels = dataSet.labels;
+    mainRevenueChart.data.datasets[0].data = dataSet.jobs;
+    mainRevenueChart.data.datasets[1].data = dataSet.revenue;
+    mainRevenueChart.update();
+});
+</script>
+
+
+
+
+
+
+
+ <!-- <script>
+  // Vehicle Pie Chart
+  const ctxTwoWheeler = document.getElementById('twoWheelerPieChart').getContext('2d');
+  const twoWheelerPieChart = new Chart(ctxTwoWheeler, {
+      type: 'pie',
+      data: {
+          labels: ['Honda', 'Hero', 'TVS', 'Suzuki', 'Yamaha', 'Bajaj', 'Royal Enfield', 'KTM', 'BMW Motorrad', 'Ducati'],
+          datasets: [{
+              data: [30.5, 25.0, 15.0, 10.0, 8.0, 5.0, 4.0, 1.5, 0.5, 0.5],
+              backgroundColor: ['#7BAAF7', '#FF6666', '#72A6A2', '#FFD580', '#A1CAF1', '#F7B36E', '#B0F1A5', '#F08080', '#1E90FF', '#A9A9A9'],
+              borderColor: '#fff',
+              borderWidth: 2
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+              legend: {
+                  position: 'chartArea', // Place legend inside chart
+                  labels: {
+                      boxWidth: 12,
+                      font: { size: 10 },
+                      color: '#333'
+                  }
+              },
+              tooltip: {
+                  callbacks: {
+                      label: function (context) {
+                          return `${context.label}: ${context.parsed.toFixed(1)}%`;
+                      }
+                  }
+              }
+          }
+      }
+  });
+
+  // Income vs Expense Doughnut Chart
+  const ctxDonut = document.getElementById('incomeExpenseDonut').getContext('2d');
+  const incomeExpenseData = { today: [500, 300], week: [3500, 2500], month: [15000, 12000], year: [180000, 150000] };
+
+  const donutChart = new Chart(ctxDonut, {
+      type: 'doughnut',
+      data: {
+          labels: ['Income', 'Expense'],
+          datasets: [{
+              data: incomeExpenseData['today'],
+              backgroundColor: ['#4CAF50', '#FF5252'],
+              borderColor: '#fff',
+              borderWidth: 2
+          }]
+      },
+      options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: {
+              legend: {
+                  position: 'chartArea', // legend inside the chart
+                  labels: {
+                      boxWidth: 12,
+                      font: { size: 10 },
+                      color: '#333'
+                  }
+              },
+              tooltip: {
+                  callbacks: {
+                      label: function (context) {
+                          return `${context.label}: ₹ ${context.parsed.toLocaleString()}`;
+                      }
+                  }
+              }
+          }
+      }
+  });
+
+  // Dropdown Filter Change
+  document.getElementById('timeFilter').addEventListener('change', function() {
+      const selected = this.value;
+      donutChart.data.datasets[0].data = incomeExpenseData[selected];
+      donutChart.update();
+  });
+</script>  -->
+
+
+ <script>
+    
+    // Vehicle Pie Chart
+    const ctxTwoWheeler = document.getElementById('twoWheelerPieChart').getContext('2d');
+    const vehicleLabels = {{ vehicle_chart_data.labels|safe }};
+    const vehicleData = {{ vehicle_chart_data.data|safe }};
+    
+    const twoWheelerPieChart = new Chart(ctxTwoWheeler, {
+        type: 'pie',
+        data: {
+            labels: vehicleLabels,
+            datasets: [{
+                data: vehicleData,
+                backgroundColor: [
+                    '#7BAAF7', '#FF6666', '#72A6A2', '#FFD580', '#A1CAF1', 
+                    '#F7B36E', '#B0F1A5', '#F08080', '#1E90FF', '#A9A9A9',
+                    '#FF9999', '#66B2FF', '#99FF99', '#FFCC99', '#FF99CC'
+                ],
+                borderColor: '#fff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 15,
+                        font: { size: 11 },
+                        padding: 5
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: ${context.parsed} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+
+    // Income vs Expense Doughnut Chart
+    // const ctxDonut = document.getElementById('incomeExpenseDonut').getContext('2d');
+    // const incomeExpenseData = {
+    //     today: [500, 300],
+    //     week: [3500, 2500],
+    //     month: [15000, 12000],
+    //     year: [180000, 150000]
+    // };
+
+    // const donutChart = new Chart(ctxDonut, {
+    //     type: 'doughnut',
+    //     data: {
+    //         labels: ['Income', 'Expense'],
+    //         datasets: [{
+    //             data: incomeExpenseData['today'],
+    //             backgroundColor: ['#4CAF50', '#FF5252'],
+    //             borderColor: '#fff',
+    //             borderWidth: 2
+    //         }]
+    //     },
+    //     options: {
+    //         responsive: true,
+    //         maintainAspectRatio: false, // Important for reduced height
+    //         cutout: '60%',
+    //         plugins: {
+    //             legend: {
+    //                 position: 'bottom',
+    //                 labels: {
+    //                     boxWidth: 15,
+    //                     font: { size: 11 },
+    //                     padding: 5
+    //                 }
+    //             },
+    //             tooltip: {
+    //                 callbacks: {
+    //                     label: function (context) {
+    //                         return `${context.label}: ₹ ${context.parsed.toLocaleString()}`;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // });
+
+    // Dropdown Filter Change
+    // document.getElementById('timeFilter').addEventListener('change', function() {
+    //     const selected = this.value;
+    //     donutChart.data.datasets[0].data = incomeExpenseData[selected];
+    //     donutChart.update();
+    // });
+</script> 
+
+
+    <!-- <script>
+        const ctxTwoWheeler = document.getElementById('twoWheelerPieChart').getContext('2d');
+
+        const twoWheelerPieChart = new Chart(ctxTwoWheeler, {
+            type: 'pie',
+            data: {
+                labels: [
+                    'Honda', 'Hero', 'TVS', 'Suzuki', 'Yamaha', 'Bajaj', 
+                    'Royal Enfield', 'KTM', 'BMW Motorrad', 'Ducati'
+                ],
+                datasets: [{
+                    data: [30.5, 25.0, 15.0, 10.0, 8.0, 5.0, 4.0, 1.5, 0.5, 0.5],
+                    backgroundColor: [
+                        '#7BAAF7', '#FF6666', '#72A6A2', '#FFD580', '#A1CAF1', 
+                        '#F7B36E', '#B0F1A5', '#F08080', '#1E90FF', '#A9A9A9'
+                    ],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.label}: ${context.parsed.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+<script>
+        const ctxDonut = document.getElementById('incomeExpenseDonut').getContext('2d');
+
+        const incomeExpenseData = {
+            today: [500, 300],
+            week: [3500, 2500],
+            month: [15000, 12000],
+            year: [180000, 150000]
+        };
+
+        const donutChart = new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Income', 'Expense'],
+                datasets: [{
+                    data: incomeExpenseData['today'], // Default "Today" data
+                    backgroundColor: ['#4CAF50', '#FF5252'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '60%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 20,
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.label}: ₹ ${context.parsed.toLocaleString()}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Dropdown Filter Change
+        document.getElementById('timeFilter').addEventListener('change', function() {
+            const selected = this.value;
+            donutChart.data.datasets[0].data = incomeExpenseData[selected];
+            donutChart.update();
+        });
+    </script> -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Bar Chart
+    const barChartEl = document.getElementById('barChart');
+    if (barChartEl) {
+        const inventoryLabels = {{ inventory_chart_data.labels|safe }};
+        const inventoryData = {{ inventory_chart_data.data|safe }};
+        
+        new Chart(barChartEl, {
+            type: 'bar',
+            data: {
+                labels: inventoryLabels,
+                datasets: [{
+                    label: '',
+                    data: inventoryData,
+                    backgroundColor: ['#f59e0b', '#ef4444', '#6366f1'],
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                legend: { 
+                    display: false,
+                }
+            }
+        });
+    }
+
+    // Donut Chart
+    const donutChartEl = document.getElementById('donutChart');
+    if (donutChartEl) {
+        new Chart(donutChartEl, {
+            type: 'doughnut',
+            data: {
+                labels: ['Suppliers', 'Categories', 'Brands', 'Models'],
+                datasets: [{
+                    label: 'Count',
+                    data: [
+                        {{ suppliers_count|default:0 }},
+                        {{ product_categories_count|default:0 }},
+                        {{ product_brands_count|default:0 }},
+                        {{ product_model_count|default:0 }}
+                    ],
+                    backgroundColor: ['#0ea5e9', '#10b981', '#9ca3af', '#8b5cf6'],
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Invoice Summary Chart - Horizontal Bar
+    const invoiceCtx = document.getElementById('invoiceChart');
+    if (invoiceCtx) {
+        const invoiceData = [
+            {{ invoice_counts.created|default:0 }}, 
+            {{ invoice_counts.dispatched|default:0 }}, 
+            {{ invoice_counts.payment_pending|default:0 }}, 
+            {{ invoice_counts.complete|default:0 }}
+        ];
+        const invoiceLabels = ['Created', 'Dispatched', 'Pending', 'Complete'];
+        const invoiceColors = ['#28a745', '#ffc107', '#dc3545', '#17a2b8'];
+
+        new Chart(invoiceCtx, {
+            type: 'bar',
+            data: {
+                labels: invoiceLabels,
+                datasets: [{
+                    data: invoiceData,
+                    backgroundColor: invoiceColors,
+                    barThickness: 12,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.x;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false,
+                        grid: { display: false },
+                        beginAtZero: true
+                    },
+                    y: {
+                        display: true,
+                        grid: { display: false },
+                        ticks: {
+                            padding: 8
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Estimate Summary Chart
+    const estimateChartEl = document.getElementById('estimateChart');
+    if (estimateChartEl) {
+        const value = {{ estimate_count|default:0 }};
+        const ctx = estimateChartEl.getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [value, 100 - value], // Assuming the total is 100
+                    backgroundColor: ['#28a745', '#e9ecef'],
+                    borderWidth: 0,
+                    cutout: '75%'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx) {
+                                return ctx.label + ': ' + ctx.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+
+{% endblock %}

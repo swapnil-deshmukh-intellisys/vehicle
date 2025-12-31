@@ -1,0 +1,82 @@
+{% extends "index.html" %}
+
+{% block title %}c-accounts-garagegroup{% endblock %}
+
+{% block style %}
+<style>
+    /* shri */
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .content-header-title {
+        display: inline-block;
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+    .breadcrumb-wrapper {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -4px; /* Adjust as needed */
+    }
+    /* shri */
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0 title">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-garagegroup' %}">List Garage Group</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Create Garage Group
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="c-accounts-garagegroup">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <form method="post" action="{% url 'c-accounts-garagegroup' %}">
+                                    {% csrf_token %}  
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                            <label class="form-label" for="name">Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="name" required />
+                                        </div> 
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <button type="reset" class="btn btn-outline-secondary waves-effect">Cancel</button>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-50"></i> Save Garage Group
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}{% endblock %}

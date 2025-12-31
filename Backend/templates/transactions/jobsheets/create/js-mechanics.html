@@ -1,0 +1,234 @@
+<script>
+    $(document).ready(function () {
+        // Initialize variables
+        let mechanics = [];
+        const mechanicSelect = $('#mechanic');
+        const $mechanicForm = $('#addNewMechanicModal form');
+        const $saveBtn = $('#saveNewMechanicBtn');
+
+        // Function to load mechanics
+        function loadMechanics() {
+            $.ajax({
+                url: '{% url "list_staff" %}',
+                type: 'GET',
+                data: {
+                    role: 'mechanic'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        mechanics = response.data;
+                        populateMechanicSelect(mechanics);
+                    } else {
+                        console.error('Error loading mechanics:', response.message);
+                        toastr.error('Failed to load mechanics');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Failed to load mechanics. Please refresh the page.');
+                }
+            });
+        }
+
+        // Function to populate mechanic select
+        function populateMechanicSelect(mechanicList) {
+            // Store the current selected values
+            const selectedValues = mechanicSelect.val() || [];
+
+            // Destroy existing Select2 instance if it exists
+            if ($.fn.select2 && mechanicSelect.hasClass('select2-hidden-accessible')) {
+                mechanicSelect.select2('destroy');
+            }
+
+            mechanicSelect.empty();
+
+            // Add existing mechanics
+            mechanicList.forEach(function (mechanic) {
+                mechanicSelect.append($('<option></option>')
+                    .val(mechanic.id)
+                    .text(mechanic.name)
+                );
+            });
+
+            // Re-initialize Select2
+            mechanicSelect.select2({
+                placeholder: 'Select Mechanic(s)',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('body'),
+                closeOnSelect: false,
+                dropdownCssClass: 'mechanic-select-dropdown',
+                templateResult: function (data) {
+                    if (data.loading) return data.text;
+                    return $('<div>').text(data.text);
+                },
+                templateSelection: function (data) {
+                    return data.text;
+                }
+            });
+
+            // Restore selected values
+            if (selectedValues.length > 0) {
+                mechanicSelect.val(selectedValues).trigger('change');
+            }
+
+            // Add custom "Add New" option to the dropdown
+            mechanicSelect.on('select2:open', function () {
+                setTimeout(function () {
+                    if ($('.select2-dropdown .add-new-mechanic-option').length === 0) {
+                        const addNewOption = $('<div class="select2-results__option select2-results__option--highlighted add-new-mechanic-option" style="color: #0d6efd; font-weight: bold; cursor: pointer;">+ Add New Mechanic</div>');
+                        $('.select2-dropdown .select2-results').prepend(addNewOption);
+                    }
+                }, 10);
+            });
+
+            // Handle click on the custom Add New option
+            $(document).off('click', '.add-new-mechanic-option').on('click', '.add-new-mechanic-option', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                mechanicSelect.select2('close');
+                $mechanicForm[0].reset();
+                $mechanicForm.find('.is-invalid').removeClass('is-invalid');
+                $mechanicForm.find('.invalid-feedback').remove();
+                const modal = new bootstrap.Modal(document.getElementById('addNewMechanicModal'));
+                modal.show();
+                $('input', $mechanicForm).first().focus();
+            });
+        }
+
+        // Handle form submission
+        $mechanicForm.on('submit', function (e) {
+            e.preventDefault();
+            $mechanicForm.find('.is-invalid').removeClass('is-invalid');
+            $mechanicForm.find('.invalid-feedback').remove();
+
+            const formData = new FormData(this);
+            formData.append('role', 'mechanic');
+            formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+            // Validate required fields
+            let isValid = true;
+            const requiredFields = [
+                'mechanicfirstname', 'mechaniclastname', 'mechanicphone',
+                'mechanicaadhar', 'mechanicyear_of_experience',
+                'mechanicreference_by_name', 'mechanicreference_by_phone'
+            ];
+
+            requiredFields.forEach(function (field) {
+                const $field = $(`[name="${field}"]`);
+                if (!$field.val() || !$field.val().trim()) {
+                    $field.addClass('is-invalid');
+                    $field.after(`<div class="invalid-feedback">This field is required</div>`);
+                    isValid = false;
+                    if (isValid) {
+                        $field.focus();
+                    }
+                }
+            });
+
+            if (!isValid) {
+                return;
+            }
+
+            const $submitBtn = $(this).find('button[type="submit"]');
+            const originalBtnText = $submitBtn.html();
+            $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+            $.ajax({
+                url: '{% url "create_staff" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Add the new mechanic to the select and select it
+                        const newOption = new Option(
+                            response.data.name,
+                            response.data.id,
+                            true,
+                            true
+                        );
+
+                        // Store current selections
+                        const currentSelections = mechanicSelect.val() || [];
+
+                        // Add new option
+                        mechanicSelect.append(newOption).trigger('change');
+
+                        // Combine previous selections with new one
+                        const newSelections = [...new Set([...currentSelections, response.data.id.toString()])];
+                        mechanicSelect.val(newSelections).trigger('change');
+
+                        // Close modal and show success message
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('addNewMechanicModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+
+                        toastr.success('Mechanic added successfully');
+
+                        // Reload mechanics to ensure we have the latest data
+                        loadMechanics();
+                    } else {
+                        toastr.error(response.message || 'Failed to add mechanic');
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = 'Failed to add mechanic. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                        if (xhr.responseJSON.errors) {
+                            Object.entries(xhr.responseJSON.errors).forEach(([field, messages]) => {
+                                const $field = $(`[name="${field}"]`);
+                                $field.addClass('is-invalid');
+                                $field.next('.invalid-feedback').remove();
+                                $field.after(`<div class="invalid-feedback">${Array.isArray(messages) ? messages.join(' ') : messages}</div>`);
+                            });
+                        }
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function () {
+                    $submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize mechanics when document is ready
+        loadMechanics();
+
+        // Initialize modal events
+        $('#addNewMechanicModal').on('hidden.bs.modal', function () {
+            $mechanicForm[0].reset();
+            $mechanicForm.find('.is-invalid').removeClass('is-invalid');
+            $mechanicForm.find('.invalid-feedback').remove();
+        });
+
+        // Handle Enter key in form inputs
+        $mechanicForm.on('keypress', 'input', function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $mechanicForm.submit();
+            }
+        });
+    });
+</script>

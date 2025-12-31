@@ -1,0 +1,624 @@
+{% extends "index.html" %}
+
+{% block title %}c-accounts-garage{% endblock %}
+
+{% block style %}
+<style>
+    .logo-preview {
+        width: 100px;
+        height: 100px;
+        border: 2px dashed #7367f0;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .logo-preview img {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .service-tag {
+        display: inline-block;
+        background-color: #f8f8f8;
+        border-radius: 5px;
+        padding: 8px 12px;
+        margin: 5px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .service-tag .remove-service {
+        margin-left: 8px;
+        color: #ea5455;
+        cursor: pointer;
+    }
+
+    .service-input-group {
+        margin-bottom: 15px;
+    }
+
+    .section-divider {
+        border-top: 1px solid #ebe9f1;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+
+    .section-divider span {
+        position: absolute;
+        top: -12px;
+        left: 10px;
+        background: white;
+        padding: 0 10px;
+        color: #7367f0;
+        font-weight: 600;
+    }
+
+    .form-section {
+        margin-bottom: 2rem;
+    }
+
+    /* shri */
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+
+    .content-header-title {
+        display: inline-block;
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+
+    .breadcrumb-wrapper {
+        display: inline-block;
+        vertical-align: middle;
+        margin-top: -4px;
+        /* Adjust as needed */
+    }
+
+    /* shri */
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0 title">Accounts</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'r-accounts-garage' %}">List Garage</a>
+                                </li>
+                                <li class="breadcrumb-item active">Create Garage
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="c-accounts-garage">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Complete Your Garage Profile</h4>
+                                <p class="card-text">Fill in the details below to set up your garage in our system</p>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'c-accounts-garage' %}"
+                                    enctype="multipart/form-data">
+                                    {% csrf_token %}
+
+                                    <!-- Logo Upload Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Garage Identity</span></div>
+                                        <div class="row mt-2">
+                                            <div
+                                                class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-center">
+                                                <div class="logo-preview" id="logoPreview">
+                                                    <i data-feather="image" class="font-large-1 text-muted"></i>
+                                                </div>
+                                                <div class="d-flex flex-column w-100">
+                                                    <label for="garageLogo"
+                                                        class="btn btn-primary mb-75 btn-sm waves-effect waves-float waves-light w-100 text-center">
+                                                        <span>Upload Logo</span>
+                                                        <input type="file" id="garageLogo" name="garage_logo"
+                                                            accept="image/*" class="d-none" />
+                                                    </label>
+                                                    <small class="text-muted text-center">PNG recommended. Max
+                                                        100KB<br>Optimal size: 200×200px (1:1 ratio)</small>
+                                                    <small id="logoError"
+                                                        class="text-danger text-center d-none"></small>
+                                                </div>
+                                            </div>
+                                            <div
+                                                class="col-12 col-md-4 d-flex flex-column align-items-center justify-content-center">
+                                                <div class="logo-preview" id="signatoryPreview">
+                                                    <i data-feather="user-check" class="font-large-1 text-muted"></i>
+                                                </div>
+                                                <div class="d-flex flex-column w-100">
+                                                    <label for="authorizedSignatory"
+                                                        class="btn btn-outline-primary mb-75 btn-sm waves-effect waves-float waves-light w-100 text-center">
+                                                        <span>Upload Signatory</span>
+                                                        <input type="file" id="authorizedSignatory"
+                                                            name="authorized_signatory" accept="image/*"
+                                                            class="d-none" />
+                                                    </label>
+                                                    <small class="text-muted text-center">PNG recommended. Max
+                                                        100KB<br>Optimal size: 200×200px (1:1 ratio)</small>
+                                                    <small id="signatoryError"
+                                                        class="text-danger text-center d-none"></small>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="row">
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label" for="garageName">
+                                                            <i data-feather="home" class="font-medium-2 me-50"></i>
+                                                            Garage Name<span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" id="garageName"
+                                                            name="garage_name" placeholder="Garage name" required />
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label" for="garageTagline">
+                                                            <i data-feather="tag" class="font-medium-2 me-50"></i>
+                                                            Tagline/Slogan
+                                                        </label>
+                                                        <input type="text" class="form-control" id="garageTagline"
+                                                            name="garage_tagline" placeholder="Tagline or slogan" />
+                                                    </div>
+                                                    <div class="col-12 col-md-4">
+                                                        <label class="form-label" for="yearEstablished">
+                                                            <i data-feather="calendar" class="font-medium-2 me-50"></i>
+                                                            Year Established
+                                                        </label>
+                                                        <input type="number" class="form-control" id="yearEstablished"
+                                                            name="year_established" placeholder="Year" min="1900"
+                                                            max="{% now 'Y' %}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Contact Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Contact Information</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="contactPerson">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        Contact Person<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="contactPerson"
+                                                        name="contact_person" placeholder="Full name" required />
+                                                </div>
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="contactEmail">
+                                                        <i data-feather="mail" class="font-medium-3 me-50"></i>
+                                                        Email Address<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="email" class="form-control" id="contactEmail"
+                                                        name="contact_email" placeholder="Email address" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="contactPhone">
+                                                        <i data-feather="phone" class="font-medium-3 me-50"></i>
+                                                        Phone<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="tel" class="form-control" id="contactPhone"
+                                                        name="contact_phone" placeholder="Phone" required />
+                                                </div>
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="alternatePhone">
+                                                        <i data-feather="phone-call" class="font-medium-3 me-50"></i>
+                                                        Alternate Phone
+                                                    </label>
+                                                    <input type="tel" class="form-control" id="alternatePhone"
+                                                        name="alternate_phone" placeholder="Alternate phone" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Address Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Garage Address</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="streetAddress">
+                                                        <i data-feather="map-pin" class="font-medium-3 me-50"></i>
+                                                        Street Address<span class="text-danger">*</span>
+                                                    </label>
+                                                    <textarea class="form-control" id="streetAddress"
+                                                        name="street_address" rows="2" placeholder="Street address"
+                                                        required></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="location">Location<span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="location"
+                                                        name="location" placeholder="Location" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="city_id">City/Town<span
+                                                            class="text-danger">*</span></label>
+                                                    <select class="select2 form-select" id="city_id" name="city_id">
+                                                        {% for city in city_objs %}
+                                                        <option value="{{ city.id }}">{{ city.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="state">State<span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="state" name="state"
+                                                        placeholder="State" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="pincode">Pincode<span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" id="pincode" name="pincode"
+                                                        placeholder="Pincode" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="landmark">Landmark</label>
+                                                    <input type="text" class="form-control" id="landmark"
+                                                        name="landmark" placeholder="Nearby landmark" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="latitude">
+                                                        <i data-feather="map" class="font-medium-3 me-50"></i>
+                                                        Latitude
+                                                    </label>
+                                                    <input type="text" class="form-control" id="latitude"
+                                                        name="latitude" placeholder="e.g. 28.6139"
+                                                        pattern="^-?([1-8]?\d|90)(\.\d+)?$"
+                                                        title="Enter a valid latitude between -90 and 90 degrees" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-3">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="longitude">
+                                                        <i data-feather="map" class="font-medium-3 me-50"></i>
+                                                        Longitude
+                                                    </label>
+                                                    <input type="text" class="form-control" id="longitude"
+                                                        name="longitude" placeholder="e.g. 77.2090"
+                                                        pattern="^-?(1[0-7]\d|\d{1,2})(\.\d+)?$"
+                                                        title="Enter a valid longitude between -180 and 180 degrees" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Service Category Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Service Category</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <label for="servicecategory">Category<span
+                                                        class="text-danger">*</span></label>
+                                                <select id="servicecategory" name="servicecategory"
+                                                    class="select2 form-select" multiple="multiple" required>
+                                                    {% for servicecategory_obj in servicecategory_objs %}
+                                                    <option value="{{servicecategory_obj.id}}">
+                                                        {{servicecategory_obj.name}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vehicle Type Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Vehicle Types</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <label for="vehicletype">Vehicle Types<span
+                                                        class="text-danger">*</span></label>
+                                                <select id="vehicletype" name="vehicletype"
+                                                    class="select2 form-select" multiple="multiple" required>
+                                                    {% for vehicletype_obj in vehicletype_objs %}
+                                                    <option value="{{vehicletype_obj.id}}">
+                                                        {{vehicletype_obj.wheeler}} Wheeler{% if vehicletype_obj.is_ev %}, EV{% endif %}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Additional Information</span></div>
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="garageDescription">
+                                                        <i data-feather="file-text" class="font-medium-3 me-50"></i>
+                                                        Garage Description
+                                                    </label>
+                                                    <textarea class="form-control" id="garageDescription"
+                                                        name="garage_description" rows="2"
+                                                        placeholder="Tell us about your garage, specialties, and what makes you unique"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="website">
+                                                        <i data-feather="globe" class="font-medium-3 me-50"></i>
+                                                        Website (if any)
+                                                    </label>
+                                                    <input type="url" class="form-control" id="website" name="website"
+                                                        placeholder="https://" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="serviceRadius">
+                                                        <i data-feather="map-pin" class="font-medium-3 me-50"></i>
+                                                        Service Radius (km)
+                                                    </label>
+                                                    <input type="number" class="form-control" id="serviceRadius"
+                                                        name="service_radius" step="0.01" min="0.01" max="99999999.99"
+                                                        pattern="^\d+(\.\d{1,2})?$" placeholder="e.g., 5.50" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="gst">
+                                                        <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                        GST
+                                                    </label>
+                                                    <input type="text" class="form-control" id="gst" name="gst"
+                                                        placeholder="e.g., 22AAAAA0000A1Z5"
+                                                        pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
+                                                        title="Enter a valid GST number (e.g., 22AAAAA0000A1Z5)" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="pan">
+                                                        <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                        PAN
+                                                    </label>
+                                                    <input type="text" class="form-control" id="pan" name="pan"
+                                                        placeholder="e.g., ABCDE1234F"
+                                                        pattern="^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
+                                                        title="Enter a valid PAN number (e.g., ABCDE1234F)" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="aadhar">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        Aadhar
+                                                    </label>
+                                                    <input type="text" class="form-control" id="aadhar" name="aadhar"
+                                                        placeholder="e.g., 234567890123" pattern="^[2-9]{1}[0-9]{11}$"
+                                                        title="Enter a valid 12-digit Aadhar number" maxlength="12" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="termsConditions">
+                                                        <i data-feather="file-text" class="font-medium-3 me-50"></i>
+                                                        Terms and Conditions <span class="text-danger">*</span>
+                                                    </label>
+                                                    <textarea class="form-control" id="termsConditions"
+                                                        name="terms_conditions" rows="2" required
+                                                        placeholder="Enter one term per line, or separate by commas. Example:&#10;30-day return policy, Warranty covers parts and labor, Payment due in 15 days"></textarea>
+                                                    <small class="text-muted">These terms will be displayed on your
+                                                        invoices. You can enter one term per line, separate by commas,
+                                                        or write in paragraph form.</small>
+                                                    <div class="invalid-feedback">
+                                                        Please provide terms and conditions for your garage.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <button type="reset"
+                                                class="btn btn-outline-secondary waves-effect">Cancel</button>
+                                            <button type="submit"
+                                                class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-50"></i> Save Garage Profile
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Image validation function
+    function garageValidateImage(file, type, callback) {
+        const img = new Image();
+        const fileSizeKB = file.size / 1024; // in KB
+        const maxSizeKB = 100; // 100KB
+
+        // Reset previous errors
+        $(`#${type}Error`).text('').addClass('d-none');
+
+        // Check file size
+        if (fileSizeKB > maxSizeKB) {
+            $(`#${type}Error`).text(`File size should not exceed ${maxSizeKB}KB`).removeClass('d-none');
+            updateSubmitButton();
+            return false;
+        }
+
+        // Check file type
+        if (!file.type.match('image.*')) {
+            $(`#${type}Error`).text('Only JPG and PNG images are allowed').removeClass('d-none');
+            updateSubmitButton();
+            return false;
+        }
+
+        // Check dimensions
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            img.src = e.target.result;
+            img.onload = function () {
+                const width = this.width;
+                const height = this.height;
+                let isValid = true;
+                let errorMessage = '';
+
+                if (type === 'logo' || type === 'signatory') {
+                    const targetWidth = 200;
+                    const targetHeight = 200;
+                    const aspectRatio = width / height;
+                    const targetAspectRatio = 1; // 1:1 aspect ratio
+
+                    if (width !== targetWidth || height !== targetHeight) {
+                        errorMessage = `${type.charAt(0).toUpperCase() + type.slice(1)} should be exactly ${targetWidth}x${targetHeight} pixels`;
+                        isValid = false;
+                    } else if (Math.abs(aspectRatio - targetAspectRatio) > 0.1) {
+                        errorMessage = `${type.charAt(0).toUpperCase() + type.slice(1)} should be a perfect square (1:1 aspect ratio)`;
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid) {
+                    $(`#${type}Error`).text(errorMessage).removeClass('d-none');
+                } else {
+                    $(`#${type}Error`).addClass('d-none');
+                }
+
+                // Update button state
+                updateSubmitButton();
+
+                if (isValid && typeof callback === 'function') {
+                    callback(e.target.result);
+                }
+            };
+        };
+        reader.readAsDataURL(file);
+        return true;
+    }
+
+    // Update submit button state
+    function updateSubmitButton() {
+        const hasLogoError = $('#logoError').is(':visible');
+        const hasSignatoryError = $('#signatoryError').is(':visible');
+        $('button[type="submit"]').prop('disabled', hasLogoError || hasSignatoryError);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize Feather Icons
+        if (feather) {
+            feather.replace({ width: 16, height: 16 });
+        }
+
+        // Function to handle file preview
+        function setupFilePreview(inputId, previewId, maxSizeMB = 2) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+
+            if (input && preview) {
+                input.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    // Check file type
+                    if (!file.type.match('image.*')) {
+                        alert('Please select an image file (JPG, PNG)');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Check file size
+                    if (file.size > maxSizeMB * 1024 * 1024) {
+                        alert(`File size should not exceed ${maxSizeMB}MB`);
+                        this.value = '';
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        preview.innerHTML = `<img src="${e.target.result}" class="img-fluid" />`;
+                        // Re-initialize feather icons in case they were removed
+                        if (feather) {
+                            feather.replace();
+                        }
+                    };
+
+                    reader.onerror = function () {
+                        console.error('Error reading file');
+                        alert('Error reading file. Please try again.');
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // Set up previews for logo and signatory with validation
+        document.getElementById('garageLogo').addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                garageValidateImage(this.files[0], 'logo', function (src) {
+                    document.getElementById('logoPreview').innerHTML = `<img src="${src}" class="img-fluid" />`;
+                    feather.replace();
+                });
+            }
+        });
+
+        document.getElementById('authorizedSignatory').addEventListener('change', function (e) {
+            if (this.files && this.files[0]) {
+                garageValidateImage(this.files[0], 'signatory', function (src) {
+                    document.getElementById('signatoryPreview').innerHTML = `<img src="${src}" class="img-fluid" />`;
+                    feather.replace();
+                });
+            }
+        });
+
+        // Disable submit button initially if required
+        $('button[type="submit"]').prop('disabled', true);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,1015 @@
+{% extends "index.html" %}
+
+{% block title %}v-accounts-garage{% endblock %}
+
+<!-- call summary only -->
+<!-- call summary only -->
+{% block navlink %}
+<li class="nav-item me-2 subsection-group" data-menu="createjobsheet" style="display: none;">
+                        <a class="nav-link" href="" style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+                            <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+                            <span>Summary</span>
+                        </a>
+                    </li>
+{% endblock %}
+
+{% block style %}
+<style>
+    .service-tag {
+        display: inline-block;
+        background-color: #f8f8f8;
+        border-radius: 5px;
+        padding: 8px 12px;
+        margin: 5px;
+        border: 1px solid #e0e0e0;
+    }
+    .service-tag .remove-service {
+        margin-left: 8px;
+        color: #ea5455;
+        cursor: pointer;
+    }
+    .service-input-group {
+        margin-bottom: 15px;
+    }
+    .section-divider {
+        border-top: 1px solid #ebe9f1;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+    .section-divider span {
+        position: absolute;
+        top: -12px;
+        left: 10px;
+        background: white;
+        padding: 0 10px;
+        color: #7367f0;
+        font-weight: 600;
+    }
+    .form-section {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-7 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-garage' %}">List Garage</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Garage Profile
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right text-md-end col-md-5 col-12">
+                <div class="mb-1 breadcrumb-right">
+                    <div class="dropdown">
+                        <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="grid"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            {% if usertype == 'admin' or usertype == 'business' %}
+                            <a class="dropdown-item" href="{%url 'r-accounts-garage-banner' garage_obj.id %}">
+                                <i class="me-1" data-feather="image"></i>
+                                <span class="align-middle">Banner</span>
+                            </a>
+                            <a class="dropdown-item" href="{%url 'r-accounts-garage-service' garage_obj.id %}">
+                                <i class="me-1" data-feather="settings"></i>
+                                <span class="align-middle">Service</span>
+                            </a>
+                            {% endif %}
+                            <a class="dropdown-item" href="{% url 'u-accounts-garage' garage_obj.id %}">
+                                <i class="me-1" data-feather="edit-2"></i>
+                                <span class="align-middle">Update Garage</span>
+                            </a>
+                            <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#businessHoursModal">
+                                <i class="me-1" data-feather="clock"></i>
+                                <span class="align-middle">Business Hours</span>
+                            </a>
+                            
+                            <a class="dropdown-item" href="#">
+                                <i class="me-1" data-feather="star"></i>
+                                <span class="align-middle">Reviews</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="v-accounts-garage">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Garage Profile</h4>
+                                {% if garage_obj.logo %}
+                                    <img src="/{{ garage_obj.logo }}" alt="Logo Preview" class="img-fluid" style="max-width: 100px; max-height: 100px; width: auto; height: auto;" />
+                                {% else %}
+                                    <i data-feather="image" class="font-large-1 text-muted" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;"></i>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <!-- Garage Identity Section -->
+                                <div class="form-section">
+                                    <div class="section-divider">
+                                        <span>Garage Identity</span>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="row">
+                                                <div class="col-12 col-md-4 mb-1">
+                                                    <div class="d-flex align-items-center">
+                                                        <i data-feather="home" class="font-medium-3 me-50"></i>
+                                                        <div>
+                                                            <p class="mb-0 text-muted small">Garage Name</p>
+                                                            <h6 class="mb-0">{{ garage_obj.name|default:'-' }}</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-2 mb-1">
+                                                    <div class="d-flex align-items-center">
+                                                        <i data-feather="calendar" class="font-medium-3 me-50"></i>
+                                                        <div>
+                                                            <p class="mb-0 text-muted small">Year Established</p>
+                                                            <h6 class="mb-0">{{ garage_obj.year_established|default:'-' }}</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <div class="d-flex align-items-center">
+                                                        <i data-feather="tag" class="font-medium-3 me-50"></i>
+                                                        <div>
+                                                            <p class="mb-0 text-muted small">Tagline</p>
+                                                            <h6 class="mb-0">{{ garage_obj.tagline|default:'-' }}</h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Contact Information Section -->
+                                <div class="form-section">
+                                    <div class="section-divider"><span>Contact Information</span></div>
+                                    <div class="row">
+                                        <div class="col-12 col-md-3 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Contact Person</p>
+                                                    <h6 class="mb-0">{{ garage_obj.contact_person|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="mail" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Email Address</p>
+                                                    <h6 class="mb-0">{{ garage_obj.email|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="phone" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Phone</p>
+                                                    <h6 class="mb-0">{{ garage_obj.phone|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="phone-call" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Alternate Phone</p>
+                                                    <h6 class="mb-0">{{ garage_obj.alt_phone|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Address Section -->
+                                <div class="form-section">
+                                    <div class="section-divider"><span>Garage Address</span></div>
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                            <div class="d-flex align-items-start">
+                                                <i data-feather="map-pin" class="font-medium-3 me-50 mt-1"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Street Address</p>
+                                                    <h6 class="mb-0">{{ garage_obj.address|default:'-'|linebreaksbr }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>   
+                                        <div class="col-12 col-md-3 mb-1">                                            
+                                            <p class="mb-0 text-muted small">City/Town</p>
+                                            <h6 class="mb-0">{{ garage_obj.city.name|default:'-' }}</h6>
+                                        </div>
+                                        <div class="col-12 col-md-3 mb-1">                                            
+                                            <p class="mb-0 text-muted small">State</p>
+                                            <h6 class="mb-0">{{ garage_obj.state|default:'-' }}</h6>
+                                        </div>
+                                        <div class="col-12 col-md-2 mb-1">
+                                            <p class="mb-0 text-muted small">Pincode</p>
+                                            <h6 class="mb-0">{{ garage_obj.postal_code|default:'-' }}</h6>
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="map-pin" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Landmark/Nearby</p>
+                                                    <h6 class="mb-0">{{ garage_obj.landmark|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div> 
+                                        <div class="col-12 col-md-3 mb-1">                                            
+                                            <p class="mb-0 text-muted small">Latitude </p>
+                                            <h6 class="mb-0">{{ garage_obj.latitude |default:'-' }}</h6>
+                                        </div>
+                                        <div class="col-12 col-md-3 mb-1">                                            
+                                            <p class="mb-0 text-muted small">Longitude </p>
+                                            <h6 class="mb-0">{{ garage_obj.longitude |default:'-' }}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                <!-- Additional Information Section -->
+                                <div class="form-section">
+                                    <div class="section-divider"><span>Additional Information</span></div>
+                                    <div class="row g-1">
+                                        <!-- Status Flags -->
+                                        <div class="col-12 col-md-4">
+                                            <div class="d-flex align-items-center bg-light p-1 rounded">
+                                                <i data-feather="award" class="font-medium-2 me-2 text-primary"></i>
+                                                <span class="text-muted me-2">Exclusive:</span>
+                                                <span class="fw-medium">
+                                                    {% if garage_obj.is_exclusive %}
+                                                        <span class="badge bg-success">Yes</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">No</span>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="d-flex align-items-center bg-light p-1 rounded">
+                                                <i data-feather="check-circle" class="font-medium-2 me-2 text-success"></i>
+                                                <span class="text-muted me-2">Verified:</span>
+                                                <span class="fw-medium">
+                                                    {% if garage_obj.is_verified %}
+                                                        <span class="badge bg-success">Yes</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">No</span>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4">
+                                            <div class="d-flex align-items-center bg-light p-1 rounded">
+                                                <i data-feather="tag" class="font-medium-2 me-2 text-warning"></i>
+                                                <span class="text-muted me-2">Special Offer:</span>
+                                                <span class="fw-medium">
+                                                    {% if garage_obj.is_offer %}
+                                                        <span class="badge bg-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">None</span>
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <!-- Offer Text -->
+                                        {% if garage_obj.is_offer and garage_obj.offer_text %}
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center bg-light p-1 rounded">
+                                                <i data-feather="edit" class="font-medium-2 me-2 text-info"></i>
+                                                <span class="text-muted me-2">Offer Details:</span>
+                                                <span class="fw-medium">{{ garage_obj.offer_text }}</span>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Original Additional Information -->
+                                    <div class="row mt-1">
+                                        <div class="col-12 mb-1">
+                                            <div class="d-flex align-items-start">
+                                                <i data-feather="align-left" class="font-medium-3 me-50 mt-1"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Garage Description</p>
+                                                    <div class="mb-0">{{ garage_obj.about|default:'-'|linebreaks }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 mb-1">                                            
+                                            <div class="d-flex align-items-start">
+                                                <i data-feather="clock" class="font-medium-3 me-50 mt-1"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Business Hours</p>
+                                                    <div class="mb-0">
+                                                        {% if garage_obj.garage_business_hours.all %}
+                                                            <div class="business-hours">
+                                                                {% for hours in garage_obj.garage_business_hours.all %}
+                                                                    <div class="d-flex justify-content-between">
+                                                                        <span class="me-2">{{ hours.get_day_of_week_display }}:</span>
+                                                                        <span>
+                                                                            {% if hours.is_closed %}
+                                                                                <span class="text-danger">Closed</span>
+                                                                            {% else %}
+                                                                                {{ hours.open_time|time:"h:i A" }} - {{ hours.close_time|time:"h:i A" }}
+                                                                            {% endif %}
+                                                                        </span>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-6 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="globe" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">Website</p>
+                                                    <h6 class="mb-0">
+                                                        {% if garage_obj.website %}
+                                                            <a href="{{ garage_obj.website }}" target="_blank" class="text-primary">{{ garage_obj.website }}</a>
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">GST</p>
+                                                    <h6 class="mb-0">{{ garage_obj.gst|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">PAN</p>
+                                                    <h6 class="mb-0">{{ garage_obj.pan|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <i data-feather="hash" class="font-medium-3 me-50"></i>
+                                                <div>
+                                                    <p class="mb-0 text-muted small">AADHAR</p>
+                                                    <h6 class="mb-0">{{ garage_obj.aadhar|default:'-' }}</h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-8 mb-1">
+                                            <div class="d-flex align-items-start">
+                                                <i data-feather="file-text" class="font-medium-3 me-50 mt-1"></i>
+                                                <div class="w-100">
+                                                    <p class="mb-1 text-muted small">Terms and Conditions</p>
+                                                    <div class="mb-0">
+                                                        {% if garage_obj.terms_and_conditions %}
+                                                            {{ garage_obj.terms_and_conditions|linebreaksbr }}
+                                                        {% else %}
+                                                            -
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Authorized Signatory -->
+                                        <div class="col-12 col-md-4 mb-1">
+                                            <div class="d-flex flex-column align-items-end">
+                                                <span class="text-muted small mb-1">Authorized Signatory</span>
+                                                <div class="border rounded p-1" style="background: #fff;">
+                                                    {% if garage_obj.authorized_signatory %}
+                                                        <img src="/{{ garage_obj.authorized_signatory }}" 
+                                                             alt="Signatory" 
+                                                             class="img-fluid"
+                                                             style="max-width: 100px; max-height: 100px; width: auto; height: auto;">
+                                                    {% else %}
+                                                        <div class="d-flex flex-column align-items-center justify-content-center" 
+                                                             style="width: 100px; height: 100px; color: #999; background: #f8f8f8;">
+                                                            <i data-feather="user" class="font-large-2 mb-1"></i>
+                                                            <small>No Signatory</small>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-section">
+                                    <div class="section-divider"><span>Banner</span></div>
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                            {% if garage_obj.garage_banner.all %}
+                                                <div class="swiper-coverflow swiper-container">
+                                                    <div class="swiper-wrapper">
+                                                        {% for banner in garage_obj.garage_banner.all %}
+                                                            <div class="swiper-slide">
+                                                                <img class="img-fluid rounded" 
+                                                                     src="/{{ banner.image_path }}" 
+                                                                     alt="Banner {{ forloop.counter }}"
+                                                                     style="width: 100%; max-height: 200px; height: 150px; object-fit: cover;">
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <!-- Add Pagination
+                                                    <div class="swiper-pagination"></div> -->
+                                                </div>
+                                            {% else %}
+                                                <div class="text-center py-4 border rounded" style="background-color: #f8f9fa;">
+                                                    <i data-feather="image" class="font-large-2 text-muted"></i>
+                                                    <p class="text-muted mt-1 mb-0">No banners available</p>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        // Initialize Coverflow Swiper
+                                        if (typeof Swiper !== 'undefined' && document.querySelector('.swiper-coverflow')) {
+                                            var swiper = new Swiper('.swiper-coverflow', {
+                                                effect: 'coverflow',
+                                                grabCursor: true,
+                                                centeredSlides: true,
+                                                slidesPerView: 'auto',
+                                                coverflowEffect: {
+                                                    rotate: 50,
+                                                    stretch: 0,
+                                                    depth: 100,
+                                                    modifier: 1,
+                                                    slideShadows: true
+                                                },
+                                                pagination: {
+                                                    el: '.swiper-pagination',
+                                                    clickable: true
+                                                },
+                                                autoplay: {
+                                                    delay: 2500,
+                                                    disableOnInteraction: false
+                                                },
+                                                loop: true
+                                            });
+                                        }
+                                    });
+                                </script> 
+
+                                <!-- Service Category Section -->
+                                <div class="form-section">
+                                    <div class="section-divider"><span>Services Provided</span></div>
+                                    <div class="row">                                            
+                                        <div class="col-12 mb-1">
+                                            <div class="d-flex flex-wrap gap-1">
+                                                {% for servicecategory_obj in servicecategory_objs %}
+                                                    {% if servicecategory_obj.id in selected_servicecategory_ids %}
+                                                    <span class="badge bg-light-primary text-primary me-1 mb-1">
+                                                        <i data-feather="tag" class="font-small-4 me-25"></i>
+                                                        {{ servicecategory_obj.name }}
+                                                    </span>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if not selected_servicecategory_ids %}-
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>  
+
+                                <div class="form-section">
+                                    <div class="section-divider"><span>Services</span></div>
+                                    <div class="row">
+                                        <div class="col-12 mb-1">
+                                            {% regroup garage_obj.rel_garage_service.all|dictsort:"service.service_type.name" by service.service_type.name as service_types %}
+                                            
+                                            {% for service_type in service_types %}
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-light-primary">
+                                                    <h5 class="mb-0">
+                                                        <i data-feather="tool" class="me-50"></i>
+                                                        {{ service_type.grouper|default:"Other Services" }}
+                                                    </h5>
+                                                </div>
+                                                <div class="card-body p-0">
+                                                    {% regroup service_type.list|dictsort:"cc.name" by cc.name as cost_centers %}
+                                                    
+                                                    {% for cost_center in cost_centers %}
+                                                    <div class="border-bottom p-2">
+                                                        <h6 class="mb-1 text-primary">
+                                                            <i data-feather="layers" class="font-small-3 me-25"></i>
+                                                            {{ cost_center.grouper|default:"General" }}
+                                                        </h6>
+                                                        <div class="ms-4">
+                                                            <div class="table-responsive">
+                                                                <table class="table table-borderless mb-0">
+                                                                    <tbody>
+                                                                        {% for service in cost_center.list %}
+                                                                        <tr>
+                                                                            <td class="ps-0">{{ service.service.name }}</td>
+                                                                            <td class="text-end pe-0">₹{{ service.price|default:0|floatformat:2 }}</td>
+                                                                        </tr>
+                                                                        {% endfor %}
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            {% empty %}
+                                            <div class="alert alert-secondary">
+                                                <div class="alert-body d-flex align-items-center">
+                                                    <i data-feather="alert-circle" class="me-50"></i>
+                                                    <span>No services have been added to this garage yet.</span>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>                                      
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+<!--Business Hours Modal -->
+<div class="modal fade text-start" id="businessHoursModal" tabindex="-1" aria-labelledby="businessHoursModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <small class="modal-title" id="businessHoursModalLabel">{% if garage_obj.garage_business_hours.exists %}Update Business Hours{% else %}Add Business Hours{% endif %}</small>
+                <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'u-accounts-garage-business-hours' garage_obj.id %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div id="business-hours-repeater-container">
+                        {% if garage_obj.garage_business_hours.exists %}
+                            {% for hours in garage_obj.garage_business_hours.all %}
+                                <div class="row g-2 align-items-center business-hours-repeater mb-2">
+                                    <div class="col-md-3">
+                                        <select class="form-control form-control-sm" name="day_of_week" required>
+                                            <option value="" disabled>Day</option>
+                                            <option value="0" {% if hours.day_of_week == 0 %}selected{% endif %}>Monday</option>
+                                            <option value="1" {% if hours.day_of_week == 1 %}selected{% endif %}>Tuesday</option>
+                                            <option value="2" {% if hours.day_of_week == 2 %}selected{% endif %}>Wednesday</option>
+                                            <option value="3" {% if hours.day_of_week == 3 %}selected{% endif %}>Thursday</option>
+                                            <option value="4" {% if hours.day_of_week == 4 %}selected{% endif %}>Friday</option>
+                                            <option value="5" {% if hours.day_of_week == 5 %}selected{% endif %}>Saturday</option>
+                                            <option value="6" {% if hours.day_of_week == 6 %}selected{% endif %}>Sunday</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input class="form-control form-control-sm" type="time" name="open_time" 
+                                               value="{{ hours.open_time|time:'H:i'|default:'' }}" 
+                                               {% if hours.is_closed %}disabled{% endif %}>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input class="form-control form-control-sm" type="time" name="close_time" 
+                                               value="{{ hours.close_time|time:'H:i'|default:'' }}" 
+                                               {% if hours.is_closed %}disabled{% endif %}>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-check form-switch form-check-inline">
+                                            <input class="form-check-input" type="checkbox" role="switch" 
+                                                   id="is_closed_{{ forloop.counter }}" name="is_closed" 
+                                                   value="1" {% if hours.is_closed %}checked{% endif %}>
+                                            <input type="hidden" name="is_closed" value="0">
+                                            <label class="form-check-label small" for="is_closed_{{ forloop.counter }}">Closed</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 text-end">
+                                        <button type="button" class="btn btn-icon btn-sm btn-outline-success business-hours-repeater-add" title="Add">
+                                            <i data-feather="plus" class="font-small-4"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-icon btn-sm btn-outline-danger business-hours-repeater-remove" title="Remove">
+                                            <i data-feather="trash-2" class="font-small-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Empty form template -->
+                            <div class="row g-2 align-items-center business-hours-repeater mb-2">
+                                <div class="col-md-3">
+                                    <select class="form-control form-control-sm" name="day_of_week" required>
+                                        <option value="">Day</option>
+                                        <option value="0">Monday</option>
+                                        <option value="1">Tuesday</option>
+                                        <option value="2">Wednesday</option>
+                                        <option value="3">Thursday</option>
+                                        <option value="4">Friday</option>
+                                        <option value="5">Saturday</option>
+                                        <option value="6">Sunday</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <input class="form-control form-control-sm" type="time" name="open_time" placeholder="Open" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <input class="form-control form-control-sm" type="time" name="close_time" placeholder="Close" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check form-switch form-check-inline">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                               id="is_closed" name="is_closed" value="1">
+                                        <input type="hidden" name="is_closed" value="0">
+                                        <label class="form-check-label small" for="is_closed">Closed</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <button type="button" class="btn btn-icon btn-sm btn-outline-success business-hours-repeater-add" title="Add">
+                                        <i data-feather="plus" class="font-small-4"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-icon btn-sm btn-outline-danger business-hours-repeater-remove" title="Remove">
+                                        <i data-feather="trash-2" class="font-small-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-12 text-end">  
+                            <div class="mb-1">                                                                  
+                                <button type="submit" class="btn btn-sm btn-success" id="submitButton">
+                                    {% if garage_obj.garage_business_hours.exists %}Update{% else %}Submit{% endif %}
+                                </button>
+                            </div> 
+                        </div>
+                    </div>   
+                </div>
+            </form>
+            <script>
+            // Enable/disable time inputs based on closed status
+            document.addEventListener('DOMContentLoaded', function() {
+                const container = document.getElementById('business-hours-repeater-container');
+                
+                // Function to create a new row
+                function createNewRow() {
+                    const template = document.querySelector('.business-hours-repeater').cloneNode(true);
+                    
+                    // Clear all input values in the new row
+                    const inputs = template.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        if (input.type === 'checkbox') {
+                            input.checked = false;
+                        } else if (input.type === 'time') {
+                            input.value = '';
+                            input.disabled = false;
+                            input.required = true;
+                        } else if (input.type === 'hidden') {
+                            // Skip hidden inputs
+                        } else if (input.tagName === 'SELECT') {
+                            input.selectedIndex = 0;
+                        } else {
+                            input.value = '';
+                        }
+                    });
+                    
+                    return template;
+                }
+                
+                // Function to handle add row button click - adds one row at a time
+                function handleAddRow(e) {
+                    e.preventDefault();
+                    e.stopPropagation();  // Prevent event from bubbling up
+                    
+                    // Only proceed if this is the actual button click, not a child element
+                    if (e.target !== this && !this.contains(e.target)) {
+                        return;
+                    }
+                    
+                    // Create and add new row
+                    const newRow = createNewRow();
+                    container.appendChild(newRow);
+                    
+                    // Initialize the new row
+                    initRowTimeInputs(newRow);
+                    
+                    // Update field names to ensure uniqueness
+                    updateFormFieldNames();
+                }
+                
+                // Function to handle remove row button click
+                function handleRemoveRow(e) {
+                    e.preventDefault();
+                    const rows = container.querySelectorAll('.business-hours-repeater');
+                    if (rows.length > 1) {
+                        const row = e.target.closest('.business-hours-repeater');
+                        if (row) {
+                            row.remove();
+                            updateFormFieldNames();
+                        }
+                    } else {
+                        // If it's the last row, just clear the values
+                        const row = e.target.closest('.business-hours-repeater');
+                        if (row) {
+                            const inputs = row.querySelectorAll('input, select');
+                            inputs.forEach(input => {
+                                if (input.type === 'checkbox') {
+                                    input.checked = false;
+                                } else if (input.type === 'hidden') {
+                                    // Skip hidden inputs
+                                } else if (input.tagName === 'SELECT') {
+                                    input.selectedIndex = 0;
+                                } else {
+                                    input.value = '';
+                                }
+                            });
+                            
+                            // Re-initialize the row
+                            initRowTimeInputs(row);
+                        }
+                    }
+                }
+                
+                // Function to toggle time inputs based on closed status
+                function toggleTimeInputs(checkbox) {
+                    const row = checkbox.closest('.business-hours-repeater');
+                    const timeInputs = row.querySelectorAll('input[type="time"]');
+                    timeInputs.forEach(input => {
+                        input.disabled = checkbox.checked;
+                        input.required = !checkbox.checked;
+                        if (checkbox.checked) {
+                            input.value = '';
+                        }
+                    });
+                }
+                
+                // Function to initialize time inputs for a specific row
+                function initRowTimeInputs(row) {
+                    // Set up add/remove buttons
+                    const addBtn = row.querySelector('.business-hours-repeater-add');
+                    const removeBtn = row.querySelector('.business-hours-repeater-remove');
+                    
+                    if (addBtn) {
+                        addBtn.addEventListener('click', handleAddRow);
+                    }
+                    
+                    if (removeBtn) {
+                        removeBtn.addEventListener('click', handleRemoveRow);
+                    }
+                    
+                    // Handle the closed checkbox
+                    const checkbox = row.querySelector('input[type="checkbox"][name^="is_closed"]');
+                    if (!checkbox) return;
+                    
+                    // Initialize the current state
+                    toggleTimeInputs(checkbox);
+                    
+                    // Add event listener for future changes
+                    checkbox.addEventListener('change', function() {
+                        toggleTimeInputs(this);
+                    });
+                }
+                
+                // Initialize all existing rows
+                container.querySelectorAll('.business-hours-repeater').forEach(row => {
+                    initRowTimeInputs(row);
+                });
+                
+                // Handle dynamically added rows
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1 && node.matches('.business-hours-repeater')) {
+                                initRowTimeInputs(node);
+                            }
+                        });
+                    });
+                });
+                
+                // Start observing the container for changes
+                observer.observe(container, { childList: true, subtree: true });
+                
+                // Initialize form field names
+                updateFormFieldNames();
+            });
+            </script>                                               
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const formContainer = document.getElementById('business-hours-repeater-container');
+    
+    // Function to update form field names with indices
+    function updateFormFieldNames() {
+        const forms = formContainer.querySelectorAll('.business-hours-repeater');
+        forms.forEach((form, index) => {
+            // Update day select
+            const daySelect = form.querySelector('select[name^="day_of_week"]');
+            if (daySelect) daySelect.name = `day_of_week_${index}`;
+            
+            // Update open time
+            const openTime = form.querySelector('input[type="time"][name^="open_time"]');
+            if (openTime) openTime.name = `open_time_${index}`;
+            
+            // Update close time
+            const closeTime = form.querySelector('input[type="time"][name^="close_time"]');
+            if (closeTime) closeTime.name = `close_time_${index}`;
+            
+            // Update is_closed checkbox and hidden input
+            const checkboxes = form.querySelectorAll('input[name^="is_closed"]');
+            checkboxes.forEach((input, i) => {
+                if (input.type === 'checkbox') {
+                    input.name = `is_closed_${index}`;
+                    // Ensure the hidden input has the same index
+                    const hiddenInput = form.querySelector('input[type="hidden"][name^="is_closed"]');
+                    if (hiddenInput) hiddenInput.name = `is_closed_${index}`;
+                }
+            });
+        });
+    }
+
+    // Handle form submission to format data correctly
+    const form = document.querySelector('#businessHoursModal form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Prevent default form submission
+            e.preventDefault();
+            
+            const formGroups = formContainer.querySelectorAll('.business-hours-repeater');
+            const formData = new FormData();
+            
+            // Add CSRF token
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            // Process each form group
+            formGroups.forEach((group, index) => {
+                const daySelect = group.querySelector('select[name^="day_of_week"]');
+                const openTimeInput = group.querySelector('input[type="time"][name^="open_time"]');
+                const closeTimeInput = group.querySelector('input[type="time"][name^="close_time"]');
+                const isClosedCheckbox = group.querySelector('input[type="checkbox"][name^="is_closed"]');
+                
+                if (daySelect && daySelect.value) {
+                    // Get the day name from the selected option
+                    const dayName = daySelect.options[daySelect.selectedIndex].text;
+                    
+                    // Append with the field names that the backend expects
+                    formData.append('day[]', dayName);
+                    formData.append('start_time[]', openTimeInput ? openTimeInput.value : '');
+                    formData.append('end_time[]', closeTimeInput ? closeTimeInput.value : '');
+                    formData.append('is_closed[]', isClosedCheckbox && isClosedCheckbox.checked ? 'on' : 'off');
+                }
+            });
+            
+            // Submit the form with the correct field names
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message using toastr
+                    toastr['success'](data.message, 'SUCCESS', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 2000,
+                        onHidden: function() {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    // Show error message using toastr
+                    toastr['error'](data.message || 'An error occurred while saving business hours.', 'ERROR', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 2000
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show error message using toastr
+                toastr['error']('An error occurred while saving business hours. Please try again.', 'ERROR', {
+                    closeButton: true,
+                    tapToDismiss: false,
+                    progressBar: true,
+                    showMethod: 'fadeIn',
+                    hideMethod: 'fadeOut',
+                    timeOut: 2000
+                });
+            });
+        });
+    }
+
+    document.addEventListener('click', function(event) {
+       if (event.target.classList.contains('business-hours-repeater-add')) {
+          // Clone the form
+          const newForm = formContainer.querySelector('.business-hours-repeater').cloneNode(true);
+          
+          // Reset all form elements in the cloned form
+          const formElements = newForm.querySelectorAll('input, select, textarea');
+          formElements.forEach(element => {
+              // Reset input, textarea, and select elements
+              if (element.tagName === 'INPUT') {
+                  if (element.type === 'checkbox' || element.type === 'radio') {
+                      element.checked = false;
+                  } else if (element.type === 'file') {
+                      element.value = '';
+                  } else {
+                      element.value = '';
+                  }
+              } else if (element.tagName === 'SELECT') {
+                  // Reset select to first option
+                  if (element.options.length > 0) {
+                      element.selectedIndex = 0;
+                  }
+              } else if (element.tagName === 'TEXTAREA') {
+                  element.value = '';
+              }
+              
+              // Remove any validation classes or error messages
+              element.classList.remove('is-invalid', 'is-valid');
+              const errorElement = element.nextElementSibling;
+              if (errorElement && errorElement.classList.contains('invalid-feedback')) {
+                  errorElement.remove();
+              }
+          });
+          
+          // Append the new form
+          formContainer.appendChild(newForm);
+          
+          // Update form field names with indices
+          updateFormFieldNames();
+          
+          // Re-initialize any plugins or datepickers if needed
+          if (typeof feather !== 'undefined') {
+              feather.replace();
+          }
+       }
+       
+       // Handle form removal when the "Close" button is clicked
+       if (event.target.classList.contains('business-hours-repeater-remove')) {
+          const formToRemove = event.target.closest('.business-hours-repeater');
+          
+          // Only remove if there is more than one form
+          if (formContainer.querySelectorAll('.business-hours-repeater').length > 1) {
+             formToRemove.remove();
+          } else {
+             toastr['error']('You cannot remove the last form.', 'ERROR', {
+               closeButton: true,
+               tapToDismiss: false,
+               progressBar: true,
+               showMethod: 'fadeIn',
+               hideMethod: 'fadeOut',
+               // positionClass: 'toast-top-left',
+               timeOut: 2000
+           });
+          }
+       }
+    });
+ });
+</script>
+{% endblock %}

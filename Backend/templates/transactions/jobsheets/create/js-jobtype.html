@@ -1,0 +1,182 @@
+<script>
+$(document).ready(function() {
+    // Initialize variables
+    let jobTypes = [];
+    const vehicleType = '{{ vehicletype }}';
+    const jobTypeSelect = $('#JobType');
+    const $jobTypeForm = $('#jobtypeForm');
+    const $newJobTypeInput = $('#newjobtype');
+    const $saveBtn = $('#savejobtypebtn');
+    
+    // Function to load job types
+    function loadJobTypes() {        
+        $.ajax({
+            url: '{% url "list_jobtypes" %}',
+            type: 'GET',
+            data: { 
+                vehicle_type: vehicleType
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    jobTypes = response.data;
+                    populateJobTypeSelect(jobTypes);
+                } else {
+                    console.error('Error loading job types:', response.message);
+                    toastr.error('Failed to load job types');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading job types:', error);
+                toastr.error('Failed to load job types. Please refresh the page.');
+            }
+        });
+    }
+
+    // Function to populate job type select with "Add New" option
+    function populateJobTypeSelect(types) {
+        jobTypeSelect.empty();
+        
+        // Add default empty option
+        jobTypeSelect.append($('<option value=""></option>').text('Select an option'));
+        
+        // Add "Add New" option at the top
+        jobTypeSelect.append($('<option value="add_new">+ Add New</option>'));
+        
+        // Add existing job types
+        types.forEach(function(type) {
+            jobTypeSelect.append($('<option></option>')
+                .val(type.id)
+                .text(type.name)
+            );
+        });
+        
+        // Initialize Select2
+        jobTypeSelect.select2({
+            placeholder: 'Select an option',
+            allowClear: false,
+            width: '100%',
+            dropdownParent: $('body')
+        });
+        
+        // Handle select change
+        jobTypeSelect.on('change', function() {
+            if ($(this).val() === 'add_new') {
+                // Reset and show the modal
+                $jobTypeForm[0].reset();
+                $jobTypeForm.find('.is-invalid').removeClass('is-invalid');
+                $jobTypeForm.find('.invalid-feedback').remove();
+                $('#jobtypemodal').modal('show');
+                $newJobTypeInput.focus();
+                // Reset the select to show placeholder
+                jobTypeSelect.val('').trigger('change');
+            }
+        });
+    }
+
+    // Handle form submission
+    $jobTypeForm.on('submit', function(e) {
+        e.preventDefault();
+        const newJobType = $newJobTypeInput.val().trim();
+        
+        // Reset previous validation
+        $jobTypeForm.find('.is-invalid').removeClass('is-invalid');
+        
+        // Validate
+        if (!newJobType) {
+            $newJobTypeInput.addClass('is-invalid');
+            $newJobTypeInput.next('.invalid-feedback').remove();
+            $newJobTypeInput.after('<div class="invalid-feedback">Please enter a job type name</div>');
+            $newJobTypeInput.focus();
+            return;
+        }
+        
+        // Disable button and show loading state
+        $saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+        
+        // Get the form data
+        const formData = new FormData();
+        formData.append('name', newJobType);
+        formData.append('vehicletype', vehicleType);
+        formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+        
+        // Send request to create new job type
+        $.ajax({
+            url: '{% url "create_jobtype" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Add the new job type to the select and select it
+                    const newOption = new Option(newJobType, response.id, true, true);
+                    jobTypeSelect.append(newOption).trigger('change');
+                    
+                    // Hide modal and reset form
+                    $('#jobtypemodal').modal('hide');
+                    $jobTypeForm[0].reset();
+                    
+                    // Show success message
+                    toastr.success('Job type added successfully');
+                } else {
+                    toastr.error(response.message || 'Failed to add job type');
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Failed to add job type. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                    if (xhr.responseJSON.errors) {
+                        // Handle field-specific errors
+                        Object.entries(xhr.responseJSON.errors).forEach(([field, messages]) => {
+                            const $field = $(`[name="${field}"]`);
+                            $field.addClass('is-invalid');
+                            $field.next('.invalid-feedback').remove();
+                            $field.after(`<div class="invalid-feedback">${messages.join(' ')}</div>`);
+                        });
+                    }
+                }
+                toastr.error(errorMessage);
+            },
+            complete: function() {
+                $saveBtn.prop('disabled', false).html('Save');
+            }
+        });
+    });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Initialize job types when document is ready
+    loadJobTypes();
+    
+    // Initialize modal events
+    $('#jobtypemodal').on('hidden.bs.modal', function() {
+        $jobTypeForm[0].reset();
+        $jobTypeForm.find('.is-invalid').removeClass('is-invalid');
+        $jobTypeForm.find('.invalid-feedback').remove();
+        $saveBtn.prop('disabled', false).html('Save');
+    });
+    
+    // Handle Enter key in the new job type input
+    $newJobTypeInput.on('keypress', function(e) {
+        if (e.which === 13) { // Enter key
+            e.preventDefault();
+            $jobTypeForm.submit();
+        }
+    });
+});    
+</script>

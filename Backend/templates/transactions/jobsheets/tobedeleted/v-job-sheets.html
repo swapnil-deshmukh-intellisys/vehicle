@@ -1,0 +1,422 @@
+{% extends "index.html" %}
+
+{% block title %}View Job Card{% endblock %}
+
+{% block style %}
+<style>
+    .job-card {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+        margin-bottom: 2rem;
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #5e5873;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #ebe9f1;
+    }
+    .info-line {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+    .info-label {
+        font-weight: 500;
+        color: #6c757d;
+        width: 45%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .info-label:after {
+        content: ':';
+        margin: 0 10px 0 5px;
+    }
+    .info-value {
+        color: #212529;
+        flex: 1;
+        text-align: left;
+    }
+    .status-badge {
+        font-size: 0.9rem;
+        font-weight: 500;
+        padding: 0.35rem 0.8rem;
+    }
+    .damage-photo {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 0.357rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #ebe9f1;
+        transition: transform 0.3s;
+    }
+    .damage-photo:hover {
+        transform: scale(1.05);
+    }
+    .diagram-container {
+        max-width: 300px;
+    }
+    /* Equal height columns */
+    .equal-height {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .equal-height > [class*='col-'] {
+        display: flex;
+        flex-direction: column;
+    }
+    .section-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .section-card .card-body {
+        flex: 1;
+    }
+    .diagram-image {
+        width: 100%;
+        border-radius: 0.5rem;
+        border: 1px solid #ebe9f1;
+    }
+    .section-card {
+        background-color: #f8f8f8;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .accessory-badge, .checklist-badge, .issue-badge {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Responsive Accordion Styles */
+    @media (max-width: 767.98px) {
+        .desktop-view { display: none; }
+        .job-card .card-body { padding: 0; }
+        .accordion-item { border: none; border-bottom: 1px solid #ebe9f1; }
+        .accordion-item:last-of-type { border-bottom: none; }
+        .accordion-button {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #5e5873;
+            padding: 1rem 1.5rem;
+            background-color: #fff;
+            box-shadow: none;
+        }
+        .accordion-button:not(.collapsed) { color: #5e5873; }
+        .accordion-button::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235e5873'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        }
+        .accordion-body { padding: 0 1.5rem 1.5rem; }
+        .info-line {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        .info-label { width: 100%; margin-bottom: 0.25rem; font-weight: 500; }
+        .info-label:after { display: none; }
+    }
+
+    @media (min-width: 768px) {
+        .mobile-accordion { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% load static %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-7 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Create Job Card</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'r-txn-job-sheets' %}">Job Sheets</a>
+                                </li>
+                                <li class="breadcrumb-item active">Job Card
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right text-md-end col-md-5 col-12">
+                <div class="mb-1 breadcrumb-right">
+                    <div class="dropdown">
+                        <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="{% url 'u-txn-job-sheets' jobcard_obj.id %}">
+                                <i class="fas fa-edit me-25"></i>
+                                <span class="align-middle">Update Job Card</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="v-job-sheets">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-9">
+                        <div class="card job-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="card-title mb-0">Job Card #{{ jobcard_obj.id|default:'' }}</h4>
+                                    <small class="text-muted">Created on {{ jobcard_obj.created_at|date:"M d, Y" }}</small>
+                                </div>
+                                <span class="badge status-badge rounded-pill {% if jobcard_obj.status == 'open' %}bg-danger{% elif jobcard_obj.status == 'finalized' %}bg-success{% else %}bg-secondary{% endif %}">
+                                    <i class="{% if jobcard_obj.status == 'open' %}fas fa-circle{% elif jobcard_obj.status == 'finalized' %}fas fa-check-circle{% else %}fas fa-circle{% endif %} me-25"></i>
+                                    {{ jobcard_obj.status|title }}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <!-- Customer & Vehicle Information -->
+                                <div class="row equal-height">
+                                    <!-- Customer Details -->
+                                    <div class="col-md-6">
+                                        <div class="section-card">
+                                            <h5 class="section-title">
+                                                <i class="fas fa-user me-25"></i> Customer Details
+                                            </h5>
+                                            <div class="info-line">
+                                                <span class="info-label">Mobile Number:</span> 
+                                                <span class="info-value">{{ jobcard_obj.customer.phone|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Customer Name:</span> 
+                                                <span class="info-value">{{ jobcard_obj.customer.name|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Customer Type:</span> 
+                                                <span class="info-value">{{ jobcard_obj.mode|title|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Delivery Date:</span> 
+                                                <span class="info-value">{{ jobcard_obj.delivery_date|date:"M d, Y"|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Delivery Time:</span> 
+                                                <span class="info-value">{{ jobcard_obj.delivery_time|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Comments:</span> 
+                                                <span class="info-value">{{ jobcard_obj.customer.comments|default:'-' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vehicle Details -->
+                                    <div class="col-md-6">
+                                        <div class="section-card">
+                                            <h5 class="section-title">
+                                                <i class="fas {% if jobcard_obj.vehicle.vehicletype == '2' %}fa-motorcycle {% elif jobcard_obj.vehicle.vehicletype == '3' %}fa-truck-pickup {% elif jobcard_obj.vehicle.vehicletype == '4' %}fa-car {% elif jobcard_obj.vehicle.vehicletype == '6' %}fa-truck-moving {% endif %} me-25"></i> Vehicle Details
+                                            </h5>
+                                            <div class="info-line">
+                                                <span class="info-label">Vehicle Number:</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.license_plate_no|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Model:</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.jobcardmodel.displayname|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Brand:</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.jobcardbrand.displayname|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Odometer (km):</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.odometerreading|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Mileage (kmpl):</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.vehiclemileage|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Daily Running (km):</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.dailyrunning|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Fuel Level (%):</span>
+                                                <span class="info-value">{{ jobcard_obj.vehicle.fuelpercentage|default:'-' }}</span>
+                                            </div>
+                                            <div class="info-line">
+                                                <span class="info-label">Vehicle Age (years):</span> 
+                                                <span class="info-value">{{ jobcard_obj.vehicle.vehicleage|default:'-' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Vehicle Common Issues, Accessories & Service Checklist -->
+                                <div class="row">
+                                    <!-- Common Issues -->
+                                    <div class="col-md-4 mb-1">
+                                        <div class="section-card h-100">
+                                            <h5 class="section-title">
+                                                <i class="fas fa-exclamation-triangle me-25"></i> Common Issues
+                                            </h5>
+                                            <div class="d-flex flex-wrap">
+                                                {% for issue in jobcard_obj.jobcard_vehicle_common_issues.all %}
+                                                <span class="badge bg-light-danger issue-badge">
+                                                    <i class="fas fa-bolt me-25"></i>
+                                                    {{ issue.vehiclecommonissues.displayname }}
+                                                </span>
+                                                {% empty %}
+                                                <div class="text-muted">No issues available</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Vehicle Accessories -->
+                                    <div class="col-md-4 mb-1">
+                                        <div class="section-card h-100">
+                                            <h5 class="section-title">
+                                                <i class="fas fa-tools me-25"></i> Accessories
+                                            </h5>
+                                            <div class="d-flex flex-wrap">
+                                                {% for accessory in jobcard_obj.jobcard_vehicle_accessories.all %}
+                                                <span class="badge bg-light-primary accessory-badge">
+                                                    <i class="fas fa-wrench me-25"></i>
+                                                    {{ accessory.vehicleaccessories.displayname }}
+                                                </span>
+                                                {% empty %}
+                                                <div class="text-muted">No accessories available</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Service Checklist -->
+                                    <div class="col-md-4 mb-1">
+                                        <div class="section-card h-100">
+                                            <h5 class="section-title">
+                                                <i class="fas fa-clipboard-list me-25"></i> Service Checklist
+                                            </h5>
+                                            <div class="d-flex flex-wrap">
+                                                {% for item in jobcard_obj.jobcard_service_checklist.all %}
+                                                <span class="badge bg-light-success checklist-badge">
+                                                    <i class="fas fa-check me-25"></i>
+                                                    {{ item.servicechecklist.displayname }}
+                                                </span>
+                                                {% empty %}
+                                                <div class="text-muted">No checklist available</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>  
+                                <!-- Damage Assessment -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="section-card">
+                                            <h5 class="section-title">
+                                                <i class="fas fa-exclamation-circle me-25"></i> Damage Assessment
+                                            </h5>
+                                            
+                                            <!-- Damage Description -->
+                                            <div class="mb-1">
+                                                <h6><i class="fas fa-comment me-25"></i> Description: <small>{{ jobcard_obj.vehicle.damagedescription|default:'-' }}</small></h6>  
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <!-- Damage Photos -->
+                                                <div class="col-md-6">
+                                                    <div class="mb-1">
+                                                        <h6><i class="fas fa-image me-25"></i> Damage Photos</h6>
+                                                        <div class="d-flex flex-wrap">
+                                                            {% for damagephoto in jobcard_obj.get_damage_photos %}
+                                                            <a href="{% static damagephoto %}" data-lightbox="damage-photos" data-title="Damage Photo">
+                                                                <img src="{% static damagephoto %}" alt="Damage Photo" class="damage-photo zoomable">
+                                                            </a>
+                                                            {% empty %}
+                                                            <div class="text-muted">No damage photos available</div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Dents Diagram -->
+                                                <div class="col-md-6">
+                                                    <div class="mb-1">
+                                                        <h6><i class="fas fa-image me-25"></i> Dents & Marks</h6>
+                                                        <div class="diagram-container">
+                                                            {% if jobcard_obj.diagram_image %}
+                                                            <a href="{% static jobcard_obj.diagram_image %}" data-lightbox="diagram" data-title="Dents & Marks Diagram">
+                                                                <img src="{% static jobcard_obj.diagram_image %}" alt="Dents & Marks Diagram" class="img-fluid zoomable">
+                                                            </a>
+                                                            {% else %}
+                                                            <div class="text-muted">No diagram available</div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- Lightbox2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+<!-- Lightbox2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox-plus-jquery.min.js"></script>
+
+<script>
+    // Initialize lightbox with zoom options
+    lightbox.option({
+        'resizeDuration': 200,
+        'wrapAround': true,
+        'showImageNumberLabel': true,
+        'disableScrolling': true,
+        'albumLabel': 'Image %1 of %2',
+        'fadeDuration': 200,
+        'imageFadeDuration': 200,
+        'fitImagesInViewport': true
+    });
+</script>
+
+<style>
+    /* Style for zoomable images */
+    .zoomable {
+        cursor: zoom-in;
+        transition: transform 0.3s ease;
+    }
+    .zoomable:hover {
+        opacity: 0.9;
+    }
+    .damage-photo {
+        max-width: 150px;
+        max-height: 150px;
+        margin: 5px;
+        object-fit: cover;
+    }
+    .diagram-container img {
+        max-width: 100%;
+        height: auto;
+        cursor: zoom-in;
+    }
+</style>
+{% endblock %}

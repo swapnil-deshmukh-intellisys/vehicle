@@ -1,0 +1,27 @@
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fuelSlider = document.getElementById("fuelInput");
+        const fuelValue = document.getElementById("fuelValue");
+        
+        function updateFuelLabel(val) {
+            val = parseInt(val);
+            let label;
+            
+            if (val <= 10) label = "Empty";
+            else if (val <= 30) label = "Quarter";
+            else if (val <= 60) label = "Half Tank";
+            else if (val <= 90) label = "Three Quarter";
+            else label = "Full";
+            
+            fuelValue.textContent = `${val}% (${label})`;
+        }
+        
+        // Initialize
+        updateFuelLabel(fuelSlider.value);
+        
+        // Update on change
+        fuelSlider.addEventListener("input", function() {
+            updateFuelLabel(this.value);
+        });
+    });
+</script>

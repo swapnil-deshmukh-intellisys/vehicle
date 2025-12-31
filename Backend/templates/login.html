@@ -1,0 +1,259 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0,minimal-ui">
+  <meta name="description" content="Bikedoot">
+  <meta name="keywords" content="Bikedoot, web app">
+  <meta name="author" content="Bikedoot">
+  <title>Bikedoot-Login</title>
+  <link rel="apple-touch-icon" href="{% static 'app-assets/images/ico/apple-icon-120.png' %}">
+  <link rel="shortcut icon" type="image/x-icon" href="../../../static/custom-assets/images/bikedoot/ServXPNG.png">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600"
+    rel="stylesheet">
+
+  <!-- BEGIN: Vendor CSS-->
+  <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/vendors.min.css' %}">
+  <!-- END: Vendor CSS-->
+
+  <!-- BEGIN: Toastr CSS-->
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/vendors.min.css' %}"> -->
+  <link rel="stylesheet" type="text/css" href="{% static 'app-assets/vendors/css/extensions/toastr.min.css' %}">
+  <link rel="stylesheet" type="text/css"
+    href="{% static 'app-assets/css/plugins/extensions/ext-component-toastr.css' %}">
+  <!-- END: Toastr CSS-->
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome (for icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Custom Font Style -->
+  <style>
+    body {
+      font-family: 'Josefin Sans', sans-serif;
+    }
+
+    /* Fix for iOS input zoom */
+    @media screen and (max-width: 767px) {
+
+      input,
+      select,
+      textarea {
+        font-size: 16px !important;
+      }
+    }
+
+    /* Improved floating animation */
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(-10px);
+      }
+
+      50% {
+        transform: translateY(10px);
+      }
+    }
+
+    /* Responsive height fix */
+    @media screen and (max-height: 700px) {
+      .height-fix {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+
+      .form-compact {
+        gap: 0.75rem !important;
+      }
+    }
+  </style>
+</head>
+
+<body
+  class="bg-gradient-to-br from-[#e0ecff] via-[#edf3ff] to-[#f2f6fc] min-h-screen flex items-center justify-center font-sans overflow-x-hidden relative overscroll-none">
+
+  <!-- Company logo with styling to match page -->
+  <img src="../../../static/custom-assets/images/bikedoot/ServXPNG.png" alt="Company Logo"
+    class="absolute top-4 sm:top-6 left-4 sm:left-6 w-24 sm:w-28 md:w-32 z-50 pointer-events-none select-none drop-shadow-md" />
+
+  <!-- Main layout -->
+  <div
+    class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 items-center px-4 sm:px-6 lg:px-16 py-4 sm:py-8 lg:py-12 gap-6 lg:gap-10 relative z-10 height-fix">
+
+    <!-- Zig-Zag Highlights (hidden on mobile) -->
+    <div class="hidden md:block space-y-6 sm:space-y-8 p-6 sm:p-8">
+      <h2 class="text-2xl text-[#3b82f6] mobile-text">Why Choose Our GMS?</h2>
+
+      <!-- Feature 1 -->
+      <div class="flex items-center gap-4 md:gap-6">
+        <i class="fas fa-tasks text-[#3b82f6] text-3xl"></i>
+        <p class="text-gray-700 text-lg font-medium">Track jobs & service orders</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="flex items-center gap-4 md:gap-6 flex-row-reverse text-right">
+        <i class="fas fa-boxes text-[#3b82f6] text-3xl"></i>
+        <p class="text-gray-700 text-lg font-medium">Manage spare parts & inventory</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="flex items-center gap-4 md:gap-6">
+        <i class="fas fa-file-invoice-dollar text-[#3b82f6] text-3xl"></i>
+        <p class="text-gray-700 text-lg font-medium">Create digital invoices</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="flex items-center gap-4 md:gap-6 flex-row-reverse text-right">
+        <i class="fas fa-history text-[#3b82f6] text-3xl"></i>
+        <p class="text-gray-700 text-lg font-medium">Track customer history & repeat services</p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="flex items-center gap-4 md:gap-6">
+        <i class="fas fa-bell text-[#3b82f6] text-3xl"></i>
+        <p class="text-gray-700 text-lg font-medium">Send automatic service reminders</p>
+      </div>
+    </div>
+
+    <!-- Vertical Divider (visible only on desktop) -->
+    <div
+      class="hidden lg:absolute h-5/6 w-px bg-gradient-to-b from-transparent via-[#3b82f6]/50 to-transparent left-1/2 top-1/2 -translate-y-1/2">
+    </div>
+
+    <!-- Login Form (centered on mobile) -->
+    <div
+      class="bg-white/30 backdrop-blur-md border border-white/20 shadow-xl rounded-3xl p-5 sm:p-8 lg:p-10 w-full max-w-md mx-auto">
+      <h2 class="text-2xl text-gray-800 text-center mb-3 sm:mb-5 lg:mb-6 tracking-tight">Welcome to <span
+          class="text-red-700 !important" style="color: #b91c1c !important;">GMS</span></h2>
+
+      <!--START: message-->
+      {% if messages %}
+      <script id="django-messages" type="application/json">
+              [
+              {% for message in messages %}
+                  {
+                      "tags": "{{ message.tags }}",
+                      "message": "{{ message|escapejs }}"
+                  }{% if not forloop.last %},{% endif %}
+              {% endfor %}
+              ]
+          </script>
+      {% endif %}
+      <!--END: message-->
+      <form class="space-y-4 sm:space-y-5 lg:space-y-6 form-compact" action="{% url 'login' %}" method="POST">
+        {% csrf_token %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <div class="relative">
+            <i class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="email" name="login-email" id="login-email" required
+              class="w-full pl-12 pr-4 py-2.5 sm:py-3 rounded-xl bg-white/70 border border-gray-300 focus:ring-2 focus:ring-[#3b82f6] outline-none transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <div class="relative">
+            <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input id="login-password" name="login-password" type="password" required
+              class="w-full pl-12 pr-12 py-2.5 sm:py-3 rounded-xl bg-white/70 border border-gray-300 focus:ring-2 focus:ring-[#3b82f6] outline-none transition" />
+            <button type="button" id="togglePassword"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 focus:outline-none">
+              <i class="fa-solid fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" name="remember_me" id="remember_me"
+              class="h-4 w-4 text-[#3b82f6] border-gray-300 rounded">
+            <span class="text-gray-600">Remember me</span>
+          </label>
+          <a href="#" class="text-[#3b82f6] hover:underline">Forgot password?</a>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-[#3b82f6] hover:bg-[#2563eb] text-white py-2.5 sm:py-3 rounded-xl text-base sm:text-lg font-semibold transition duration-300 shadow-md">
+          <i class="fas fa-sign-in-alt mr-2"></i>Login
+        </button>
+      </form>
+
+
+    </div>
+  </div>
+
+  <!-- Background decoration -->
+  <div class="absolute -top-32 -right-24 h-96 w-96 bg-[#3b82f6] opacity-20 rounded-full blur-[120px]"></div>
+  <div class="absolute -bottom-32 -left-24 h-96 w-96 bg-blue-300 opacity-20 rounded-full blur-[120px]"></div>
+
+  <!-- BEGIN: Vendor JS-->
+  <script src="{% static 'app-assets/vendors/js/vendors.min.js' %}"></script>
+  <!-- BEGIN Vendor JS-->
+
+  <!-- BEGIN: Toastr JS-->
+  <!-- <script src="{% static 'app-assets/vendors/js/vendors.min.js' %}"></script> -->
+  <script src="{% static 'app-assets/vendors/js/extensions/toastr.min.js' %}"></script>
+  <script src="{% static 'app-assets/js/scripts/extensions/ext-component-toastr.js' %}"></script>
+  <script src="{% static 'custom-assets/js/toastrDjangoMessages.js' %}"></script>
+  <!-- END: Toastr JS-->
+
+  <!-- Remember Me and Password toggle JS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Password toggle functionality
+      const toggle = document.getElementById("togglePassword");
+      const password = document.getElementById("login-password");
+      const eyeIcon = document.getElementById("eyeIcon");
+      const rememberMe = document.getElementById("remember_me");
+      const loginForm = document.querySelector('form.form-compact');
+      const emailInput = document.getElementById("login-email");
+
+      // Toggle password visibility
+      toggle.addEventListener("click", () => {
+        const isHidden = password.type === "password";
+        password.type = isHidden ? "text" : "password";
+        eyeIcon.classList.toggle("fa-eye");
+        eyeIcon.classList.toggle("fa-eye-slash");
+      });
+
+      // Check for saved credentials
+      const savedEmail = localStorage.getItem('savedEmail');
+      const savedPassword = localStorage.getItem('savedPassword');
+
+      if (savedEmail && savedPassword) {
+        emailInput.value = savedEmail;
+        password.value = savedPassword;
+        rememberMe.checked = true;
+      }
+
+      // Handle form submission
+      loginForm.addEventListener('submit', function (e) {
+        if (rememberMe.checked) {
+          // Save credentials to localStorage
+          localStorage.setItem('savedEmail', emailInput.value);
+          localStorage.setItem('savedPassword', password.value);
+        } else {
+          // Remove saved credentials
+          localStorage.removeItem('savedEmail');
+          localStorage.removeItem('savedPassword');
+        }
+
+        // Continue with form submission
+        return true;
+      });
+    });
+  </script>
+</body>
+
+</html>

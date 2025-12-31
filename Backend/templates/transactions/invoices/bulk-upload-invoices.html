@@ -1,0 +1,363 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}Bulk Upload Invoices{% endblock %}
+
+{% block style %}
+<style>
+/* Modern card/table styles */
+.table-modern td, .table-modern th, .status-badge, .font-small-2 {
+    font-size: 1.08rem !important;
+}
+.r-invoice-header, .table-modern thead th {
+    font-size: 1.12rem;
+}
+
+.r-invoice-header {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(80, 80, 180, 0.06);
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.r-invoice-header .actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.r-invoice-header .search-box {
+    border-radius: 8px;
+    border: 1px solid #eee;
+    padding: 0.4rem 1rem;
+    min-width: 220px;
+    background: #fafbfc;
+    transition: box-shadow 0.2s;
+}
+.r-invoice-header .search-box:focus {
+    box-shadow: 0 0 0 2px #e0d7ff;
+}
+
+/* Table/Card styles */
+/* .table-modern thead th {
+    background: #ffa726;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+} */
+.table-modern tbody tr {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(110, 110, 160, 0.05);
+    margin-bottom: 0.5rem;
+    transition: box-shadow 0.2s;
+}
+.table-modern tbody tr:hover {
+    box-shadow: 0 2px 10px rgba(80, 80, 180, 0.13);
+}
+.status-badge {
+    display: inline-block;
+    padding: 0.25em 0.8em;
+    font-size: 0.95em;
+    border-radius: 0px;
+    font-weight: 500;
+    background: #ede7f6;
+    color: #7c4dff;
+}
+/* Status colors */
+.status-badge.created { background: #ede7f6; color: #7c4dff; } /* Purple */
+.status-badge.updated { background: #e3f2fd; color: #1976d2; } /* Blue */
+.status-badge.dispatched { background: #e0f7fa; color: #00acc1; } /* Cyan */
+.status-badge.payment-pending, .status-badge.payment\ pending { background: #fff3e0; color: #f57c00; } /* Orange */
+.status-badge.complete { background: #e8f5e9; color: #388e3c; } /* Green */
+.status-badge.closed { background: #f5f5f5; color: #616161; } /* Grey */
+.status-badge.cancelled { background: #ffebee; color: #e53935; } /* Red */
+.status-badge.pending { background: #fff3e0; color: #f57c00; } /* Orange */
+
+.activity-icon {
+    vertical-align: middle;
+    margin-right: 0.3em;
+    width: 1.25em;
+    height: 1.25em;
+    stroke-width: 2.2px;
+}
+.activity-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2em;
+    height: 2.2em;
+    border-radius: 0.6em;
+    margin-right: 0.55em;
+    box-shadow: 0 1px 6px rgba(80,80,180,0.07);
+}
+.activity-badge.created {
+    background: #e8f5e9;
+    color: #388e3c;
+}
+.activity-badge.updated {
+    background: #00bcd4;
+    color: #fff;
+}
+.activity-badge svg {
+    stroke: currentColor;
+    color: inherit;
+    width: 1.3em;
+    height: 1.3em;
+}
+
+/* Responsive Card View */
+@media (max-width: 768px) {
+    .table-responsive { border: none; }
+    table.table-modern, .table-modern thead, .table-modern tbody, .table-modern th, .table-modern td, .table-modern tr {
+        display: block;
+        width: 100%;
+    }
+    .table-modern thead { display: none; }
+    .table-modern tbody tr {
+        margin-bottom: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(80, 80, 180, 0.09);
+        padding: 1rem;
+        background: #fff;
+    }
+    .table-modern td {
+        padding: 0.5rem 0;
+        border: none;
+        position: relative;
+    }
+    .table-modern td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #888;
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">Invoices Summary</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item active">Bulk Upload Invoices
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body"> 
+                <section  id="bulk-upload-invoices">
+                    <!-- Responsive tables start -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="r-invoice-header">
+                                    <div class="actions">
+                                        <button type="button" class="btn btn-icon btn-outline-primary waves-effect" data-bs-toggle="modal" data-bs-target="#bulkUploadInvoicesModal"><i data-feather='upload'></i></button>
+                                    </div>
+                                    {% if track_invoice_uploads %}
+                                    <div style="flex:1; max-width: 350px; margin-left:auto;">
+                                        <input type="search" class="form-control search-box" id="searchTrackInvoiceUploads" placeholder="Search..." autocomplete="off" oninput="searchTable('searchTrackInvoiceUploads', 'tableTrackInvoiceUploads')">
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                    <div class="card-body">
+                                    {% if track_invoice_uploads %}
+                                    <div class="table-responsive">
+                                        <table class="table table-modern mb-0 table-sm table-striped table-hover" id="tableTrackInvoiceUploads">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="text-nowrap">File Name</th>
+                                                    <th scope="col" class="text-nowrap">Total</th>
+                                                    <th scope="col" class="text-nowrap">Success</th>
+                                                    <th scope="col" class="text-nowrap">Failed</th>
+                                                    <th scope="col" class="text-nowrap">Created At</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for track_invoice_upload in track_invoice_uploads %}
+                                                <tr>
+                                                    <td class="text-nowrap">
+                                                        <a href="{% url 'track-invoice-uploads' track_invoice_upload.id %}">{{ track_invoice_upload.file_name }}</a>
+                                                    </td>
+                                                    <td class="text-nowrap">{{ track_invoice_upload.total_count }}</td>
+                                                    <td class="text-nowrap text-success">{{ track_invoice_upload.success_count }}</td>
+                                                    <td class="text-nowrap text-danger">{{ track_invoice_upload.failed_count }}</td>
+                                                    <td class="text-nowrap">{{ track_invoice_upload.created_at }}</td>
+                                                </tr>                                    
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                        <div class="card-header">
+                                            <div>                                    
+                                                Showing {{ track_invoice_uploads.start_index }} to {{ track_invoice_uploads.end_index }} of {{ track_invoice_uploads.paginator.count }} entries
+                                            </div>
+                                            <div> 
+                                                {% if track_invoice_uploads.has_other_pages %}
+                                                    <nav aria-label="Page navigation">
+                                                        <ul class="pagination pagination-success">  
+
+                                                            <!-- First Page Link -->
+                                                            {% if track_invoice_uploads.number > 1 %}
+                                                            <li class="page-item first">
+                                                                <a href="?page=1&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link">First</a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item first disabled">
+                                                                <span class="page-link">First</span>
+                                                            </li>
+                                                            {% endif %}   
+
+                                                            <!-- Previous Page Link -->
+                                                            {% if track_invoice_uploads.has_previous %}
+                                                            <li class="page-item prev">
+                                                                <a href="?page={{ track_invoice_uploads.previous_page_number }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link" aria-label="Previous"></a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item prev disabled">
+                                                                <span class="page-link" aria-label="Previous"></span>
+                                                            </li>
+                                                            {% endif %}
+
+                                                            <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                            {% for page in track_invoice_uploads.paginator.page_range %}
+                                                                {% if page >= track_invoice_uploads.number|add:'-1' and page <= track_invoice_uploads.number|add:'1' %}
+                                                                    {% if page == track_invoice_uploads.number %}
+                                                                    <li class="page-item active">
+                                                                        <span class="page-link">{{ page }}</span>
+                                                                    </li>
+                                                                    {% else %}
+                                                                    <li class="page-item">
+                                                                        <a href="?page={{ page }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link">{{ page }}</a>
+                                                                    </li>
+                                                                    {% endif %}
+                                                                {% endif %}
+                                                            {% endfor %}
+
+                                                            <!-- Next Page Link -->
+                                                            {% if track_invoice_uploads.has_next %}
+                                                            <li class="page-item next">
+                                                                <a href="?page={{ track_invoice_uploads.next_page_number }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link" aria-label="Next"></a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item next disabled">
+                                                                <span class="page-link" aria-label="Next"></span>
+                                                            </li>
+                                                            {% endif %}
+
+                                                            <!-- Last Page Link -->
+                                                            {% if track_invoice_uploads.number < track_invoice_uploads.paginator.num_pages %}
+                                                            <li class="page-item last">
+                                                                <a href="?page={{ track_invoice_uploads.paginator.num_pages }}&status={{ request.GET.status }}&startdate={{ request.GET.startdate }}&enddate={{ request.GET.enddate }}" class="page-link">Last</a>
+                                                            </li>
+                                                            {% else %}
+                                                            <li class="page-item last disabled">
+                                                                <span class="page-link">Last</span>
+                                                            </li>
+                                                            {% endif %}
+
+                                                        </ul>
+                                                    </nav>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>  
+                                    {% else %}
+                                    <div class="text-center">
+                                        <div class="avatar bg-light-danger avatar-xl">
+                                            <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                        </div>
+                                        <p class="card-text fw-bolder">No data available.</p>
+                                        <p class="card-text fw-bold">Click on <i data-feather='upload'></i> icon to upload invoices.</p>
+                                    </div> 
+                                    {% endif %}                              
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Responsive tables end -->
+                </section>
+            </div>
+        </div>
+    </div>
+
+<!-- Bulk Upload Modal -->
+<div class="modal fade" id="bulkUploadInvoicesModal" tabindex="-1" aria-labelledby="bulkUploadInvoicesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkUploadInvoicesModalLabel">Bulk Upload Invoices</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="bulkUploadForm" method="post" enctype="multipart/form-data"> 
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="invoiceFile" class="form-label">Upload Invoice File</label>
+                        <input class="form-control" type="file" id="invoiceFile" name="invoice_file" accept=".csv, .xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
+                        <div class="form-text">
+                            <p class="mb-1">Valid Formats: CSV, XLS, XLSX</p>
+                            <ul class="mb-0">
+                                <li>Date format: YYYY-MM-DD</li>
+                                <li>🔴 Red headers for mandatory fields</li>
+                                <li>🟢 Green headers for non-mandatory fields</li>
+                            </ul>
+                            <a href="{% static 'samplecsv/sample-file-for-invoices.xlsx' %}" class="mt-2 d-inline-block">
+                                <i data-feather='download'></i> Download Sample CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload & Process</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>    
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Handle bulk upload services form submission
+        const bulkUploadForm = document.getElementById('bulkUploadForm');
+        if (bulkUploadForm) {
+            const bulkUploadSubmitBtn = bulkUploadForm.querySelector('button[type="submit"]');
+            bulkUploadForm.addEventListener('submit', function() {
+                if (bulkUploadSubmitBtn) {
+                    bulkUploadSubmitBtn.disabled = true;
+                    bulkUploadSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

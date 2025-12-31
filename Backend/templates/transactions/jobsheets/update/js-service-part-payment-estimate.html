@@ -1,0 +1,1972 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ============ START PAYMENT SECTION ============
+
+        // Store payments in an array
+        let payments = [];
+        let editingPaymentId = null;
+
+        function updatePaymentSummary() {
+            console.log("payments>>>>>>>>>>>>>>>>>>", payments);
+            const grandTotal = parseFloat($('#grandTotal').text().replace(/[^0-9.-]+/g, "")) || 0;
+            const totalPaid = payments.reduce((sum, payment) => sum + parseFloat(payment.amount), 0);
+            const balance = grandTotal - totalPaid;
+            // Update the UI
+            $('#totalPaidAmount').text(`₹${totalPaid.toFixed(2)}`);
+            const balanceElement = $('#balanceAmount');
+            const balanceLabel = $('#balanceLabel');
+            if (balance > 0) {
+                balanceElement.removeClass('text-success').addClass('text-danger');
+                balanceLabel.text('BALANCE DUE');
+                balanceElement.text(`₹${balance.toFixed(2)}`);
+            } else if (balance < 0) {
+                balanceElement.removeClass('text-danger').addClass('text-success');
+                balanceLabel.text('ADVANCE');
+                balanceElement.text(`₹${Math.abs(balance).toFixed(2)}`);
+            } else {
+                balanceElement.removeClass('text-danger text-success');
+                balanceLabel.text('PAID');
+                balanceElement.text('₹0.00');
+            }
+        }
+
+        // Function to load payments
+        function loadPayments() {
+            const jobcardId = '{{ jobcard_obj.id }}';
+            if (!jobcardId) return;
+            // Show loading state
+            const $paymentsList = $('#paymentsList');
+            const $noPaymentsMessage = $('#noPaymentsMessage');
+            $paymentsList.hide();
+            $noPaymentsMessage.html('<i class="fas fa-spinner fa-spin me-2"></i>Loading payments...').show();
+            $.ajax({
+                url: `/api/jobcard/payments/${jobcardId}/`,
+                type: 'GET',
+                success: function (response) {
+                    if (response.status === 'success') {
+                        payments = response.data.payments || [];
+                        renderPaymentsList(payments);
+                        // Update payment summary
+                        updatePaymentSummary();
+                    } else {
+                        toastr.error(response.message || 'Error loading payments');
+                        $noPaymentsMessage.html('Error loading payments. Please try again.').show();
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading payments:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        responseText: xhr.responseText,
+                        error: error
+                    });
+                    toastr.error('An error occurred while loading payments');
+                    $noPaymentsMessage.html('Error loading payments. Please try again.').show();
+                }
+            });
+        }
+
+        // Function to render payments list
+        function renderPaymentsList(payments) {
+            const $paymentsList = $('#paymentsList');
+            const $noPaymentsMessage = $('#noPaymentsMessage');
+            // Clear existing payments
+            $paymentsList.empty();
+            if (!payments || payments.length === 0) {
+                // Show "no payments" message and hide the list
+                $noPaymentsMessage.html(`
+                    <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                    <p class="mb-0 small">No Payment data found</p>
+                    <p class="mb-0 extra-small text-muted">Click "Add Payment" to get started</p>
+                `).show();
+                $paymentsList.hide();
+                return;
+            }
+            // Hide "no payments" message and show the list
+            $noPaymentsMessage.hide();
+            $paymentsList.show();
+            // Set the height and overflow based on the number of payments
+            if (payments.length <= 2) {
+                $paymentsList.css({
+                    'max-height': 'none',
+                    'overflow-y': 'hidden'
+                });
+            } else {
+                $paymentsList.css({
+                    'max-height': '200px',
+                    'overflow-y': 'auto'
+                });
+            }
+            try {
+                // Sort payments by date (newest first)
+                payments.sort((a, b) => new Date(b.payment_date) - new Date(a.payment_date));
+                // Add each payment to the list
+                payments.forEach(payment => {
+                    if (!payment || !payment.payment_date) {
+                        console.error('Invalid payment data:', payment);
+                        return;
+                    }
+                    const paymentDate = new Date(payment.payment_date).toLocaleDateString('en-IN', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                        // hour: '2-digit',
+                        // minute: '2-digit'
+                    });
+                    const amount = parseFloat(payment.amount || 0).toFixed(2);
+                    let paymentDetails = '';
+                    let paymentModeIcon = 'fa-money-bill-wave';
+                    let paymentModeClass = 'bg-primary';
+                    // Normalize payment mode for consistent comparison
+                    const paymentMode = String(payment.payment_mode || '').toLowerCase().trim().replace(/\s+/g, '_');
+                    // Debug log
+                    console.log('Processing payment:', {
+                        id: payment.id,
+                        mode: payment.payment_mode,
+                        normalized: paymentMode,
+                        data: payment
+                    });
+                    // Set payment mode specific details and styling
+                    switch (paymentMode) {
+                        case 'check':
+                        case 'cheque':
+                            paymentDetails = `Check #${payment.check_number || 'N/A'}`;
+                            if (payment.bank_name) paymentDetails += ` • ${payment.bank_name}`;
+                            if (payment.check_date) {
+                                paymentDetails += ` • ${new Date(payment.check_date).toLocaleDateString()}`;
+                            }
+                            if (payment.check_status) {
+                                paymentDetails += ` • ${String(payment.check_status).charAt(0).toUpperCase() + String(payment.check_status).slice(1)}`;
+                            }
+                            if (payment.deposited_date) {
+                                paymentDetails += ` • Deposited: ${new Date(payment.deposited_date).toLocaleDateString()}`;
+                            }
+                            paymentModeIcon = 'fa-money-check-alt';
+                            paymentModeClass = 'bg-info text-dark';
+                            break;
+                        case 'upi':
+                            paymentDetails = `UPI: ${payment.upi_id || 'N/A'}`;
+                            if (payment.transaction_id) {
+                                paymentDetails += ` • Txn: ${payment.transaction_id}`;
+                            }
+                            if (payment.upi_reference_id) {
+                                paymentDetails += ` • Ref: ${payment.upi_reference_id}`;
+                            }
+                            if (payment.upi_status) {
+                                paymentDetails += ` • ${String(payment.upi_status).charAt(0).toUpperCase() + String(payment.upi_status).slice(1)}`;
+                            }
+                            paymentModeIcon = 'fa-mobile-alt';
+                            paymentModeClass = 'bg-success';
+                            break;
+                        case 'bank_transfer':
+                        case 'banktransfer':
+                        case 'bank_transfer':
+                        case 'bank-transfer':
+                        case 'bank transfer':
+                            paymentDetails = `Bank Transfer`;
+                            if (payment.account_number) {
+                                paymentDetails += ` • A/C: ••••${String(payment.account_number).slice(-4)}`;
+                            }
+                            if (payment.account_holder_name) {
+                                paymentDetails += ` • ${payment.account_holder_name}`;
+                            }
+                            if (payment.ifsc_code) {
+                                paymentDetails += ` • IFSC: ${payment.ifsc_code}`;
+                            }
+                            if (payment.transaction_reference || payment.reference_number) {
+                                paymentDetails += ` • Ref: ${payment.transaction_reference || payment.reference_number}`;
+                            }
+                            if (payment.bank_name) {
+                                paymentDetails += ` • ${payment.bank_name}`;
+                            }
+                            if (payment.branch_name) {
+                                paymentDetails += ` • ${payment.branch_name}`;
+                            }
+                            paymentModeIcon = 'fa-university';
+                            paymentModeClass = 'bg-warning text-dark';
+                            break;
+                        case 'card':
+                        case 'credit_card':
+                        case 'debit_card':
+                            paymentDetails = `Card Payment`;
+                            if (payment.card_type) {
+                                paymentDetails += ` • ${String(payment.card_type).charAt(0).toUpperCase() + String(payment.card_type).slice(1)}`;
+                            }
+                            if (payment.card_number) {
+                                paymentDetails += ` • ••••${String(payment.card_number).slice(-4)}`;
+                            } else if (payment.last_four) {
+                                paymentDetails += ` • ••••${payment.last_four}`;
+                            }
+                            if (payment.card_holder_name) {
+                                paymentDetails += ` • ${payment.card_holder_name}`;
+                            }
+                            if (payment.transaction_id) {
+                                paymentDetails += ` • Txn: ${payment.transaction_id}`;
+                            }
+                            if (payment.card_expiry) {
+                                paymentDetails += ` • Exp: ${payment.card_expiry}`;
+                            }
+                            if (payment.card_status) {
+                                paymentDetails += ` • ${String(payment.card_status).charAt(0).toUpperCase() + String(payment.card_status).slice(1)}`;
+                            }
+                            paymentModeIcon = 'fa-credit-card';
+                            paymentModeClass = 'bg-secondary';
+                            break;
+                        default: // cash
+                            paymentDetails = 'Cash Payment';
+                            if (payment.receipt_number) {
+                                paymentDetails += ` • Receipt: ${payment.receipt_number}`;
+                            }
+                            if (payment.received_by) {
+                                paymentDetails += ` • Received by: ${payment.received_by}`;
+                            }
+                            if (payment.payment_reference) {
+                                paymentDetails += ` • Ref: ${payment.payment_reference}`;
+                            }
+                            if (payment.counter_name) {
+                                paymentDetails += ` • Counter: ${payment.counter_name}`;
+                            }
+                            paymentModeIcon = 'fa-money-bill-wave';
+                            paymentModeClass = 'bg-primary';
+                    }
+                    const $paymentItem = $(`
+                        <div class="voice-item d-flex align-items-center justify-content-between px-25 py-25 border-bottom" 
+                            data-payment-id="${payment.id || ''}" 
+                            style="transition: background-color 0.2s; cursor: pointer;">
+                            <div class="d-flex align-items-center" style="flex: 1; min-width: 0;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div class="d-flex align-items-center mb-1">
+                                        <span class="fw-bold me-2">₹${amount}</span>
+                                        <span class="badge ${paymentModeClass}">
+                                            <i class="fas ${paymentModeIcon} me-1"></i>
+                                            ${payment.payment_mode_display || payment.payment_mode || 'Cash'}
+                                        </span>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="far fa-calendar-alt me-1"></i>${paymentDate}
+                                    </div>
+                                    <div class="text-muted small mt-1">
+                                        <i class="fas ${paymentModeIcon} me-1"></i>${paymentDetails}
+                                    </div>
+                                    ${payment.notes ? `
+                                    <div class="text-muted small mt-1">
+                                        <i class="far fa-sticky-note me-1"></i>${payment.notes}
+                                    </div>` : ''}
+                                </div>
+                            </div>
+                            <div class="d-flex ms-2" style="flex-shrink: 0;">
+                                <button type="button" 
+                                        class="btn btn-sm btn-link text-primary p-0 edit-payment" 
+                                        data-payment-id="${payment.id || ''}" 
+                                        style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.7;"
+                                        title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-sm btn-link text-danger p-0 remove-payment ms-1" 
+                                        data-payment-id="${payment.id || ''}" 
+                                        style="width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; opacity: 0.7;"
+                                        title="Delete">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `);
+                    $paymentsList.append($paymentItem);
+                });
+            } catch (error) {
+                console.error('Error rendering payments:', error);
+                toastr.error('Error displaying payment information. Please check console for details.');
+            }
+        }
+
+        // Load payments when modal is shown
+        $('#paymentModal').on('shown.bs.modal', function () {
+            // Set default date to today
+            document.getElementById('paymentDate').valueAsDate = new Date();
+        });
+
+        // Reset form when modal is closed
+        $('#paymentModal').on('hidden.bs.modal', function () {
+            $('#paymentModalForm')[0].reset();
+            $('.payment-details').hide();
+            $('#paymentModalSaveBtn').html('<i class="fas fa-save me-1"></i> Save Payment');
+            $('#paymentModal .modal-title').text('Add Payment');
+            editingPaymentId = null;
+            // Remove any validation errors
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').remove();
+        });
+
+        // Handle edit payment click
+        $(document).on('click', '.edit-payment', function () {
+            const paymentId = $(this).data('payment-id');
+            const payment = payments.find(p => p.id == paymentId);
+            if (!payment) return;
+            editingPaymentId = paymentId;
+            // Set modal title
+            $('#paymentModal .modal-title').text('Edit Payment');
+            // Fill form with payment data
+            $('#paymentDate').val(payment.payment_date.split('T')[0]);
+            // First, hide all payment details
+            $('.payment-details').hide();
+            // Get the payment mode and normalize it (lowercase and replace spaces with underscores)
+            let paymentMode = payment.payment_mode.toLowerCase().replace(/\s+/g, '_');
+            console.log('Normalized payment mode:', paymentMode);
+            // Set the radio button state using a small delay to ensure DOM is ready
+            setTimeout(() => {
+                // Uncheck all payment modes first
+                $('input[name="payment_mode"]').prop('checked', false);
+                // Find and check the correct radio button
+                const $radio = $(`input[name="payment_mode"][value="${paymentMode}"]`);
+                $radio.prop('checked', true);
+                // For Bootstrap custom radio buttons, we need to update the visual state
+                $radio.closest('.btn').addClass('active').siblings().removeClass('active');
+                // Show the corresponding details section based on payment mode
+                if (paymentMode === 'check') {
+                    $('#checkNumber').val(payment.check_number || '');
+                    $('#bankName').val(payment.bank_name || '');
+                    $('#checkDate').val(payment.check_date ? payment.check_date.split('T')[0] : '');
+                    $('#checkDetails').show();
+                } else if (paymentMode === 'upi') {
+                    console.log('UPI Payment Data:', {
+                        upi_id: payment.upi_id,
+                        transaction_id: payment.transaction_id,
+                        full_payment: payment
+                    });
+                    $('#upiId').val(payment.upi_id || '');
+                    $('#transactionId').val(payment.transaction_id || '');
+                    $('#upiDetails').show();
+                } else if (paymentMode === 'bank_transfer' || paymentMode === 'banktransfer' || payment.payment_mode.toLowerCase().includes('bank')) {
+                    $('#accountNumber').val(payment.account_number || '');
+                    $('#accountHolderName').val(payment.account_holder_name || '');
+                    $('#ifscCode').val(payment.ifsc_code || '');
+                    $('#transactionReference').val(payment.transaction_reference || '');
+                    $('#bankTransferDetails').show();
+                }
+            }, 10);
+            // Set amount and notes
+            $('#amount').val(payment.amount);
+            $('#notes').val(payment.notes || '');
+            // Fill payment mode specific fields
+            if (payment.payment_mode === 'check') {
+                $('#checkNumber').val(payment.check_number || '');
+                $('#bankName').val(payment.bank_name || '');
+                $('#checkDate').val(payment.check_date ? payment.check_date.split('T')[0] : '');
+                $('#checkDetails').show();
+            } else if (payment.payment_mode === 'upi') {
+                $('#upiId').val(payment.upi_id || '');
+                $('#transactionId').val(payment.upi_transaction_id || '');
+                $('#upiDetails').show();
+            } else if (payment.payment_mode === 'bank_transfer') {
+                $('#accountNumber').val(payment.account_number || '');
+                $('#accountHolderName').val(payment.account_holder_name || '');
+                $('#ifscCode').val(payment.ifsc_code || '');
+                $('#transactionReference').val(payment.transaction_reference || '');
+                $('#bankTransferDetails').show();
+            }
+            // Update button text
+            $('#paymentModalSaveBtn').html('<i class="fas fa-save me-1"></i> Update Payment');
+            // Show the modal
+            $('#paymentModal').modal('show');
+        });
+
+        // Handle payment mode change
+        $('input[name="payment_mode"]').on('change', function () {
+            // Hide all payment details first
+            $('.payment-details').hide();
+            // Show the selected payment details
+            const selectedMode = $(this).val();
+            if (selectedMode === 'check') {
+                $('#checkDetails').show();
+            } else if (selectedMode === 'upi') {
+                $('#upiDetails').show();
+            } else if (selectedMode === 'bank_transfer') {
+                $('#bankTransferDetails').show();
+            }
+        });
+
+        // Handle form submission
+        $('#paymentModalForm').on('submit', function (e) {
+            e.preventDefault();
+            // Validate form
+            const amount = parseFloat($('#amount').val());
+            if (isNaN(amount) || amount <= 0) {
+                toastr.error('Please enter a valid amount');
+                return;
+            }
+            // Collect form data
+            const formData = {
+                jobcard_id: '{{ jobcard_obj.id }}',
+                payment_date: $('#paymentDate').val(),
+                payment_mode: $('input[name="payment_mode"]:checked').val(),
+                amount: amount,
+                notes: $('#notes').val()
+            };
+            // Add payment mode specific data
+            const paymentMode = formData.payment_mode;
+            if (paymentMode === 'check') {
+                formData.check_number = $('#checkNumber').val();
+                formData.bank_name = $('#bankName').val();
+                formData.check_date = $('#checkDate').val();
+            } else if (paymentMode === 'upi') {
+                formData.upi_id = $('#upiId').val();
+                formData.transaction_id = $('#transactionId').val();
+            } else if (paymentMode === 'bank_transfer') {
+                formData.account_number = $('#accountNumber').val();
+                formData.account_holder_name = $('#accountHolderName').val();
+                formData.ifsc_code = $('#ifscCode').val();
+                formData.transaction_reference = $('#transactionReference').val();
+            }
+            // Show loading state
+            const saveBtn = $('#paymentModalSaveBtn');
+            const originalBtnText = saveBtn.html();
+            saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...');
+            // Determine the URL and method based on whether we're adding or updating
+            const url = editingPaymentId
+                ? `/api/jobcard/payment/update/${editingPaymentId}/`
+                : '{% url "save_jobcard_payment" %}';
+            const method = editingPaymentId ? 'PUT' : 'POST';
+            // Send AJAX request
+            $.ajax({
+                url: url,
+                type: method,
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        const message = editingPaymentId ? 'updated' : 'saved';
+                        toastr.success(`Payment ${message} successfully`);
+                        loadPayments();
+                        $('#paymentModal').modal('hide');
+                    } else {
+                        toastr.error(response.message || `Error ${editingPaymentId ? 'updating' : 'saving'} payment`);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(`Error ${editingPaymentId ? 'updating' : 'saving'} payment:`, {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        responseText: xhr.responseText,
+                        error: error
+                    });
+                    let errorMsg = `An error occurred while ${editingPaymentId ? 'updating' : 'saving'} the payment`;
+                    try {
+                        const errorResponse = JSON.parse(xhr.responseText);
+                        errorMsg = errorResponse.message || errorMsg;
+                    } catch (e) {
+                        console.error('Error parsing error response:', e);
+                    }
+                    toastr.error(errorMsg);
+                },
+                complete: function () {
+                    saveBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Handle payment removal
+        $(document).on('click', '.remove-payment', function (e) {
+            e.stopPropagation(); // Prevent triggering edit when clicking delete button
+            const paymentId = $(this).data('payment-id');
+            if (!paymentId) return;
+            if (confirm('Are you sure you want to delete this payment? This action cannot be undone.')) {
+                const $paymentItem = $(`[data-payment-id="${paymentId}"]`);
+                const $deleteBtn = $(this);
+                const originalBtnText = $deleteBtn.html();
+                // Show loading state on the delete button
+                $deleteBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                $.ajax({
+                    url: `/api/jobcard/payment/delete/${paymentId}/`,
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            $paymentItem.fadeOut(300, function () {
+                                $(this).remove();
+                                // Remove from local payments array
+                                payments = payments.filter(p => p.id != paymentId);
+                                // Update payment summary
+                                updatePaymentSummary();
+                                // If no payments left, show the "no payments" message
+                                if (payments.length === 0) {
+                                    $('#noPaymentsMessage').html(`
+                                        <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                                        <p class="mb-0 small">No Payment data found</p>
+                                        <p class="mb-0 extra-small text-muted">Click "Add Payment" to get started</p>
+                                    `).show();
+                                    $('#paymentsList').hide();
+                                }
+                            });
+                            toastr.success('Payment deleted successfully');
+                        } else {
+                            toastr.error(response.message || 'Error deleting payment');
+                            $deleteBtn.prop('disabled', false).html(originalBtnText);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error deleting payment:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText,
+                            error: error
+                        });
+                        toastr.error('An error occurred while deleting the payment');
+                        $deleteBtn.prop('disabled', false).html(originalBtnText);
+                    }
+                });
+            }
+        });
+
+        // ============ ENT PAYMENT SECTION ============
+
+        let selectedServices = [];
+        let selectedParts = [];
+
+        const serviceObjs = [
+            {% for service in service_objs %}
+        {
+            id: "{{ service.id }}",
+            text: "{{ service.name|escapejs }}",
+            price: parseFloat("{{ service.price|default:0 }}"),
+            tax: parseFloat("{{ service.gst|default:0 }}"),
+            discount: parseFloat("{{ service.discount|default:0 }}")
+        }{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    ];
+    const productObjs = [
+        {% for product in product_catalogues_objs %}
+    {
+        id: "{{ product.id }}",
+            text: "{{ product.name|escapejs }}",
+                part_number: "{{ product.part_number|default:''|escapejs }}",
+                    code: "{{ product.code|default:''|escapejs }}",
+                        price: parseFloat("{{ product.price|default:0 }}"),
+                            tax: parseFloat("{{ product.gst|default:0 }}"),
+                                discount: parseFloat("{{ product.discount|default:0 }}")
+    } {% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    ];
+
+    function fetchJobcardServices() {
+        const jobcardNumber = '{{ jobcard_obj.jobcard_number }}';
+        if (!jobcardNumber) return;
+
+        $.ajax({
+            url: '{% url "get_jobcard_services" %}',
+            type: 'GET',
+            data: { jobcard_number: jobcardNumber },
+            success: function (response) {
+                if (response.status === 'success') {
+                    selectedServices = response.services || [];
+                    updateServiceList();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching services:', error);
+                showToast('Error', 'Failed to load services', 'danger');
+            }
+        });
+    }
+    function fetchJobcardParts() {
+        const jobcardNumber = '{{ jobcard_obj.jobcard_number }}';
+        if (!jobcardNumber) return;
+
+        $.ajax({
+            url: '{% url "get_jobcard_parts" %}',
+            type: 'GET',
+            data: { jobcard_number: jobcardNumber },
+            success: function (response) {
+                if (response.status === 'success') {
+                    selectedParts = response.parts || [];
+                    updatePartsList();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching parts:', error);
+                showToast('Error', 'Failed to load parts', 'danger');
+            }
+        });
+    }
+    function resetServiceForm() {
+        const form = document.getElementById('serviceForm');
+        if (form) {
+            // Reset the form
+            form.reset();
+
+            // Reset select2 dropdowns
+            if ($.fn.select2 && $('#serviceSelect').hasClass('select2-hidden-accessible')) {
+                $('#serviceSelect').val(null).trigger('change');
+            }
+
+            // Ensure default values
+            $('input[name*="servicequantity"]').val('1');
+            $('input[name*="servicetax"]').val('0');
+            $('input[name*="servicediscount"]').val('0');
+
+            // Clear validation states
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').hide();
+        }
+    }
+    function resetPartsForm() {
+        const form = document.getElementById('partForm');
+        if (form) {
+            // Reset the form
+            form.reset();
+
+            // Reset select2 dropdowns
+            if ($.fn.select2 && $('#partSelect').hasClass('select2-hidden-accessible')) {
+                $('#partSelect').val(null).trigger('change');
+            }
+
+            // Ensure default values
+            $('input[name*="partquantity"]').val('1');
+            $('input[name*="parttax"]').val('0');
+            $('input[name*="partdiscount"]').val('0');
+
+            // Clear validation states
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').hide();
+        }
+    }
+    function saveService(serviceData, callback) {
+        const saveBtn = $('#saveServiceBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('serviceChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ jobcard_obj.jobcard_number }}');
+        formData.append('service_id', serviceData.id || '');
+        formData.append('service_source', serviceData.type === 'existing' ? 'internal' : 'external');
+        formData.append('service_name', serviceData.name);
+        formData.append('quantity', serviceData.quantity);
+        formData.append('service_value', serviceData.value);
+        formData.append('service_tax', serviceData.tax || 0);
+
+        // Get CSRF token
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "save_jobcard_service" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardServices(); // Refresh services list
+                    resetServiceForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Service saved successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to save service';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to save service';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function savePart(partData, callback) {
+        const saveBtn = $('#savePartBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('partsChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ jobcard_obj.jobcard_number }}');
+        formData.append('part_id', partData.id || '');
+        formData.append('part_source', partData.type === 'existing' ? 'internal' : 'external');
+        formData.append('part_name', partData.name);
+        formData.append('part_number', partData.part_number || '');
+        formData.append('code', partData.code || '');
+        formData.append('quantity', partData.quantity);
+        formData.append('part_value', partData.value);
+        formData.append('part_tax', partData.tax || 0);
+
+        // Get CSRF token
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "save_jobcard_part" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardParts(); // Refresh parts list
+                    resetPartsForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Part saved successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to save part';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to save part';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function updateService(itemId, serviceData, callback) {
+        const saveBtn = $('#saveServiceBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('serviceChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ jobcard_obj.jobcard_number }}');
+        formData.append('item_id', itemId);
+        formData.append('service_id', serviceData.id || '');
+        formData.append('service_source', serviceData.type === 'existing' ? 'internal' : 'external');
+        formData.append('service_name', serviceData.name);
+        formData.append('quantity', serviceData.quantity);
+        formData.append('service_value', serviceData.value);
+        formData.append('service_tax', serviceData.tax || 0);
+
+        // Get CSRF token
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "update_jobcard_service" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardServices(); // Refresh services list
+                    resetServiceForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Service updated successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to update service';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to update service';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function updatePart(itemId, partData, callback) {
+        const saveBtn = $('#savePartBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('partsChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ jobcard_obj.jobcard_number }}');
+        formData.append('item_id', itemId);
+        formData.append('part_id', partData.id || '');
+        formData.append('part_source', partData.type === 'existing' ? 'internal' : 'external');
+        formData.append('part_name', partData.name);
+        formData.append('part_number', partData.part_number || '');
+        formData.append('code', partData.code || '');
+        formData.append('quantity', partData.quantity);
+        formData.append('part_value', partData.value);
+        formData.append('part_tax', partData.tax || 0);
+
+        // Get CSRF token
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "update_jobcard_part" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardParts(); // Refresh parts list
+                    resetPartsForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Part updated successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to update part';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to update part';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function showToast(title, message, type = 'info') {
+        // Create toast container if it doesn't exist
+        if ($('.toast-container').length === 0) {
+            $('body').append('<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>');
+        }
+
+        const toastId = 'toast-' + Date.now();
+        const toastHtml = `
+              <div class="toast align-items-center text-white bg-${type} border-0" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="d-flex">
+                      <div class="toast-body">
+                          <strong>${title}</strong><br>${message}
+                      </div>
+                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+              </div>
+          `;
+
+        $('.toast-container').append(toastHtml);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, {
+            delay: 3000,
+            autohide: true
+        });
+        toast.show();
+
+        // Remove the toast from DOM after it's hidden
+        toastEl.addEventListener('hidden.bs.toast', function () {
+            $(this).remove();
+        });
+    }
+    function initializeSelect2() {
+        if ($.fn.select2) {
+            // Initialize service select
+            if ($('#serviceSelect').length) {
+                $('#serviceSelect').select2({
+                    width: '100%',
+                    dropdownParent: $('#serviceChargesModal'),
+                    data: serviceObjs,
+                    placeholder: 'Select a service',
+                    allowClear: true
+                }).on('change', function () {
+                    const selectedId = $(this).val();
+                    if (selectedId) {
+                        const selectedService = serviceObjs.find(service => service.id === selectedId);
+                        if (selectedService) {
+                            $('input[name="fromdb_servicevalue"]').val(selectedService.price || '0');
+                            $('input[name="fromdb_servicetax"]').val(selectedService.tax || '0');
+                            $('input[name="fromdb_servicediscount"]').val(selectedService.discount || '0');
+                            $('input[name="fromdb_servicequantity"]').val('1');
+                        }
+                    }
+                });
+            }
+
+            // Initialize part select
+            if ($('#partSelect').length) {
+                $('#partSelect').select2({
+                    width: '100%',
+                    dropdownParent: $('#partsChargesModal'),
+                    debug: true,
+                    data: productObjs,
+                    placeholder: 'Select a part',
+                    allowClear: true,
+                    templateResult: function (data) {
+                        if (!data.id) {
+                            return data.text;
+                        }
+
+                        // Helper function to highlight text safely
+                        function highlightMatch(text, term) {
+                            // If no text, return empty string
+                            if (!text) return '';
+
+                            // If no term, just escape the text
+                            if (!term || term.trim() === '') {
+                                return $('<div>').text(text).html();
+                            }
+
+                            // Clean term for regex
+                            var cleanTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            var regex = new RegExp('(' + cleanTerm + ')', 'gi');
+
+                            // Split text by term (capturing the delimiter/term)
+                            var parts = text.split(regex);
+
+                            // Escape and wrap matches
+                            return parts.map(function (part) {
+                                if (part.toLowerCase() === term.toLowerCase()) {
+                                    return '<span class="fw-bolder text-primary">' + $('<div>').text(part).html() + '</span>';
+                                } else {
+                                    return $('<div>').text(part).html();
+                                }
+                            }).join('');
+                        }
+
+                        // Get current search term
+                        var searchTerm = $('#partsChargesModal .select2-search__field').val() || '';
+
+                        var highlightedText = highlightMatch(data.text, searchTerm);
+                        var partNumberHtml = data.part_number ? `Part No: ${highlightMatch(data.part_number, searchTerm)}` : '';
+                        var codeHtml = data.code ? `Code: ${highlightMatch(data.code, searchTerm)}` : '';
+
+                        var $container = $(
+                            `<div class='select2-result-repository clearfix'>
+                                <div class='select2-result-repository__title'>${highlightedText}</div>
+                                ${(data.part_number || data.code) ?
+                                `<div class='select2-result-repository__meta'>
+                                        <small class='text-muted'>
+                                            ${partNumberHtml}
+                                            ${(data.part_number && data.code) ? ' | ' : ''}
+                                            ${codeHtml}
+                                        </small>
+                                    </div>` : ''
+                            }
+                            </div>`
+                        );
+                        return $container;
+                    },
+                    matcher: function (params, data) {
+                        // If there are no search terms, return all of the data
+                        if ($.trim(params.term) === '') {
+                            return data;
+                        }
+
+                        // Do not display the item if there is no 'text' label
+                        if (typeof data.text === 'undefined') {
+                            return null;
+                        }
+
+                        // `params.term` should be the term that is used for searching
+                        // `data.text` is the text that is displayed for the data object
+                        var term = params.term.toLowerCase();
+                        var text = data.text.toLowerCase();
+                        var partNumber = (data.part_number || '').toLowerCase();
+                        var code = (data.code || '').toLowerCase();
+
+                        // Check if the search term is contained in the text, part number, or code
+                        if (text.indexOf(term) > -1 || partNumber.indexOf(term) > -1 || code.indexOf(term) > -1) {
+                            return data;
+                        }
+
+                        // Return `null` if the term should not be displayed
+                        return null;
+                    },
+                }).on('change', function () {
+                    const selectedId = $(this).val();
+                    if (selectedId) {
+                        const selectedPart = productObjs.find(part => part.id === selectedId);
+                        if (selectedPart) {
+                            $('input[name="fromdb_partvalue"]').val(selectedPart.price || '0');
+                            $('input[name="fromdb_parttax"]').val(selectedPart.tax || '0');
+                            $('input[name="fromdb_partdiscount"]').val(selectedPart.discount || '0');
+                            $('input[name="fromdb_partquantity"]').val('1');
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    $('.modal').on('shown.bs.modal', function () {
+        initializeSelect2();
+    });
+
+    // Service Modal Toggle
+    const serviceOptions = document.querySelectorAll('.service-option');
+    const existingServiceSection = document.getElementById('existingServiceSection');
+    const newServiceSection = document.getElementById('newServiceSection');
+    // Parts Modal Toggle
+    const partOptions = document.querySelectorAll('.part-option');
+    const existingPartSection = document.getElementById('existingPartSection');
+    const newPartSection = document.getElementById('newPartSection');
+    // Service Radio Button Handler
+    serviceOptions.forEach(option => {
+        option.addEventListener('change', function () {
+            if (this.checked) {
+                if (this.value === 'existing') {
+                    resetServiceForm();
+                    existingServiceSection.style.display = 'block';
+                    newServiceSection.style.display = 'none';
+                    document.getElementById('existingService').checked = true;
+                    document.getElementById('newService').checked = false;
+                } else {
+                    resetServiceForm();
+                    existingServiceSection.style.display = 'none';
+                    newServiceSection.style.display = 'block';
+                    document.getElementById('existingService').checked = false;
+                    document.getElementById('newService').checked = true;
+                }
+            }
+        });
+    });
+    // Parts Radio Button Handler
+    partOptions.forEach(option => {
+        option.addEventListener('change', function () {
+            if (this.checked) {
+                if (this.value === 'existing') {
+                    resetPartsForm();
+                    existingPartSection.style.display = 'block';
+                    newPartSection.style.display = 'none';
+                    document.getElementById('existingPart').checked = true;
+                    document.getElementById('newPart').checked = false;
+                } else {
+                    resetPartsForm();
+                    existingPartSection.style.display = 'none';
+                    newPartSection.style.display = 'block';
+                    document.getElementById('existingPart').checked = false;
+                    document.getElementById('newPart').checked = true;
+                }
+            }
+        });
+    });
+
+    // Modal close handlers
+    const serviceModal = document.getElementById('serviceChargesModal');
+    const partsModal = document.getElementById('partsChargesModal');
+    if (serviceModal) {
+        serviceModal.addEventListener('hidden.bs.modal', function () {
+            resetServiceForm();
+            existingServiceSection.style.display = 'block';
+            newServiceSection.style.display = 'none';
+            document.getElementById('existingService').checked = true;
+            document.getElementById('newService').checked = false;
+        });
+    }
+    if (partsModal) {
+        partsModal.addEventListener('hidden.bs.modal', function () {
+            resetPartsForm();
+            existingPartSection.style.display = 'block';
+            newPartSection.style.display = 'none';
+            document.getElementById('existingPart').checked = true;
+            document.getElementById('newPart').checked = false;
+        });
+    }
+
+    // Save Service Button Handler
+    $('#saveServiceBtn').on('click', function () {
+        const isNewService = $('#newService').is(':checked');
+        let isValid = true;
+        let serviceData = {};
+
+        // Clear previous validations
+        $('#serviceChargesModal .is-invalid').removeClass('is-invalid');
+        $('#serviceChargesModal .invalid-feedback').remove();
+
+        if (isNewService) {
+            // Validate new service
+            const serviceName = $('input[name="fromuser_servicename"]');
+            const servicePrice = $('input[name="fromuser_servicevalue"]');
+            const quantity = $('input[name="fromuser_servicequantity"]');
+
+            if (!serviceName.val()) {
+                showError(serviceName, 'Please enter a service name');
+                isValid = false;
+            }
+            if (!servicePrice.val()) {
+                showError(servicePrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                serviceData = {
+                    type: 'new',
+                    name: serviceName.val(),
+                    value: parseFloat(servicePrice.val()),
+                    quantity: parseInt(quantity.val()),
+                    tax: parseFloat($('input[name="fromuser_servicetax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromuser_servicediscount"]').val()) || 0
+                };
+                saveService(serviceData);
+            }
+        } else {
+            // Validate existing service
+            const selectedOption = $('#serviceSelect').select2('data')[0];
+            const servicePrice = $('input[name="fromdb_servicevalue"]');
+            const quantity = $('input[name="fromdb_servicequantity"]');
+
+            if (!selectedOption?.id) {
+                showError($('#serviceSelect').next('.select2-container'), 'Please select a service');
+                isValid = false;
+            }
+            if (!servicePrice.val()) {
+                showError(servicePrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                serviceData = {
+                    type: 'existing',
+                    id: selectedOption.id,
+                    name: selectedOption.text,
+                    value: parseFloat(servicePrice.val()),
+                    quantity: parseInt(quantity.val()),
+                    tax: parseFloat($('input[name="fromdb_servicetax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromdb_servicediscount"]').val()) || 0
+                };
+                saveService(serviceData);
+            }
+        }
+    });
+    // Save Part Button Handler
+    $('#savePartBtn').on('click', function () {
+        const isNewPart = $('#newPart').is(':checked');
+        let isValid = true;
+        let partData = {};
+
+        // Clear previous validations
+        $('#partsChargesModal .is-invalid').removeClass('is-invalid');
+        $('#partsChargesModal .invalid-feedback').remove();
+
+        if (isNewPart) {
+            // Validate new part
+            const partName = $('input[name="fromuser_partname"]');
+            const partPrice = $('input[name="fromuser_partvalue"]');
+            const quantity = $('input[name="fromuser_partquantity"]');
+
+            if (!partName.val()) {
+                showError(partName, 'Please enter a part name');
+                isValid = false;
+            }
+            if (!partPrice.val()) {
+                showError(partPrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                partData = {
+                    type: 'new',
+                    name: partName.val(),
+                    part_number: $('input[name="fromuser_partnumber"]').val() || '',
+                    code: $('input[name="fromuser_partcode"]').val() || '',
+                    value: parseFloat(partPrice.val()),
+                    quantity: parseInt(quantity.val()),
+                    tax: parseFloat($('input[name="fromuser_parttax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromuser_partdiscount"]').val()) || 0
+                };
+                savePart(partData);
+            }
+        } else {
+            // Validate existing part
+            const selectedOption = $('#partSelect').select2('data')[0];
+            const partPrice = $('input[name="fromdb_partvalue"]');
+            const quantity = $('input[name="fromdb_partquantity"]');
+
+            if (!selectedOption?.id) {
+                showError($('#partSelect').next('.select2-container'), 'Please select a part');
+                isValid = false;
+            }
+            if (!partPrice.val()) {
+                showError(partPrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                const selectedPart = productObjs.find(part => part.id === selectedOption.id);
+                partData = {
+                    type: 'existing',
+                    id: selectedOption.id,
+                    name: selectedOption.text,
+                    part_number: selectedPart?.part_number || '',
+                    code: selectedPart?.code || '',
+                    value: parseFloat(partPrice.val()),
+                    quantity: parseInt(quantity.val()),
+                    tax: parseFloat($('input[name="fromdb_parttax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromdb_partdiscount"]').val()) || 0
+                };
+                savePart(partData);
+            }
+        }
+    });
+
+    // Helper function to show validation error
+    function showError(input, message) {
+        const formGroup = $(input).closest('.form-group, .mb-3, .form-floating');
+        formGroup.addClass('has-error');
+
+        let feedback = formGroup.find('.invalid-feedback');
+        if (!feedback.length) {
+            feedback = $('<div class="invalid-feedback d-block"></div>');
+            formGroup.append(feedback);
+        }
+        feedback.text(message);
+        formGroup.addClass('is-invalid');
+    }
+
+    // Helper function to clear validation
+    function clearValidation(input) {
+        const formGroup = $(input).closest('.form-group, .mb-3, .form-floating');
+        formGroup.removeClass('has-error is-invalid');
+        formGroup.find('.invalid-feedback').remove();
+    }
+
+    // Function to update service list display
+    function updateServiceList() {
+        const servicesList = $('#selectedServicesList');
+        const serviceCount = $('#serviceItemCount');
+        const serviceCountBadge = $('#serviceCount');
+        const serviceTotalAmountBadge = $('#serviceTotalAmount');
+
+        // Calculate total service amount
+        let totalServiceAmount = 0;
+        selectedServices.forEach(service => {
+            const subtotal = (service.service_value || 0) * (service.quantity || 1);
+            const tax = (subtotal * (service.service_tax || 0)) / 100;
+            const valueWithTax = subtotal + tax;
+            const total = valueWithTax;
+            totalServiceAmount += total;
+        });
+        // let totalServiceAmount = 0;
+        // selectedServices.forEach(service => {
+        //     const subtotal = (service.service_value || 0) * (service.quantity || 1);
+        //     const tax = (subtotal * (service.service_tax || 0)) / 100;
+        //     const total = subtotal + tax - discount;
+        //     totalServiceAmount += total;
+        // });
+
+        // Update count and total badges
+        serviceCountBadge.text(selectedServices.length);
+        serviceTotalAmountBadge.text(totalServiceAmount.toFixed(2));
+
+        if (selectedServices.length === 0) {
+            servicesList.html(`
+              <div class="text-center text-muted py-3">
+                  <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                  <p class="mb-0 small">No services selected</p>
+                  <p class="mb-0 extra-small text-muted">Click "Add Services" to get started</p>
+              </div>
+          `);
+            serviceCount.text('0');
+            updateGrandTotal();
+            return;
+        }
+
+        let servicesHtml = `<div class="list-group list-group-flush" ${selectedServices.length > 3 ? 'style="max-height: 300px; overflow-y: auto;"' : ''}>`;
+
+        selectedServices.forEach((service) => {
+            const total = calculateItemTotal(service);
+            const unitValue = getUnitPrice(service) || 0;
+
+            servicesHtml += `
+              <div class="list-group-item" data-service-id="${service.id}">
+                  <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between align-items-start mb-1">
+                              <span class="service-name">${service.service_name}</span>
+                              <span class="service-price">₹${total}</span>
+                          </div>
+                          <div class="service-details">
+                              <span class="quantity">${service.quantity} × ₹${unitValue.toFixed(2)}</span>
+                              ${service.service_tax > 0 ? `<span class="badge tax-badge">+${service.service_tax}% Tax</span>` : ''}
+                          </div>
+                      </div>
+                      <button class="btn btn-sm btn-link text-danger p-0 remove-item" data-type="service" data-id="${service.id}" title="Remove service">
+                          <i class="fas fa-times"></i>
+                      </button>
+                  </div>
+              </div>`;
+        });
+
+        servicesHtml += '</div>';
+        servicesList.html(servicesHtml);
+        serviceCount.text(selectedServices.length);
+        updateGrandTotal();
+    }
+
+    // Function to update parts list display
+    function updatePartsList() {
+        const partsList = $('#selectedPartsList');
+        const partsCount = $('#partsItemCount');
+        const partsCountBadge = $('#partsCount');
+        const partsTotalAmountBadge = $('#partsTotalAmount');
+
+        // Calculate total parts amount
+        let totalPartsAmount = 0;
+        selectedParts.forEach(part => {
+            const subtotal = (part.part_value || 0) * (part.quantity || 1);
+            const tax = (subtotal * (part.part_tax || 0)) / 100;
+            const valueWithTax = subtotal + tax;
+            const total = valueWithTax;
+            totalPartsAmount += total;
+        });
+        // let totalPartsAmount = 0;
+        // selectedParts.forEach(part => {
+        //     const subtotal = (part.part_value || 0) * (part.quantity || 1);
+        //     const tax = (subtotal * (part.part_tax || 0)) / 100;
+        //     const total = subtotal + tax - discount;
+        //     totalPartsAmount += total;
+        // });
+
+        // Update count and total badges
+        partsCountBadge.text(selectedParts.length);
+        partsTotalAmountBadge.text(totalPartsAmount.toFixed(2));
+
+        if (selectedParts.length === 0) {
+            partsList.html(`
+              <div class="text-center text-muted py-3">
+                  <i class="fas fa-cog fa-2x mb-2 d-block opacity-50"></i>
+                  <p class="mb-0 small">No parts selected</p>
+                  <p class="mb-0 extra-small text-muted">Click "Add Parts" to get started</p>
+              </div>
+          `);
+            partsCount.text('0');
+            updateGrandTotal();
+            return;
+        }
+
+        let partsHtml = `<div class="list-group list-group-flush" ${selectedParts.length > 3 ? 'style="max-height: 300px; overflow-y: auto;"' : ''}>`;
+
+        selectedParts.forEach((part) => {
+            const total = calculateItemTotal(part);
+            const unitValue = getUnitPrice(part) || 0;
+
+            partsHtml += `
+              <div class="list-group-item" data-part-id="${part.id}">
+                  <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between align-items-start mb-1">
+                              <span class="service-name">${part.part_name}</span>
+                              <span class="service-price">₹${total}</span>
+                          </div>
+                          <div class="service-details">
+                              <span class="quantity">${part.quantity} × ₹${unitValue.toFixed(2)}</span>
+                              ${part.part_tax > 0 ? `<span class="badge tax-badge">+${part.part_tax}% Tax</span>` : ''}
+                          </div>
+                      </div>
+                      <button class="btn btn-sm btn-link text-danger p-0 remove-item" data-type="part" data-id="${part.id}" title="Remove part">
+                          <i class="fas fa-times"></i>
+                      </button>
+                  </div>
+              </div>`;
+        });
+
+        partsHtml += '</div>';
+        partsList.html(partsHtml);
+        partsCount.text(selectedParts.length);
+        updateGrandTotal();
+    }
+
+    function getUnitPrice(item) {
+        if (item.service_purchase_price) return parseFloat(item.service_purchase_price);
+        if (item.part_purchase_price) return parseFloat(item.part_purchase_price);
+        const value = item.service_value || item.part_value || 0;
+        const discount = item.service_discount || item.part_discount || 0;
+        return value * (1 - (discount / 100));
+    }
+
+    // Function to calculate item total with discount as percentage
+    function calculateItemTotal(item) {
+        const unitValue = getUnitPrice(item) || 0;
+        const tax = item.service_tax || item.part_tax || 0;
+        const quantity = item.quantity || 1;
+
+        const subtotal = unitValue * quantity;
+        const taxAmount = (subtotal * tax) / 100;
+        const valueWithTax = subtotal + taxAmount;
+        return (valueWithTax).toFixed(2);
+    }
+    // function calculateItemTotal(item) {
+    //     const value = item.service_value || item.part_value || 0;
+    //     const tax = item.service_tax || item.part_tax || 0;
+    //     const quantity = item.quantity || 1;
+
+    //     const subtotal = value * quantity;
+    //     const taxAmount = (subtotal * tax) / 100;
+    //     const discountAmount = (subtotal * discount) / 100;
+    //     return (subtotal + taxAmount - discountAmount).toFixed(2);
+    // }
+
+    // Function to animate value changes
+    function animateValueChange(elementId) {
+        const element = $('#' + elementId);
+        element.addClass('updating');
+        setTimeout(() => {
+            element.removeClass('updating');
+        }, 300);
+    }
+
+    // Complete updateGrandTotal function with animations
+    function updateGrandTotal() {
+        // Calculate service totals
+        let serviceSubtotal = 0;
+        let serviceTaxTotal = 0;
+        let serviceDiscountTotal = 0;
+        let serviceTotal = 0;
+
+        selectedServices.forEach(service => {
+            const subtotal = (service.service_value || 0) * (service.quantity || 1);
+            const tax = (subtotal * (service.service_tax || 0)) / 100;
+            const valueWithTax = subtotal + tax;
+
+            serviceSubtotal += subtotal;
+            serviceTaxTotal += tax;
+            serviceTotal += valueWithTax;
+        });
+
+        // Calculate parts totals
+        let partsSubtotal = 0;
+        let partsTaxTotal = 0;
+        let partsDiscountTotal = 0;
+        let partsTotal = 0;
+
+        selectedParts.forEach(part => {
+            const subtotal = (part.part_value || 0) * (part.quantity || 1);
+            const tax = (subtotal * (part.part_tax || 0)) / 100;
+            const valueWithTax = subtotal + tax;
+
+            partsSubtotal += subtotal;
+            partsTaxTotal += tax;
+            partsTotal += valueWithTax;
+        });
+
+        // Calculate grand total
+        const grandTotal = serviceTotal + partsTotal;
+
+        // Update summary displays with animations
+        $('.grand-total-amount').text(`₹${grandTotal.toFixed(2)}`);
+
+        // Update service section
+        $('#serviceSubtotal').text(`₹${serviceSubtotal.toFixed(2)}`);
+        $('#serviceTaxAmount').text(`₹${serviceTaxTotal.toFixed(2)}`);
+        $('#serviceDiscountAmount').text(`₹${serviceDiscountTotal.toFixed(2)}`);
+        $('#serviceTotal').text(`₹${serviceTotal.toFixed(2)}`);
+
+        // Update parts section
+        $('#partsSubtotal').text(`₹${partsSubtotal.toFixed(2)}`);
+        $('#partsTaxAmount').text(`₹${partsTaxTotal.toFixed(2)}`);
+        $('#partsDiscountAmount').text(`₹${partsDiscountTotal.toFixed(2)}`);
+        $('#partsTotal').text(`₹${partsTotal.toFixed(2)}`);
+
+        // Update grand total
+        $('#grandTotal').text(`₹${grandTotal.toFixed(2)}`);
+
+        // Update hidden form fields
+        $('input[name="total_services"]').val(serviceTotal.toFixed(2));
+        $('input[name="total_parts"]').val(partsTotal.toFixed(2));
+        $('input[name="grand_total"]').val(grandTotal.toFixed(2));
+
+        // Animate all value changes
+        animateValueChange('serviceSubtotal');
+        animateValueChange('serviceTaxAmount');
+        animateValueChange('serviceDiscountAmount');
+        animateValueChange('serviceTotal');
+        animateValueChange('partsSubtotal');
+        animateValueChange('partsTaxAmount');
+        animateValueChange('partsDiscountAmount');
+        animateValueChange('partsTotal');
+        animateValueChange('grandTotal');
+    }
+    // function updateGrandTotal() {
+    //     // Calculate service totals
+    //     let serviceSubtotal = 0;
+    //     let serviceTaxTotal = 0;
+    //     let serviceDiscountTotal = 0;
+
+    //     selectedServices.forEach(service => {
+    //         const subtotal = (service.service_value || 0) * (service.quantity || 1);
+    //         const tax = (subtotal * (service.service_tax || 0)) / 100;
+
+    //         serviceSubtotal += subtotal;
+    //         serviceTaxTotal += tax;
+    //         serviceDiscountTotal += discount;
+    //     });
+
+    //     const serviceTotal = serviceSubtotal + serviceTaxTotal - serviceDiscountTotal;
+
+    //     // Calculate parts totals
+    //     let partsSubtotal = 0;
+    //     let partsTaxTotal = 0;
+    //     let partsDiscountTotal = 0;
+
+    //     selectedParts.forEach(part => {
+    //         const subtotal = (part.part_value || 0) * (part.quantity || 1);
+    //         const tax = (subtotal * (part.part_tax || 0)) / 100;
+
+    //         partsSubtotal += subtotal;
+    //         partsTaxTotal += tax;
+    //         partsDiscountTotal += discount;
+    //     });
+
+    //     const partsTotal = partsSubtotal + partsTaxTotal - partsDiscountTotal;
+
+    //     // Calculate grand total
+    //     const grandTotal = serviceTotal + partsTotal;
+
+    //     // Update summary displays with animations
+    //     $('.grand-total-amount').text(`₹${grandTotal.toFixed(2)}`);
+
+    //     // Update service section
+    //     $('#serviceSubtotal').text(`₹${serviceSubtotal.toFixed(2)}`);
+    //     $('#serviceTaxAmount').text(`₹${serviceTaxTotal.toFixed(2)}`);
+    //     $('#serviceDiscountAmount').text(`₹${serviceDiscountTotal.toFixed(2)}`);
+    //     $('#serviceTotal').text(`₹${serviceTotal.toFixed(2)}`);
+
+    //     // Update parts section
+    //     $('#partsSubtotal').text(`₹${partsSubtotal.toFixed(2)}`);
+    //     $('#partsTaxAmount').text(`₹${partsTaxTotal.toFixed(2)}`);
+    //     $('#partsDiscountAmount').text(`₹${partsDiscountTotal.toFixed(2)}`);
+    //     $('#partsTotal').text(`₹${partsTotal.toFixed(2)}`);
+
+    //     // Update grand total
+    //     $('#grandTotal').text(`₹${grandTotal.toFixed(2)}`);
+
+    //     // Update hidden form fields
+    //     $('input[name="total_services"]').val(serviceTotal.toFixed(2));
+    //     $('input[name="total_parts"]').val(partsTotal.toFixed(2));
+    //     $('input[name="grand_total"]').val(grandTotal.toFixed(2));
+
+    //     // Animate all value changes
+    //     animateValueChange('serviceSubtotal');
+    //     animateValueChange('serviceTaxAmount');
+    //     animateValueChange('serviceDiscountAmount');
+    //     animateValueChange('serviceTotal');
+    //     animateValueChange('partsSubtotal');
+    //     animateValueChange('partsTaxAmount');
+    //     animateValueChange('partsDiscountAmount');
+    //     animateValueChange('partsTotal');
+    //     animateValueChange('grandTotal');
+
+    //     updatePaymentSummary()
+    // }
+
+    // Handle remove item
+    $(document).on('click', '.remove-item', function (e) {
+        e.preventDefault();
+        e.stopPropagation(); // Stop event from bubbling up to parent elements
+
+        const type = $(this).data('type');
+        const id = $(this).data('id');
+        const jobcardNumber = '{{ jobcard_obj.jobcard_number }}';
+
+        if (!jobcardNumber) {
+            showToast('Error', 'Jobcard number not found', 'danger');
+            return;
+        }
+
+        const url = type === 'service' ? '{% url "delete_jobcard_service" %}' : '{% url "delete_jobcard_part" %}';
+        const itemText = type === 'service' ? 'service' : 'part';
+
+        if (confirm(`Are you sure you want to remove this ${itemText}?`)) {
+            const button = $(this);
+            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    jobcard_number: jobcardNumber,
+                    item_id: id,
+                    csrfmiddlewaretoken: getCookie('csrftoken')
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        if (type === 'service') {
+                            selectedServices = selectedServices.filter(s => s.id != id);
+                            updateServiceList();
+                        } else {
+                            selectedParts = selectedParts.filter(p => p.id != id);
+                            updatePartsList();
+                        }
+                        showToast('Success', `${itemText.charAt(0).toUpperCase() + itemText.slice(1)} removed successfully`, 'success');
+                    } else {
+                        showToast('Error', response.message || `Failed to remove ${itemText}`, 'danger');
+                        button.prop('disabled', false).html('<i class="fas fa-times"></i>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showToast('Error', `Failed to remove ${itemText}: ${error}`, 'danger');
+                    button.prop('disabled', false).html('<i class="fas fa-times"></i>');
+                }
+            });
+        }
+    });
+
+    // Initialize the page
+    function initializePage() {
+        initializeSelect2();
+        fetchJobcardServices();
+        fetchJobcardParts();
+        loadPayments();
+    }
+
+    // Call initialize when DOM is ready
+    initializePage();
+
+    // ============ UPDATED EDIT FUNCTIONALITY FOR SERVICES AND PARTS ============
+
+    // Add edit functionality for selected services (click to edit)
+    $(document).on('click', '.list-group-item[data-service-id]', function (e) {
+        // Don't trigger if clicking the remove button
+        if ($(e.target).closest('.remove-item').length) {
+            return false;
+        }
+
+        // Get the service data
+        const serviceId = $(this).data('service-id');
+        const service = selectedServices.find(s => s.id == serviceId);
+
+        if (!service) return;
+
+        // Store that we're editing
+        window.editingServiceId = serviceId;
+        window.currentServiceData = service;
+
+        // Reset form and validation
+        $('#serviceChargesModal form')[0].reset();
+        $('#serviceChargesModal .is-invalid').removeClass('is-invalid');
+        $('#serviceChargesModal .invalid-feedback').remove();
+
+        // Set the appropriate radio button and show/hide sections
+        if (service.service_source === 'internal' && service.service_id) {
+            // For internal services with service_id
+            $('#existingService').prop('checked', true).trigger('change');
+            $('#existingServiceSection').show();
+            $('#newServiceSection').hide();
+
+            // Set the service select value
+            setTimeout(() => {
+                $('#serviceSelect').val(service.service_id).trigger('change');
+
+                // Update form fields with service data
+                $('input[name="fromdb_servicevalue"]').val(service.service_value || 0);
+                $('input[name="fromdb_servicetax"]').val(service.service_tax || 0);
+                $('input[name="fromdb_servicequantity"]').val(service.quantity || 1);
+            }, 100);
+        } else {
+            // For external services
+            $('#newService').prop('checked', true).trigger('change');
+            $('#newServiceSection').show();
+            $('#existingServiceSection').hide();
+
+            // Fill the form with external service data
+            $('input[name="fromuser_servicename"]').val(service.service_name || '');
+            $('input[name="fromuser_servicevalue"]').val(service.service_value || 0);
+            $('input[name="fromuser_servicetax"]').val(service.service_tax || 0);
+            $('input[name="fromuser_servicequantity"]').val(service.quantity || 1);
+        }
+
+        // Update the save button handler
+        $('#saveServiceBtn').off('click').on('click', function () {
+            let isValid = true;
+            let serviceData = {};
+
+            // Clear previous validations
+            $('#serviceChargesModal .is-invalid').removeClass('is-invalid');
+            $('#serviceChargesModal .invalid-feedback').remove();
+
+            if ($('#existingService').is(':checked')) {
+                // Validate existing service
+                const selectedOption = $('#serviceSelect').select2('data')[0];
+                const servicePrice = $('input[name="fromdb_servicevalue"]');
+                const quantity = $('input[name="fromdb_servicequantity"]');
+
+                if (!selectedOption?.id) {
+                    showError($('#serviceSelect').next('.select2-container'), 'Please select a service');
+                    isValid = false;
+                }
+                if (!servicePrice.val()) {
+                    showError(servicePrice, 'Please enter a price');
+                    isValid = false;
+                }
+                if (!quantity.val() || quantity.val() < 1) {
+                    showError(quantity, 'Please enter a valid quantity');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    serviceData = {
+                        type: 'existing',
+                        id: selectedOption.id,
+                        name: selectedOption.text,
+                        value: parseFloat(servicePrice.val()),
+                        quantity: parseInt(quantity.val()),
+                        tax: parseFloat($('input[name="fromdb_servicetax"]').val()) || 0,
+                        discount: parseFloat($('input[name="fromdb_servicediscount"]').val()) || 0
+                    };
+                }
+            } else {
+                // Validate new/external service
+                const serviceName = $('input[name="fromuser_servicename"]');
+                const servicePrice = $('input[name="fromuser_servicevalue"]');
+                const quantity = $('input[name="fromuser_servicequantity"]');
+
+                if (!serviceName.val()) {
+                    showError(serviceName, 'Please enter a service name');
+                    isValid = false;
+                }
+                if (!servicePrice.val()) {
+                    showError(servicePrice, 'Please enter a price');
+                    isValid = false;
+                }
+                if (!quantity.val() || quantity.val() < 1) {
+                    showError(quantity, 'Please enter a valid quantity');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    serviceData = {
+                        type: 'new',
+                        name: serviceName.val(),
+                        value: parseFloat(servicePrice.val()),
+                        quantity: parseInt(quantity.val()),
+                        tax: parseFloat($('input[name="fromuser_servicetax"]').val()) || 0,
+                        discount: parseFloat($('input[name="fromuser_servicediscount"]').val()) || 0
+                    };
+                }
+            }
+
+            if (isValid) {
+                updateService(serviceId, serviceData, function (error) {
+                    if (!error) {
+                        $('#serviceChargesModal').modal('hide');
+                    }
+                });
+            }
+        });
+
+        // Change modal title to indicate editing
+        $('#serviceChargesModal .modal-title').text('Edit Service');
+        $('#serviceChargesModal').modal('show');
+    });
+
+    // Add edit functionality for selected parts (click to edit)
+    $(document).on('click', '.list-group-item[data-part-id]', function (e) {
+        // Don't trigger if clicking the remove button
+        if ($(e.target).closest('.remove-item').length) {
+            return false;
+        }
+
+        // Get the part data
+        const partId = $(this).data('part-id');
+        const part = selectedParts.find(p => p.id == partId);
+
+        if (!part) return;
+
+        // Store that we're editing
+        window.editingPartId = partId;
+        window.currentPartData = part;
+
+        // Reset form and validation
+        $('#partsChargesModal form')[0].reset();
+        $('#partsChargesModal .is-invalid').removeClass('is-invalid');
+        $('#partsChargesModal .invalid-feedback').remove();
+
+        // Set the appropriate radio button and show/hide sections
+        if (part.part_source === 'internal' && part.part_id) {
+            // For internal parts with part_id
+            $('#existingPart').prop('checked', true).trigger('change');
+            $('#existingPartSection').show();
+            $('#newPartSection').hide();
+
+            // Set the part select value
+            setTimeout(() => {
+                $('#partSelect').val(part.part_id).trigger('change');
+
+                // Update form fields with part data
+                $('input[name="fromdb_partvalue"]').val(part.part_value || 0);
+                $('input[name="fromdb_parttax"]').val(part.part_tax || 0);
+                $('input[name="fromdb_partquantity"]').val(part.quantity || 1);
+                $('input[name="fromdb_partnumber"]').val(part.part_number || '');
+                $('input[name="fromdb_partcode"]').val(part.code || '');
+            }, 100);
+        } else {
+            // For external parts
+            $('#newPart').prop('checked', true).trigger('change');
+            $('#newPartSection').show();
+            $('#existingPartSection').hide();
+
+            // Fill the form with external part data
+            $('input[name="fromuser_partname"]').val(part.part_name || '');
+            $('input[name="fromuser_partnumber"]').val(part.part_number || '');
+            $('input[name="fromuser_partcode"]').val(part.code || '');
+            $('input[name="fromuser_partvalue"]').val(part.part_value || 0);
+            $('input[name="fromuser_parttax"]').val(part.part_tax || 0);
+            $('input[name="fromuser_partquantity"]').val(part.quantity || 1);
+        }
+
+        // Update the save button handler
+        $('#savePartBtn').off('click').on('click', function () {
+            let isValid = true;
+            let partData = {};
+
+            // Clear previous validations
+            $('#partsChargesModal .is-invalid').removeClass('is-invalid');
+            $('#partsChargesModal .invalid-feedback').remove();
+
+            if ($('#existingPart').is(':checked')) {
+                // Validate existing part
+                const selectedOption = $('#partSelect').select2('data')[0];
+                const partPrice = $('input[name="fromdb_partvalue"]');
+                const quantity = $('input[name="fromdb_partquantity"]');
+
+                if (!selectedOption?.id) {
+                    showError($('#partSelect').next('.select2-container'), 'Please select a part');
+                    isValid = false;
+                }
+                if (!partPrice.val()) {
+                    showError(partPrice, 'Please enter a price');
+                    isValid = false;
+                }
+                if (!quantity.val() || quantity.val() < 1) {
+                    showError(quantity, 'Please enter a valid quantity');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    const selectedPart = productObjs.find(part => part.id === selectedOption.id);
+                    partData = {
+                        type: 'existing',
+                        id: selectedOption.id,
+                        name: selectedOption.text,
+                        part_number: selectedPart?.part_number || '',
+                        code: selectedPart?.code || '',
+                        value: parseFloat(partPrice.val()),
+                        quantity: parseInt(quantity.val()),
+                        tax: parseFloat($('input[name="fromdb_parttax"]').val()) || 0,
+                        discount: parseFloat($('input[name="fromdb_partdiscount"]').val()) || 0
+                    };
+                }
+            } else {
+                // Validate new/external part
+                const partName = $('input[name="fromuser_partname"]');
+                const partPrice = $('input[name="fromuser_partvalue"]');
+                const quantity = $('input[name="fromuser_partquantity"]');
+
+                if (!partName.val()) {
+                    showError(partName, 'Please enter a part name');
+                    isValid = false;
+                }
+                if (!partPrice.val()) {
+                    showError(partPrice, 'Please enter a price');
+                    isValid = false;
+                }
+                if (!quantity.val() || quantity.val() < 1) {
+                    showError(quantity, 'Please enter a valid quantity');
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    partData = {
+                        type: 'new',
+                        name: partName.val(),
+                        part_number: $('input[name="fromuser_partnumber"]').val() || '',
+                        code: $('input[name="fromuser_partcode"]').val() || '',
+                        value: parseFloat(partPrice.val()),
+                        quantity: parseInt(quantity.val()),
+                        tax: parseFloat($('input[name="fromuser_parttax"]').val()) || 0,
+                        discount: parseFloat($('input[name="fromuser_partdiscount"]').val()) || 0
+                    };
+                }
+            }
+
+            if (isValid) {
+                updatePart(partId, partData, function (error) {
+                    if (!error) {
+                        $('#partsChargesModal').modal('hide');
+                    }
+                });
+            }
+        });
+
+        // Change modal title to indicate editing
+        $('#partsChargesModal .modal-title').text('Edit Part');
+        $('#partsChargesModal').modal('show');
+    });
+
+    // Reset modal titles and editing flags when modals are closed
+    $('#serviceChargesModal').on('hidden.bs.modal', function () {
+        // Reset form
+        $('#serviceChargesModal form')[0].reset();
+        // Reset select2 dropdowns
+        if ($('#serviceSelect').hasClass('select2-hidden-accessible')) {
+            $('#serviceSelect').val(null).trigger('change.select2');
+        }
+        window.editingServiceId = null;
+        window.currentServiceData = null;
+        $(this).find('.modal-title').text('Add Service');
+    });
+
+    $('#partsChargesModal').on('hidden.bs.modal', function () {
+        // Reset form
+        $('#partsChargesModal form')[0].reset();
+        // Reset select2 dropdowns
+        if ($('#partSelect').hasClass('select2-hidden-accessible')) {
+            $('#partSelect').val(null).trigger('change.select2');
+        }
+        window.editingPartId = null;
+        window.currentPartData = null;
+        $(this).find('.modal-title').text('Add Part');
+    });
+
+    // ============ END EDIT FUNCTIONALITY ============
+  
+  });
+</script>

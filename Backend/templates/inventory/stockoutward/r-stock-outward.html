@@ -1,0 +1,549 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-inv-stock-outward{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0"><a href="{% url 'r-inventory' %}">Inventory</a></h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item active">Stock Outward
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                <div class="mb-1 breadcrumb-right">
+                    <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <!-- Responsive tables start -->
+            <div class="row" id="r-inv-stock-outward">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                {% if 'add' in useruiacl.Inventory.Stock_Outward %}
+                                    <button type="button" class="btn btn-sm btn-outline-success waves-effect" data-bs-toggle="modal" data-bs-target="#stockOutwardModal" onclick="resetStockOutwardModal()">
+                                    <i data-feather='plus-square'></i> Add
+                                </button>
+                                {% endif %}
+
+                                {% if 'delete' in useruiacl.Inventory.Stock_Outward %}
+                                {% if stock_outward %}
+                                        <button type="button"  id="delStockOutward" class="btn btn-sm btn-outline-danger waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete Stock Outward">
+                                    <i data-feather='trash-2'></i> Delete
+                                </button>
+                                {% endif %}
+                                {% endif %}
+                                    <button type="button" class="btn btn-sm btn-outline-primary waves-effect" data-bs-toggle="modal" data-bs-target="#bulkUploadStockOutwardModal">
+                                    <i data-feather='upload'></i> Upload
+                                </button>
+                                    <a href="{% url 'export-stock-outwards-csv' %}" class="btn btn-sm btn-outline-info waves-effect" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Export CSV">
+                                    <i data-feather='download'></i> Export
+                                </a>
+                            </div>
+                            {% if stock_outward %}
+                            <div>
+                                <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputStockOutward" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputStockOutward', 'tableStockOutward')"/>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            {% if stock_outward %}
+                            <div class="table-responsive">
+                                <table class="table mb-0 table-sm table-striped table-hover" id="tableStockOutward">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="text-nowrap form-check-success">
+                                                {% if 'delete' in useruiacl.Inventory.Stock_Outward %}
+                                                    <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all Stock Outward"> 
+                                                {% endif %}
+                                                Product
+                                            </th>
+                                            <th scope="col" class="text-nowrap">Part Number</th>
+                                            <th scope="col" class="text-nowrap">Code</th>
+                                            <th scope="col" class="text-nowrap">Issued To</th>
+                                            <th scope="col" class="text-nowrap">Issued Date</th>
+                                            <th scope="col" class="text-nowrap">Quantity</th>
+                                            <th scope="col" class="text-nowrap">Updated at</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for stockoutward in stock_outward %}
+                                        <tr>
+                                            <td class="text-nowrap d-flex">
+                                                {% if 'delete' in useruiacl.Inventory.Stock_Outward %}
+                                                <form method="post" class="form-check-success">
+                                                    {% csrf_token %}
+                                                        <input  class="form-check-input me-1" type="checkbox" name="checkedStockOutward" value="{{stockoutward.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select Stock Outward">  
+                                                </form>
+                                                {% endif %}
+
+                                                {% if 'edit' in useruiacl.Inventory.Stock_Outward %}
+                                                <a href="#" onclick="loadStockOutwardModal({{stockoutward.id}})">
+                                                        {{ stockoutward.product.name }} | {{ stockoutward.product.brand.name }}
+                                                </a>
+                                                {% else %}
+                                                {{ stockoutward.product.name }} | {{ stockoutward.product.brand.name }}
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-nowrap">{{stockoutward.product.part_number}}</td>
+                                            <td class="text-nowrap">{{stockoutward.product.code}}</td>
+                                            <td class="text-nowrap">{{stockoutward.issued_to}}</td>
+                                            <td class="text-nowrap">{{stockoutward.issued_date}}</td>
+                                            <td class="text-nowrap">{{stockoutward.quantity}}</td>
+                                            <td class="text-nowrap">{{stockoutward.updated_at|utc_to_ist|date:'M d, Y H:i:s'}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div class="card-header">
+                                    <div>
+                                            Showing {{ stock_outward.start_index }} to {{ stock_outward.end_index }} of {{ stock_outward.paginator.count }} entries
+                                    </div>
+                                    <div>
+                                        {% if stock_outward.has_other_pages %}
+                                        <nav aria-label="Page navigation">
+                                            <ul class="pagination pagination-success">
+
+                                                <!-- First Page Link -->
+                                                {% if stock_outward.number > 1 %}
+                                                <li class="page-item first">
+                                                    <a href="?page=1" class="page-link">First</a>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item first disabled">
+                                                    <span class="page-link">First</span>
+                                                </li>
+                                                {% endif %}
+
+                                                <!-- Previous Page Link -->
+                                                {% if stock_outward.has_previous %}
+                                                <li class="page-item prev">
+                                                            <a href="?page={{ stock_outward.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                </li>
+                                                {% else %}
+                                                <li class="page-item prev disabled">
+                                                    <span class="page-link" aria-label="Previous"></span>
+                                                </li>
+                                                {% endif %}
+
+                                                <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                {% for page in stock_outward.paginator.page_range %}
+                                                {% if page >= stock_outward.number|add:'-1' and page <= stock_outward.number|add:'1' %}
+                                                                {% if page == stock_outward.number %}
+                                                    <li class="page-item active">
+                                                    <span class="page-link">{{ page }}</span>
+                                                    </li>
+                                                    {% else %}
+                                                    <li class="page-item">
+                                                        <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                    </li>
+                                                    {% endif %}
+                                                    {% endif %}
+                                                    {% endfor %}
+
+                                                    <!-- Next Page Link -->
+                                                    {% if stock_outward.has_next %}
+                                                    <li class="page-item next">
+                                                            <a href="?page={{ stock_outward.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                    </li>
+                                                    {% else %}
+                                                    <li class="page-item next disabled">
+                                                        <span class="page-link" aria-label="Next"></span>
+                                                    </li>
+                                                    {% endif %}
+
+                                                    <!-- Last Page Link -->
+                                                    {% if stock_outward.number < stock_outward.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ stock_outward.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+
+                                            </ul>
+                                        </nav>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center">
+                                <div class="avatar bg-light-danger avatar-xl">
+                                    <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                </div>
+                                <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to add stock outward.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Responsive tables end -->
+            <!-- Create Stock Outward Modal -->
+
+            {% include "inventory/stockoutward/includes/create-stock-outward-modal.html" %}
+            <!-- Create Stock Outward Modal -->
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Upload Stock Outward Modal -->
+<div class="modal fade" id="bulkUploadStockOutwardModal" tabindex="-1" aria-labelledby="bulkUploadStockOutwardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkUploadStockOutwardModalLabel">Bulk Upload Stock Outward</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="bulkUploadStockOutwardForm" method="post" action="{% url 'bulk-upload-stock-outward' %}" enctype="multipart/form-data"> 
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="stockOutwardFile" class="form-label">Upload Stock Outward File</label>
+                        <input class="form-control" type="file" id="stockOutwardFile" name="stock_outward_file" accept=".csv, .xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" required>
+                        <div class="form-text">
+                            <p class="mb-1">Valid Formats: CSV, XLS, XLSX</p>
+                            <ul class="mb-0">
+                                <li>product_id format: Integer (Get it from Inventory > Current Stock)</li>
+                                <li>issued_date format: YYYY-MM-DD</li>
+                                <li>🔴 Red headers for mandatory fields</li>
+                                <li>🟢 Green headers for non-mandatory fields</li>
+                            </ul>
+                            <a href="{% static 'samplecsv/sample-file-for-stock-outward.xlsx' %}" class="mt-2 d-inline-block">
+                                <i data-feather='download'></i> Download Sample CSV
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload & Process</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}?v=0.1"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    const stockOutwardData = {
+        {% for stockoutward in stock_outward %}
+        {{ stockoutward.id }}: {
+            product_id: {{ stockoutward.product.id }},
+        issued_to: '{{ stockoutward.issued_to|default:"" }}',
+            issued_date: '{{ stockoutward.issued_date|date:"Y-m-d"|default:"" }}',
+            quantity: {{ stockoutward.quantity }},
+            rate: {{ stockoutward.rate|default:0 }},
+            total_price: {{ stockoutward.total_price|default:0 }},
+        usage_purpose: '{{ stockoutward.usage_purpose|default:"" }}',
+            reference_document: '{{ stockoutward.reference_document|default:"" }}',
+                location: '{{ stockoutward.location|default:"" }}',
+                    rack: '{{ stockoutward.rack|default:"" }}',
+                        remarks: '{{ stockoutward.remarks|default:"" }}'
+    },
+    {% endfor %}
+    };
+
+    function resetStockOutwardModal() {
+        const modal = document.getElementById('stockOutwardModal');
+        const form = modal.querySelector('form');
+
+        // Reset form action to create URL
+        form.action = "{% url 'r-inv-stock-outward' %}";
+
+        // Reset all form fields
+        form.reset();
+    }
+
+    function submitStockOutwardForm(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const submitBtn = form.querySelector('#stockOutwardSubmitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const spinner = submitBtn.querySelector('.spinner-border');
+
+        // Show loading state
+        submitBtn.disabled = true;
+        btnText.textContent = 'Processing...';
+        spinner.classList.remove('d-none');
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status) {
+                    // Success - close modal and reload page
+                    bootstrap.Modal.getInstance(document.getElementById('stockOutwardModal')).hide();
+                    location.reload();
+                } else {
+                    // Show error message
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing the request.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.disabled = false;
+                btnText.textContent = 'Submit';
+                spinner.classList.add('d-none');
+            });
+
+        return false;
+    }
+
+    function loadStockOutwardModal(id) {
+        const data = stockOutwardData[id];
+        if (!data) return;
+
+        const modal = document.getElementById('stockOutwardModal');
+        const form = modal.querySelector('form');
+
+        // Update form action for update
+        form.action = `/u-inv-stock-outward/${id}/`;
+
+        // Add hidden ID field for update
+        let idField = form.querySelector('#stockOutwardId');
+        if (!idField) {
+            idField = document.createElement('input');
+            idField.type = 'hidden';
+            idField.id = 'stockOutwardId';
+            idField.name = 'id';
+            form.appendChild(idField);
+        }
+        idField.value = id;
+
+        // Update form values
+        form.querySelector('[name="product"]').value = data.product_id;
+        form.querySelector('[name="issued_to"]').value = data.issued_to;
+        form.querySelector('[name="issued_date"]').value = data.issued_date;
+        form.querySelector('[name="quantity"]').value = data.quantity;
+        form.querySelector('[name="usage_purpose"]').value = data.usage_purpose;
+        form.querySelector('[name="reference_document"]').value = data.reference_document;
+        form.querySelector('[name="location"]').value = data.location;
+        form.querySelector('[name="rack"]').value = data.rack;
+        form.querySelector('[name="remarks"]').value = data.remarks;
+
+        new bootstrap.Modal(modal).show();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // DELETE FUNCTIONALITY: Handles deleting selected stock outward items
+        const delStockOutwardButton = document.getElementById("delStockOutward");
+        if (delStockOutwardButton) {
+            delStockOutwardButton.addEventListener("click", function () {
+                let selectedIds = []; // Array to store selected item IDs
+                const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value; // Get CSRF token
+
+                // Find all checked checkboxes and store their values (IDs)
+                document.querySelectorAll('input[name="checkedStockOutward"]:checked').forEach(function (input) {
+                    selectedIds.push(input.value);
+                });
+
+                // Prepare data for the AJAX request
+                const requestData = {
+                    id: selectedIds,
+                    csrfmiddlewaretoken: csrfToken
+                };
+                const ajaxUrl = "{% url 'd-inv-stock-outward' %}"; // URL for the delete request
+
+                // Call the delete confirmation function
+                deleteConfirmation(requestData, ajaxUrl);
+            });
+        }
+
+        // Handle bulk upload stock outward form submission
+        const bulkUploadStockOutwardForm = document.getElementById('bulkUploadStockOutwardForm');
+        if (bulkUploadStockOutwardForm) {
+            const bulkUploadStockOutwardSubmitBtn = bulkUploadStockOutwardForm.querySelector('button[type="submit"]');
+            bulkUploadStockOutwardForm.addEventListener('submit', function() {
+                if (bulkUploadStockOutwardSubmitBtn) {
+                    bulkUploadStockOutwardSubmitBtn.disabled = true;
+                    bulkUploadStockOutwardSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
+                }
+            });
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        function showSelectedProductDetails(selectElement) {
+            const selectedProductId = selectElement.value; // Get selected product ID
+            const modalBody = selectElement.closest(".modal-body"); // Find the closest modal container
+
+            if (modalBody) {
+                // Hide all product details inside this modal
+                modalBody.querySelectorAll(".product-details").forEach(detail => detail.style.display = "none");
+
+                // Show the selected product's details
+                if (selectedProductId) {
+                    const selectedDetails = modalBody.querySelector(`#product-details-${selectedProductId}`);
+                    if (selectedDetails) selectedDetails.style.display = "block";
+                }
+            }
+        }
+
+        // Handle dropdown change for multiple product selectors
+        document.querySelectorAll("[id^='productSelect']").forEach(select => {
+            select.addEventListener("change", function () {
+                showSelectedProductDetails(this);
+            });
+
+            // Ensure correct details are displayed on page load if a product is already selected
+            if (select.value) {
+                showSelectedProductDetails(select);
+            }
+        });
+
+        // Handle modal persistence
+        document.querySelectorAll(".modal").forEach(modal => {
+            let lastSelectedValues = {};
+
+            modal.addEventListener("show.bs.modal", function () {
+                // Restore the last selected product value
+                const select = this.querySelector("[id^='productSelect']");
+                if (select && lastSelectedValues[modal.id]) {
+                    select.value = lastSelectedValues[modal.id];
+                    showSelectedProductDetails(select);
+                }
+            });
+
+            modal.addEventListener("hide.bs.modal", function () {
+                // Store the currently selected product value before closing
+                const select = this.querySelector("[id^='productSelect']");
+                if (select) {
+                    lastSelectedValues[modal.id] = select.value;
+                }
+
+                // Hide product details when modal closes
+                this.querySelectorAll(".product-details").forEach(detail => detail.style.display = "none");
+            });
+        });
+
+    });
+</script>
+</script>
+<script>
+    $(document).ready(function () {
+        // Helper function to highlight text safely
+        function highlightMatch(text, term) {
+            if (!text) return '';
+            if (!term || term.trim() === '') {
+                return $('<div>').text(text).html();
+            }
+            var cleanTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var regex = new RegExp('(' + cleanTerm + ')', 'gi');
+            var parts = text.split(regex);
+            return parts.map(function (part) {
+                if (part.toLowerCase() === term.toLowerCase()) {
+                    return '<span class="fw-bolder text-primary">' + $('<div>').text(part).html() + '</span>';
+                } else {
+                    return $('<div>').text(part).html();
+                }
+            }).join('');
+        }
+
+        var $stockOutwardProductSelect = $('#stockOutwardProductSelect');
+        if ($stockOutwardProductSelect.length) {
+            $stockOutwardProductSelect.select2({
+                dropdownParent: $('#stockOutwardModal'),
+                width: '100%',
+                templateResult: function (data) {
+                    if (!data.id) {
+                        return data.text;
+                    }
+                    var element = $(data.element);
+                    var partNumber = element.data('part-number') || '';
+                    var code = element.data('code') || '';
+
+                    // Get current search term
+                    var searchTerm = $('#stockOutwardModal .select2-search__field').val() || '';
+
+                    var highlightedText = highlightMatch(data.text, searchTerm);
+                    var partNumberHtml = partNumber ? `Part No: ${highlightMatch(partNumber, searchTerm)}` : '';
+                    var codeHtml = code ? `Code: ${highlightMatch(code, searchTerm)}` : '';
+
+                    var $container = $(
+                        `<div class='select2-result-repository clearfix'>
+                            <div class='select2-result-repository__title'>${highlightedText}</div>
+                            ${(partNumber || code) ?
+                            `<div class='select2-result-repository__meta'>
+                                    <small class='text-muted'>
+                                        ${partNumberHtml}
+                                        ${(partNumber && code) ? ' | ' : ''}
+                                        ${codeHtml}
+                                    </small>
+                                </div>` : ''
+                        }
+                        </div>`
+                    );
+                    return $container;
+                },
+                matcher: function (params, data) {
+                    if ($.trim(params.term) === '') {
+                        return data;
+                    }
+                    if (typeof data.text === 'undefined') {
+                        return null;
+                    }
+
+                    var element = $(data.element);
+                    var partNumber = (element.data('part-number') || '').toString().toLowerCase();
+                    var code = (element.data('code') || '').toString().toLowerCase();
+
+                    var term = params.term.toLowerCase();
+                    var text = data.text.toLowerCase();
+
+                    if (text.indexOf(term) > -1 || partNumber.indexOf(term) > -1 || code.indexOf(term) > -1) {
+                        return data;
+                    }
+                    return null;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

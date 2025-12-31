@@ -1,0 +1,2573 @@
+{% extends "index.html" %}
+
+{% block title %}Create Job Card{% endblock %}
+
+<!--start call summary only -->
+{% block navlink %}
+<li class="nav-item me-2 subsection-group" data-menu="createjobsheet" style="display: none;">
+                        <a class="nav-link" href="" style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'" onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+                            <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+                            <span>Summary</span>
+                        </a>
+                    </li>
+{% endblock %}
+<!--end call summary only -->
+
+{% block style %}
+<!-- PC start upload cross icon ui -->
+<!-- <style>
+
+
+
+
+</style> -->
+<!-- PC end upload cross icon ui -->
+<style>
+    /* Responsive Styles */
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .content-wrapper {
+        padding: 0 0.75rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 991.98px) {
+        .content-wrapper {
+            padding: 0 0.5rem;
+        }
+        
+        /* Make form elements stack on mobile */
+        .row > [class*='col-'] {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        
+        /* Adjust form controls */
+        .form-control, .form-select, .select2-container {
+            width: 100% !important;
+        }
+        
+        /* Make buttons full width on mobile */
+        .btn-group {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        
+        .btn-group .btn {
+            flex: 1 0 auto;
+            margin-bottom: 0.25rem;
+        }
+    }
+    
+    /* Ensure flex items wrap properly */
+    .d-flex {
+        flex-wrap: wrap;
+    }
+
+    /**/
+    .info-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: 100%;
+        box-sizing: border-box;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+    
+    .info-card:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        /*background: linear-gradient(to bottom, #4361ee, #3a56d4);*/
+        background-color: #3b82f6;
+        border-radius: 4px 0 0 4px;
+    }
+    
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        background-color: #f8f9fa;
+    }
+    
+    .info-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .info-card p {
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+        color: #5e6e82;
+        font-size: 0.95rem;
+    }
+    
+    .info-card .row.g-2 > [class*='col-'] {
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+    
+    /* Dent Markers Styles */
+    .dent-marker {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: rgba(255, 107, 107, 0.9);
+        border: 2px solid #fff;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        cursor: move;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.2s ease;
+        z-index: 10;
+    }
+
+    .dent-marker .marker-icon {
+        width: 18px;
+        height: 18px;
+        color: white;
+        stroke-width: 2.5px;
+    }
+
+    .dent-marker .marker-number {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background-color: #ff2e2e;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: bold;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .dent-marker.active {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.5);
+        z-index: 20;
+    }
+
+    .dent-marker:hover {
+        transform: translate(-50%, -50%) scale(1.15);
+        z-index: 30;
+    }
+
+    .vehicle-diagram {
+        position: relative;
+        background-color: #f8f9fa;
+        min-height: 200px;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: crosshair;
+        overflow: hidden;
+        border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+        transition: border-color 0.3s ease;
+        margin: 0 auto;
+        width: 100%;
+        height: 300px; /* Fixed height for better control */
+    }
+    
+    @media (min-width: 768px) {
+        .vehicle-diagram {
+            height: 400px; /* Slightly taller on larger screens */
+        }
+    }
+
+    .vehicle-diagram:hover {
+        border-color: #bdbdbd;
+    }
+
+    .vehicle-diagram img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    .dent-markers {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .dent-markers > * {
+        pointer-events: auto;
+    }
+    .vehicle-diagram {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Dent Marker */
+    .vehicle-diagram {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dent-markers {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+    
+    .dent-marker {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        pointer-events: auto;
+    }
+    
+    .dent-marker i {
+        filter: drop-shadow(0px 0px 2px white);
+    }
+    
+    /* Accessory badges */
+    .accessory-badge {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 0.5rem;
+        cursor: default;
+    }
+    
+    .remove-accessory {
+        cursor: pointer;
+    }
+    
+    /* Photo preview */
+    .photo-item {
+        transition: all 0.2s ease;
+    }
+    
+    .photo-item:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Vehicle Type Selector */
+    .vehicle-type-selector {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    @media (max-width: 991.98px) {
+        .vehicle-type-option {
+            width: calc(33.333% - 0.5rem) !important;
+            margin: 0.25rem;
+            padding: 0.75rem 0.5rem !important;
+            flex: 1 0 auto;
+            min-width: 100px;
+            box-sizing: border-box;
+        }
+        
+        .vehicle-icon-wrapper {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        
+        /* Responsive form groups */
+        .form-group {
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Adjust card padding on mobile */
+        .card-body {
+            padding: 1rem;
+        }
+        
+        /* Make sure input groups stack properly */
+        .input-group {
+            flex-wrap: wrap;
+        }
+        
+        .input-group > .form-control,
+        .input-group > .form-select,
+        .input-group > .btn {
+            width: 100%;
+            margin-bottom: 0.25rem;
+        }
+    }
+    
+    .vehicle-type-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+        width: 120px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .vehicle-type-option.selected {
+        /*border-color: #7367f0; */
+        border-color: #3b82f6;
+        background-color: rgba(115, 103, 240, 0.08);
+        box-shadow: 0 4px 10px rgba(115, 103, 240, 0.2);
+    }
+    
+    .vehicle-icon-wrapper {
+        background-color: #f8f8f8;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .vehicle-type-option.selected .vehicle-icon-wrapper {
+       /* background-color: #7367f0;*/
+        background-color: #3b82f6
+    }
+    
+    .vehicle-type-option.selected .vehicle-icon {
+        color: white;
+    }
+    
+    .vehicle-type-label {
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+    
+    /* Fuel Gauge */    
+    .fuel-markers {
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+    }
+    
+    .fuel-dot {
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+    
+    .fuel-dot.active {
+        /*background-color: #7367f0;*/
+        background-color: #3b82f6;
+        
+        transform: scale(1.2);
+    }
+    
+    /* Service Checklist */
+    .service-checklist .form-check-input:checked {
+        background-color: #ff9f43;
+        border-color: #ff9f43;
+    }
+
+    /* Style for Select2 with Add New */
+    .select2-add-new-dropdown .select2-results__option {
+        padding: 0.5rem 1rem;
+    }
+    
+    .select2-add-new-option-container {
+        border-top: 1px solid #e9ecef;
+        margin-top: 0.25rem;
+        padding-top: 0.25rem;
+    }
+    
+    .select2-add-new-option {
+        color: #7367f0;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+    
+    .select2-add-new-option:hover {
+        background-color: #f8f9fa;
+        color: #5d52d8;
+    }
+    
+    .select2-add-new-option i {
+        margin-right: 0.5rem;
+    }
+    
+    /* Style for the Add New buttons */
+    .btn-add-new {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-add-new i {
+        margin-right: 0.25rem;
+    }
+    
+    /* Make sure the select2 dropdowns are full width */
+    .select2-container {
+        width: 100% !important;
+    }
+    
+    /* Style for the modal forms */
+    .modal-content {
+        border: none;
+        border-radius: 0.5rem;
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+</style>
+
+<style>
+/* When Select2 shows the placeholder */
+#vehicleModel + .select2-container .select2-selection__placeholder {
+  color: #999 !important;  /* light gray */
+  font-style: italic;      /* optional */
+}
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% load static %}
+
+
+
+
+{% block content %}
+<div class="app-content content ">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Job Card</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">                                
+                                {% if booking_obj %} 
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'v-accounts-bookings' id=booking_obj.id %}">Booking Details</a>
+                                </li>
+                                {% else %}  
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'r-txn-job-sheets' %}">List Job Cards</a>
+                                </li>                          
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'job-sheets-vehicletype' %}">Select Vehicle Type</a>
+                                </li>
+                                {% endif %}
+                                <li class="breadcrumb-item active">Create Job Card
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                <div class="mb-1 breadcrumb-right">
+                    <!-- Additional header buttons can go here -->
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="c-job-sheets"> 
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">                            
+                            <div class="card-header">
+                                <h6 class="card-title mb-0 fw-600">Create Job Card</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="createJobCardForm" class="form form-vertical" action="{% url 'c-txn-job-sheets' vehicletype %}{% if booking_obj %}?booking_id={{ booking_obj.id }}{% endif %}" method="post" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    <div class="row"> 
+                                        <div class="col-12 col-md-6">
+                                            <!-- Customer Details -->
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="row info-card">
+                                                        <p class="mb-1 text-muted small"><i class="fas fa-user me-1"></i>Customer Details</p>                                                    
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="customerMobile">Mobile Number *</label>
+                                                            <input type="text" id="customerMobile" class="form-control" name="customermobile" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" placeholder="Enter Mobile Number" {% if booking_obj %}value="{{ booking_obj.customer.phone }}" readonly{% endif %} required />
+                                                        </div>
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="customerName">Full Name *</label>
+                                                            <input type="text" id="customerName" class="form-control" name="customername" placeholder="Enter Full Name" {% if booking_obj %}value="{{ booking_obj.customer.name }}"{% endif %} required />
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <label class="form-label" for="customerComments">
+                                                                Customer Feedback
+                                                            </label>
+                                                            <textarea class="form-control" id="customerComments" rows="2" name="customercomments" placeholder="Enter customer comments, complaints or special requests">{% if booking_obj %}{{ booking_obj.customer.comments }}{% endif %}</textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>                                
+                                            </div> 
+                                            <!-- Vehicle Details -->
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="row info-card">
+                                                        <p class="mb-1 text-muted small"><i class="fas {% if vehicletype == '2' %}fa-motorcycle {% elif vehicletype == '3' %}fa-truck-pickup {% elif vehicletype == '4' %}fa-car {% elif vehicletype == '6' %}fa-truck-moving {% endif %} me-1"></i>Vehicle Details</p>                    
+                                                        {% if booking_obj %}
+                                                        <input type="hidden" name="booking_vehicle_id" value="{{ booking_obj.vehicle.id }}">
+                                                        {% endif %}
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="vehicleNumber">Vehicle Number *</label>
+                                                            <input type="text" id="vehicleNumber" class="form-control" name="vehiclenumber" placeholder="Vehicle Number *" required />
+                                                        </div>                
+                                                        <!-- <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="vehicleBrand">Brand *</label>
+                                                            <select class="form-select select2" id="vehicleBrand" name="existing_jobcardbrand" required>
+                                                                <option value="" hidden selected>Select Brand</option>
+                                                                {% for brand in brand_objs %}
+                                                                    <option value="{{ brand.id }}">{{ brand.displayname }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>                 -->
+
+
+                                                       <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="vehicleBrand">Brand *</label>
+                                                            <select class="form-select select2" 
+                                                                    id="vehicleBrand" 
+                                                                    name="existing_jobcardbrand" 
+                                                                    data-placeholder="Select Brand"
+                                                                    data-allow-clear="false">
+                                                                <option></option> 
+                                                                {% for brand in brand_objs %}
+                                                                    <option value="{{ brand.id }}">{{ brand.displayname }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div> 
+                                                        
+                                                        <div class="col-12 mb-1">
+                                                            <label class="form-label" for="vehicleModel">Model *</label>
+                                                            <select class="form-select select2" id="vehicleModel" name="existing_jobcardmodel"  required>
+                                                                <option value="" hidden selected>Select Brand First</option>
+                                                                <!-- Models will be populated based on brand selection -->
+                                                            </select>
+                                                        </div>                
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="dailyRunning">
+                                                                Daily Running (km)
+                                                            </label>                                            
+                                                            <input type="number" id="dailyRunning" class="form-control" placeholder="Daily running" name="dailyrunning" min="0" step="0.01" />
+                                                        </div>                                                    
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="odometerReading">
+                                                                Odometer Reading (km)
+                                                            </label>
+                                                            <input type="number" id="odometerReading" class="form-control" placeholder="Current odometer reading" name="odometerreading" min="0" step="0.01" />
+                                                        </div>                
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="vehicleMileage">
+                                                                Mileage (km)
+                                                            </label>
+                                                            <input type="number" id="vehicleMileage" class="form-control" placeholder="Mileage" name="vehiclemileage" min="0" step="0.01" />
+                                                        </div>                
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="vehicleAge">
+                                                                Vehicle Age (years)
+                                                            </label>
+                                                            <input type="number" id="vehicleAge" class="form-control" placeholder="Vehicle Age" name="vehicleage" min="0" step="0.01" />
+                                                        </div>                
+                                                        <div class="col-12 mb-1">
+                                                            <label class="form-label">Vehicle Fuel Type</label>
+                                                            <div class="vehicle-type-selector d-flex flex-wrap" style="gap: 0.5rem;">                                                
+                                                                <input type="hidden" name="vehiclefueltype" value="petrol">
+                                                                <div class="vehicle-type-option selected" data-value="petrol">
+                                                                    <div class="vehicle-icon-wrapper">
+                                                                        <i data-feather="droplet" class="vehicle-icon"></i>
+                                                                    </div>
+                                                                    <span class="vehicle-type-label">Petrol</span>
+                                                                </div>   
+                                                                {% if vehicletype != '2' %}                                        
+                                                                <div class="vehicle-type-option" data-value="diesel">
+                                                                    <div class="vehicle-icon-wrapper">
+                                                                        <i data-feather="droplet" class="vehicle-icon"></i>
+                                                                    </div>
+                                                                    <span class="vehicle-type-label">Diesel</span>
+                                                                </div>
+                                                                {% endif %}
+                                                                <div class="vehicle-type-option" data-value="cng">
+                                                                    <div class="vehicle-icon-wrapper">
+                                                                        
+                                                                        <i data-feather="wind" class="vehicle-icon"></i>
+                                                                    </div>
+                                                                    <span class="vehicle-type-label">CNG</span>
+                                                                </div>
+                                                                <div class="vehicle-type-option" data-value="ev">
+                                                                    <div class="vehicle-icon-wrapper">
+                                                                        <i data-feather="battery-charging" class="vehicle-icon"></i>
+                                                                    </div>
+                                                                    <span class="vehicle-type-label">EV</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12 fuel-section mb-1">
+                                                            <div class="bg-light-primary p-1 rounded shadow-sm">
+                                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="avatar avatar-tag  me-1" style="background-color:#3b82f6;">
+                                                                            <i data-feather="trending-up"></i>
+                                                                        </div>
+                                                                        <h5 class="mb-0 fuel-title">Fuel Level</h5>
+                                                                    </div>
+                                                                    <div class="fuel-percentage badge fs-6 fw-bold" style="background-color:#3b82f6;">30%</div>
+                                                                    <input type="hidden" name="fuelpercentage" value="30">
+                                                                </div>
+                                                                <div class="position-relative mb-2">
+                                                                    <div class="progress" style="height: 12px;">
+                                                                        <div class="progress-bar" role="progressbar" style="width: 30%;background: linear-gradient(90deg, #3b82f6, #6366f1) !important;" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                    </div>
+                                                                    
+                                                                    <div class="fuel-markers d-flex justify-content-between position-absolute w-100" style="top: -10px;color:#3b82f6 !important;">
+                                                                        <span class="fuel-marker">E</span>
+                                                                        <span class="fuel-marker">½</span>
+                                                                        <span class="fuel-marker">F</span>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="fuel-level-selector d-flex justify-content-between mt-25">
+                                                                    <div class="fuel-dots d-flex justify-content-between w-100">
+                                                                        <span class="fuel-dot active" data-value="10"></span>
+                                                                        <span class="fuel-dot active" data-value="20"></span>
+                                                                        <span class="fuel-dot active" data-value="30"></span>
+                                                                        <span class="fuel-dot" data-value="40"></span>
+                                                                        <span class="fuel-dot" data-value="50"></span>
+                                                                        <span class="fuel-dot" data-value="60"></span>
+                                                                        <span class="fuel-dot" data-value="70"></span>
+                                                                        <span class="fuel-dot" data-value="80"></span>
+                                                                        <span class="fuel-dot" data-value="90"></span>
+                                                                        <span class="fuel-dot" data-value="100"></span>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <div class="d-flex justify-content-between align-items-center mt-1">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <i data-feather="navigation" class="me-1" style="color:#3b82f6"></i>
+                                                                        <h6 class="mb-0 dte-title">Distance to Empty</h6>
+                                                                    </div>
+                                                                    <div class="dte-value badge bg-light-primary px-3 py-1 fs-6" style="color: #3b82f6 !important;">~45 km</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <!-- Vehicle Issues Section -->
+                                                        <div class="col-12 mb-1">
+                                                            <select class="form-select select2" id="existingIssuesList" name="vehicleexistingcommonissues" multiple data-placeholder="Select Vehicle Issues">
+                                                                
+                                                                {% for issue in vehicle_common_issues_objs %}
+                                                                    <option value="{{ issue.id }}">{{ issue.displayname }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+
+                                                        
+
+                                                        <!-- Vehicle Accessories Section -->
+                                                        <div class="col-12 mb-1">
+                                                            <select class="form-select select2" id="existingAccessories" name="vehicleexistingaccessories" multiple data-placeholder="Select Vehicle Accessories" >
+                                                                {% for accessory in vehicle_accessories_objs %}
+                                                                    <option value="{{ accessory.id }}">{{ accessory.displayname }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <!-- Service Checklist Section -->
+                                                        <div class="col-12 mb-1">
+                                                            <select class="form-select select2" id="existingChecklists" name="service_checklist" multiple  data-placeholder="Select Service Type">
+                                                                {% for checklist in service_checklist_objs %}
+                                                                    <option value="{{ checklist.id }}">{{ checklist.displayname }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>                                
+                                            </div>
+                                           
+                                        </div> 
+                                        <!-- Vehicle Details -->
+                                        <div class="col-12 col-md-6">
+                                            <!-- Damage Details -->
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="row info-card">
+                                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                                            <p class="text-muted small"><i class="fas fa-hashtag me-1"></i>Damage Details</p> 
+                                                            <!-- <select id="DiagramType" class="form-select form-select-sm" style="width: 150px;">
+                                                                {% if vehicletype == '2' %}
+                                                                <option value="{{ vehicletype }}" selected>{{ vehicletype }}-Wheeler</option>
+                                                                {% endif %}
+                                                                {% if vehicletype == '3' %}
+                                                                <option value="{{ vehicletype }}" selected>{{ vehicletype }}-Wheeler</option>
+                                                                {% endif %}
+                                                                {% if vehicletype == '4' %}
+                                                                <option value="{{ vehicletype }}" selected>{{ vehicletype }}-Wheeler</option>
+                                                                {% endif %}
+                                                                {% if vehicletype == '6' %}
+                                                                <option value="{{ vehicletype }}" selected>{{ vehicletype }}-Wheeler</option>
+                                                                {% endif %}
+                                                            </select>                       -->
+                                                        </div>                       
+                                                        <div class="col-12 mb-1">
+                                                            <div class="vehicle-diagram-container border rounded p-25">
+                                                                <div class="position-relative" style="width: 100%; height: 300px;">
+                                                                    <div id="canvasLoading" class="d-none w-100 h-100 position-absolute d-flex justify-content-center align-items-center bg-light" style="z-index: 10;">
+                                                                        <div class="spinner-border text-primary" role="status">
+                                                                            <span class="visually-hidden">Loading...</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <canvas id="vehicleCanvas" class="w-100 h-100"></canvas>
+                                                                    <input type="hidden" name="dent_positions" id="dentPositions" value="">
+                                                                    <input type="hidden" name="diagram_image" id="diagramImageData" value="">
+                                                                </div>
+                                                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                                                    <small class="text-muted">Click on the diagram to mark dents or damage</small>
+                                                                    <div class="btn-group">
+                                                                        <button type="button" id="undoDent" class="btn btn-sm btn-outline-secondary" disabled>
+                                                                            <i class="fas fa-undo"></i> Undo
+                                                                        </button>
+                                                                        <button type="button" id="clearAllDents" class="btn btn-sm btn-outline-danger" disabled>
+                                                                            <i class="fas fa-trash-alt"></i> Clear All
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>                                                    
+                                                        <div class="col-12 mb-1">
+                                                            <label class="form-label" for="dentDescription">Damage Description</label>
+                                                            <textarea class="form-control" id="dentDescription" rows="2" name="damagedescription" placeholder="Describe any existing damage"></textarea>
+                                                        </div>
+                                                        <div class="col-12 mb-1">
+                                                            <div class="card border">
+                                                                <div class="card-body p-2">
+                                                                    <p class="mb-1 text-muted small"><i class="fas fa-image me-1"></i>Damage Photos<span class="badge bg-light-primary ms-1" id="photoCount" style="color: #3b82f6 !important;">0/10</span></p> 
+
+                                                                    <div class="upload-area border rounded p-3 text-center mb-2" id="uploadArea" style="cursor: pointer; border-style: dashed !important;">
+                                                                        <div class="d-flex flex-column align-items-center">
+                                                                            <i data-feather="plus" style="width: 24px; height: 24px;color: #3b82f6 !important;"></i>
+                                                                            <p class="mb-0 small">Click to upload or drag & drop</p>
+                                                                            <p class="text-muted extra-small mb-0">JPG, PNG (max 5MB)</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <input type="file" class="d-none" id="damagePhotos" multiple accept="image/*" name="damagephotos"/>
+                                                                    
+                                                                    <div class="photo-preview d-flex flex-wrap gap-2 mt-3" id="photoPreview">
+                                                                        <!-- Photo previews will appear here -->
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>                                
+                                            </div>  
+                                            <!-- Delivery Details -->
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="row info-card">
+                                                        <p class="mb-1 text-muted small"><i class="fas fa-truck me-1"></i>Delivery Details</p>                                                   
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="deliveryDate">
+                                                                Expected Delivery Date
+                                                            </label>
+                                                            <input type="date" id="deliveryDate" name="deliverydate" class="form-control" />
+                                                        </div>
+                                                        <div class="col-12 col-md-6 mb-1">
+                                                            <label class="form-label" for="deliveryTime">
+                                                                Expected Delivery Time
+                                                            </label>
+                                                            <input type="time" id="deliveryTime" name="deliverytime" class="form-control" />
+                                                        </div>
+                                                    </div>
+                                                </div>                                
+                                            </div> 
+                                            
+                                        </div>                                      
+                                    </div> 
+                                    <div class="row mt-2 text-center">
+                                        <div class="col-12">
+                                            <button type="submit" class="btn" id="jobcardSubmitBtn" style="background-color: #3b82f6;color:white" >
+                                                <i data-feather="check-circle" class="me-25"></i> Create JobCard
+                                            </button>
+                                        </div> 
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Item Modals -->
+<div class="modal fade" id="addNewIssueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Vehicle Issue</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <label for="newIssueName" class="form-label">Issue Name</label>
+                    <input type="text" class="form-control" id="newIssueName" placeholder="Enter issue name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveNewIssueBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addNewAccessoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Accessory</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <label for="newAccessoryName" class="form-label">Accessory Name</label>
+                    <input type="text" class="form-control" id="newAccessoryName" placeholder="Enter accessory name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveNewAccessoryBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addNewChecklistModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Checklist Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <label for="newChecklistItemName" class="form-label">Checklist Item</label>
+                    <input type="text" class="form-control" id="newChecklistItemName" placeholder="Enter checklist item">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveNewChecklistBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Brand Modal -->
+<div class="modal fade" id="addNewBrandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Brand</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <label for="newBrandName" class="form-label">Brand Name</label>
+                    <input type="text" class="form-control" id="newBrandName" placeholder="Enter brand name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveNewBrandBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add New Model Modal -->
+<div class="modal fade" id="addNewModelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-1">
+                    <label for="newModelName" class="form-label">Model Name</label>
+                    <input type="text" class="form-control" id="newModelName" placeholder="Enter model name">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveNewModelBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+  $(document).ready(function () {
+      $('.select2').each(function () {
+          $(this).select2({
+              placeholder: $(this).data('placeholder'),
+              allowClear: true,
+              width: '100%'   // keeps it aligned with Bootstrap form
+          });
+      });
+  });
+</script>
+
+<script>
+feather.replace();
+
+
+</script>
+
+
+<!-- jQuery (must be loaded before Select2) -->
+
+
+
+<!--start PC upload file -->
+<!-- <script>
+document.addEventListener("DOMContentLoaded", () => {
+    const uploadArea = document.getElementById("uploadArea");
+    const fileInput = document.getElementById("damagePhotos");
+    const photoPreview = document.getElementById("photoPreview");
+    const photoCount = document.getElementById("photoCount");
+
+    let selectedFiles = [];
+
+    // Update counter
+    function updateCounter() {
+        photoCount.textContent = `${selectedFiles.length}/10`;
+    }
+
+    /*
+    // Render previews
+    function renderPreviews() {
+        photoPreview.innerHTML = "";
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const div = document.createElement("div");
+                div.classList.add("position-relative");
+                div.style.width = "100px";
+                div.style.height = "100px";
+
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="rounded border" style="width:100%; height:100%; object-fit:cover;">
+                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-btn">&times;</button>
+                `;
+
+                // remove file event
+                div.querySelector(".remove-btn").addEventListener("click", () => {
+                    selectedFiles.splice(index, 1);
+                    renderPreviews();
+                    updateCounter();
+                });
+
+                photoPreview.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }*/
+
+    /*
+    function renderPreviews() {
+    photoPreview.innerHTML = "";
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement("div");
+            div.classList.add("position-relative");
+            div.style.width = "100px";
+            div.style.height = "100px";
+
+            div.innerHTML = `
+                <img src="${e.target.result}" class="rounded border" 
+                     style="width:100%; height:100%; object-fit:cover;">
+                <span class="remove-icon" data-index="${index}">&times;</span>
+            `;
+
+            photoPreview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // attach remove events
+    document.querySelectorAll(".remove-icon").forEach(icon => {
+        icon.addEventListener("click", (e) => {
+            const idx = e.target.getAttribute("data-index");
+            selectedFiles.splice(idx, 1);
+            renderPreviews();
+            updateCounter();
+        });
+    });
+}
+    */
+
+    function renderPreviews() {
+    photoPreview.innerHTML = "";
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement("div");
+            div.classList.add("position-relative");
+            div.style.width = "100px";
+            div.style.height = "100px";
+
+            // create image
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.classList.add("rounded", "border");
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+
+            // create remove icon
+            const removeIcon = document.createElement("span");
+            removeIcon.classList.add("remove-icon");
+            removeIcon.innerHTML = "&times;";
+
+            // remove photo on click
+            removeIcon.addEventListener("click", () => {
+                selectedFiles.splice(index, 1);  // remove file
+                renderPreviews();                // re-render
+                updateCounter();                 // update counter
+            });
+
+            div.appendChild(img);
+            div.appendChild(removeIcon);
+            photoPreview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+
+    // Handle files
+    function handleFiles(files) {
+        for (let file of files) {
+            if (!file.type.startsWith("image/")) {
+                alert("Only JPG/PNG images allowed.");
+                continue;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert(`${file.name} exceeds 5MB limit.`);
+                continue;
+            }
+            if (selectedFiles.length >= 10) {
+                alert("Maximum 10 photos allowed.");
+                break;
+            }
+            selectedFiles.push(file);
+        }
+        renderPreviews();
+        updateCounter();
+    }
+
+    // Click to open file input
+    uploadArea.addEventListener("click", () => fileInput.click());
+
+    // On file selection
+    fileInput.addEventListener("change", (e) => {
+        handleFiles(e.target.files);
+        fileInput.value = ""; // reset so same file can be re-selected if needed
+    });
+
+    // Drag & drop
+    uploadArea.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadArea.classList.add("bg-light");
+    });
+
+    uploadArea.addEventListener("dragleave", () => {
+        uploadArea.classList.remove("bg-light");
+    });
+
+    uploadArea.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove("bg-light");
+        handleFiles(e.dataTransfer.files);
+    });
+
+    // Initialize counter
+    updateCounter();
+});
+</script> -->
+<!--end PC upload file -->
+
+<script>
+    // Initialize model data once when the page loads
+    const modelData = [
+        {% for model in model_objs %}
+        {
+            id: '{{ model.id|escapejs }}',
+            name: '{{ model.name|escapejs }}',
+            displayname: '{{ model.displayname|escapejs }}',
+            brand: '{{ model.jobcardbrand_id|escapejs }}'
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    $(document).ready(function() {
+        // Initialize feather icons
+        if (feather) {
+            feather.replace();
+        }
+
+        // Initialize select2 for multiple select boxes
+        if ($.fn.select2) {
+            $('.select2').select2({
+                placeholder: "Select options",
+                allowClear: true
+            });
+        }
+
+        // Function to populate models based on selected brand
+        function populateModels(selectedModelId = null) {
+            const brandId = $('#vehicleBrand').val();
+            const modelSelect = $('#vehicleModel');
+            
+            // Clear existing options and add default option
+            modelSelect.empty().append('<option value="" hidden selected>Select Model</option>');
+            
+            // Exit if no brand is selected
+            if (!brandId) return;
+            
+            // Filter models for the selected brand
+            const brandModels = modelData.filter(function(model) {
+                return model.brand === brandId;
+            });
+            
+            // Add filtered models to the dropdown
+            brandModels.forEach(function(model) {
+                const option = $('<option></option>')
+                    .val(model.id)
+                    .text(model.displayname);
+                
+                // Select the option if it matches the selected model ID
+                if (selectedModelId && model.id === selectedModelId.toString()) {
+                    option.attr('selected', 'selected');
+                }
+                
+                modelSelect.append(option);
+            });
+        }
+
+        // Set up initial selection if we have jobcard brand and model
+        const selectedBrandId = '{{ booking_obj.vehicle.jobcardbrand.id }}';
+        const selectedModelId = '{{ booking_obj.vehicle.jobcardmodel.id }}';           
+        if (selectedBrandId && selectedModelId) {
+            // Set the brand and trigger change
+            $('#vehicleBrand').val(selectedBrandId).trigger('change');            
+            // After a small delay, set the model (to ensure the options are populated)
+            setTimeout(() => {
+                populateModels(selectedModelId);
+            }, 100);
+        }        
+        // Handle brand change event
+        $('#vehicleBrand').on('change', function() {
+            populateModels();
+        });
+
+        // Vehicle type selector functionality
+        $('.vehicle-type-option').on('click', function() {
+            $('.vehicle-type-option').removeClass('selected');
+            $(this).addClass('selected');
+            $('input[name="vehiclefueltype"]').val($(this).data('value'));            
+            // Show/hide specific sections based on vehicle type
+            const vehiclefueltype = $(this).data('value');            
+            // Update fuel section title based on fuel type
+            if (vehiclefueltype === 'ev') {
+                $('.fuel-title').text('EV Level');
+                $('.dte-title').text('Range Estimate');
+            } else {
+                $('.fuel-title').text('Fuel Level');
+                $('.dte-title').text('Distance to Empty');
+            }
+        });
+        
+        // Fuel level indicator functionality
+        $('.fuel-dot').on('click', function() {
+            const value = $(this).data('value');
+            const index = $(this).index();
+            
+            $('.fuel-dot').each(function(i) {
+                if (i <= index) {
+                    $(this).addClass('active');
+                } else {
+                    $(this).removeClass('active');
+                }
+            });
+            
+            // Update fuel percentage and progress bar
+            $('.fuel-percentage').text(value + '%');
+            $('input[type="hidden"][name="fuelpercentage"]').val(value);
+            $('.progress-bar').css('width', value + '%');
+            
+            // Update distance to empty based on fuel level
+            const dteValue = Math.round(value * 1.5); // Simple calculation for demo
+            $('.dte-value').text('~' + dteValue + ' km');
+        });
+
+        // Canvas-based Dent Marking System
+        (function() {
+            // Canvas and UI elements
+            const canvas = document.getElementById('vehicleCanvas');
+            const ctx = canvas.getContext('2d');
+            const dentPositionsInput = document.getElementById('dentPositions');
+            const canvasLoading = document.getElementById('canvasLoading');
+            
+            // Canvas state
+            let image = new Image();
+            let dents = [];
+            let activeDentIndex = -1;
+            let isDragging = false;
+            let dragOffset = { x: 0, y: 0 };
+            
+            // Function to load vehicle image
+            function loadVehicleImage(vehicletype) {
+
+                // Show loading spinner
+                canvasLoading.classList.remove('d-none');
+                
+                // Clear existing dents when changing vehicle type
+                dents = [];
+                activeDentIndex = -1;
+                updateDentPositionsInput();
+                
+                // Create a new image object with CORS support
+                const newImage = new Image();
+                newImage.crossOrigin = 'Anonymous'; // Enable CORS if needed
+                
+                newImage.onload = function() {
+                    // Hide loading spinner
+                    canvasLoading.classList.add('d-none');
+                    
+                    // Update the image reference
+                    image = newImage;
+                    
+                    // Force resize and redraw
+                    setTimeout(() => {
+                        resizeCanvas();
+                        drawCanvas();
+                    }, 10);
+                };
+                
+                newImage.onerror = function() {
+                    console.error('Failed to load ' + vehicletype + ' wheeler vehicle image');
+                    canvasLoading.classList.add('d-none');
+                    
+                    // Fallback to placeholder
+                    image = new Image();
+                    image.onload = function() {
+                        resizeCanvas();
+                        drawCanvas();
+                    };
+                    image.src = 'https://via.placeholder.com/800x400?text=' + encodeURIComponent(vehicletype + ' Wheeler Diagram');
+                };
+                
+                // Set the image source with cache busting
+                newImage.src = `/static/images/vehicles/${vehicletype}.avif?t=${new Date().getTime()}`;
+            }
+                        
+            // Load initial image
+            loadVehicleImage(`{{vehicletype}}`);
+            
+            // Set canvas size
+            function resizeCanvas() {
+                if (!canvas || !canvas.parentElement) return;
+                
+                const container = canvas.parentElement;
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                // Set display size
+                canvas.style.width = width + 'px';
+                canvas.style.height = height + 'px';
+                
+                // Set actual size in memory (scaled to account for device pixel ratio)
+                const scale = window.devicePixelRatio || 1;
+                canvas.width = Math.floor(width * scale);
+                canvas.height = Math.floor(height * scale);
+                
+                // Reset transform and clear the canvas
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(scale, scale);
+                
+                // Clear the canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Redraw if we have an image
+                if (image && image.complete && image.width > 0) {
+                    drawCanvas();
+                }
+            }
+            
+            // Add resize observer to handle container size changes
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    if (entry.contentBoxSize) {
+                        resizeCanvas();
+                    }
+                }
+            });
+            
+            // Start observing the canvas container
+            if (canvas.parentElement) {
+                resizeObserver.observe(canvas.parentElement);
+            }
+            
+            // Draw the canvas with image and dents
+            function drawCanvas() {
+                if (!canvas || !canvas.parentElement || !image || !image.complete || image.width === 0) {
+                    return;
+                }
+                
+                // Get display size (CSS pixels)
+                const displayWidth = canvas.parentElement.clientWidth;
+                const displayHeight = canvas.parentElement.clientHeight;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                try {
+                    // Calculate dimensions to maintain aspect ratio
+                    const imageAspectRatio = image.width / image.height;
+                    const containerAspectRatio = displayWidth / displayHeight;
+                    
+                    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+                    
+                    if (containerAspectRatio > imageAspectRatio) {
+                        // Container is wider than image (relative to height)
+                        drawHeight = displayHeight;
+                        drawWidth = drawHeight * imageAspectRatio;
+                        offsetX = (displayWidth - drawWidth) / 2;
+                    } else {
+                        // Container is taller than image (relative to width)
+                        drawWidth = displayWidth;
+                        drawHeight = drawWidth / imageAspectRatio;
+                        offsetY = (displayHeight - drawHeight) / 2;
+                    }
+                    
+                    // Store the image position and size for click handling
+                    canvas._imageData = {
+                        x: offsetX,
+                        y: offsetY,
+                        width: drawWidth,
+                        height: drawHeight,
+                        scaleX: drawWidth / image.width,
+                        scaleY: drawHeight / image.height
+                    };
+                    
+                    // Draw the image centered in the container
+                    ctx.drawImage(
+                        image,
+                        offsetX, 
+                        offsetY,
+                        drawWidth,
+                        drawHeight
+                    );
+                    
+                    // Draw dents if any
+                    dents.forEach((dent, index) => {
+                        // Calculate the actual position on the canvas
+                        const x = canvas._imageData.x + (dent.x * canvas._imageData.width);
+                        const y = canvas._imageData.y + (dent.y * canvas._imageData.height);
+                        
+                        // Draw dent marker
+                        ctx.beginPath();
+                        ctx.arc(x, y, 10, 0, Math.PI * 2);
+                        ctx.fillStyle = index === activeDentIndex ? '#ff4444' : '#ff6b6b';
+                        ctx.fill();
+                        ctx.strokeStyle = '#fff';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                        
+                        // Draw dent number
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 10px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText((index + 1).toString(), x, y);
+                    });
+                    
+                } catch (error) {
+                    console.error('Error drawing canvas:', error);
+                }
+            }
+            
+            // Update hidden input with dent positions
+            function updateDentPositionsInput() {
+                dentPositionsInput.value = JSON.stringify(dents);
+            }
+            
+            // Get canvas position from mouse or touch event
+            function getCanvasPosition(canvas, event) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                let clientX, clientY;
+                
+                if (event.touches) {
+                    // For touch events
+                    const touch = event.touches[0] || event.changedTouches[0];
+                    clientX = touch.clientX;
+                    clientY = touch.clientY;
+                } else if (event.clientX !== undefined) {
+                    // For mouse events
+                    clientX = event.clientX;
+                    clientY = event.clientY;
+                } else if (event.changedTouches) {
+                    // For touch end events
+                    const touch = event.changedTouches[0];
+                    clientX = touch.clientX;
+                    clientY = touch.clientY;
+                } else {
+                    return { x: 0, y: 0 }; // Fallback
+                }
+                
+                // Apply device pixel ratio
+                const dpr = window.devicePixelRatio || 1;
+                
+                return {
+                    x: (clientX - rect.left) * scaleX / dpr,
+                    y: (clientY - rect.top) * scaleY / dpr
+                };
+            }
+            
+            // Handle canvas interactions (both touch and mouse)
+            function handleCanvasInteraction(e) {
+                e.preventDefault();
+                if (!canvas._imageData) return;
+                
+                // Skip if this is a touch event and we're not handling a tap
+                if (e.type === 'touchend' && touchMoved) {
+                    return;
+                }
+                
+                // Skip if we just handled a removal
+                if (canvas._justHandledRemoval) {
+                    canvas._justHandledRemoval = false;
+                    return;
+                }
+                
+                // Get the correct position based on event type
+                const pos = getCanvasPosition(canvas, e);
+                const x = pos.x;
+                const y = pos.y;
+                
+                // Calculate position relative to the image
+                const relX = (x - canvas._imageData.x) / canvas._imageData.width;
+                const relY = (y - canvas._imageData.y) / canvas._imageData.height;
+                
+                // Skip if clicking outside the image
+                if (relX < 0 || relX > 1 || relY < 0 || relY > 1) {
+                    return;
+                }
+                
+                // Check if we're clicking on an existing dent
+                const clickedDentIndex = dents.findIndex(dent => {
+                    const dentX = canvas._imageData.x + (dent.x * canvas._imageData.width);
+                    const dentY = canvas._imageData.y + (dent.y * canvas._imageData.height);
+                    const distance = Math.sqrt(
+                        Math.pow(dentX - x, 2) + 
+                        Math.pow(dentY - y, 2)
+                    );
+                    return distance < 20; // Slightly larger click radius for touch
+                });
+                
+                if (clickedDentIndex !== -1) {
+                    const dent = dents[clickedDentIndex];
+                    const markerX = canvas._imageData.x + (dent.x * canvas._imageData.width);
+                    const markerY = canvas._imageData.y + (dent.y * canvas._imageData.height);
+                    
+                    // Select the clicked dent
+                    activeDentIndex = clickedDentIndex;
+                    
+                    // Set up for dragging
+                    isDragging = true;
+                    dragOffset = {
+                        x: x - markerX,
+                        y: y - markerY
+                    };
+                } else {
+                    // Add new dent if not clicking on existing one
+                    const relativeX = (x - canvas._imageData.x) / canvas._imageData.width;
+                    const relativeY = (y - canvas._imageData.y) / canvas._imageData.height;
+                    
+                    // Check if we're too close to an existing dent
+                    const tooClose = dents.some(dent => {
+                        const distance = Math.sqrt(
+                            Math.pow(dent.x - relativeX, 2) + 
+                            Math.pow(dent.y - relativeY, 2)
+                        );
+                        return distance < 0.05; // 5% of canvas size
+                    });
+                    
+                    if (!tooClose) {
+                        const newDent = { 
+                            x: relativeX, 
+                            y: relativeY, 
+                            description: '',
+                            number: dents.length + 1
+                        };
+                        dents.push(newDent);
+                        activeDentIndex = dents.length - 1;
+                    }
+                }
+                
+                updateDentPositionsInput();
+                drawCanvas();
+                
+                // Prevent default for touch events
+                if (e.type === 'touchstart') {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+            
+
+            // Track mouse state for desktop dragging
+            let isMouseDown = false;
+            let mouseDownX = 0;
+            let mouseDownY = 0;
+            const DRAG_THRESHOLD = 5; // pixels
+            
+            // Handle mouse down on canvas
+            canvas.addEventListener('mousedown', function(e) {
+                if (!canvas._imageData) return;
+                
+                const pos = getCanvasPosition(canvas, e);
+                mouseDownX = pos.x;
+                mouseDownY = pos.y;
+                isMouseDown = true;
+                
+                // Handle the click immediately for selection
+                handleCanvasInteraction(e);
+                
+                e.preventDefault();
+                return false;
+            });
+            
+            // Handle mouse move for dragging
+            canvas.addEventListener('mousemove', function(e) {
+                if (!isMouseDown || activeDentIndex === -1 || !canvas._imageData) return;
+                
+                const pos = getCanvasPosition(canvas, e);
+                const deltaX = Math.abs(pos.x - mouseDownX);
+                const deltaY = Math.abs(pos.y - mouseDownY);
+                
+                // Only start dragging if mouse has moved beyond threshold
+                if (!isDragging && (deltaX > DRAG_THRESHOLD || deltaY > DRAG_THRESHOLD)) {
+                    isDragging = true;
+                }
+                
+                if (isDragging) {
+                    const x = pos.x - dragOffset.x;
+                    const y = pos.y - dragOffset.y;
+                    
+                    // Calculate position relative to the image
+                    const relX = (x - canvas._imageData.x) / canvas._imageData.width;
+                    const relY = (y - canvas._imageData.y) / canvas._imageData.height;
+                    
+                    // Update dent position if within bounds
+                    if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
+                        dents[activeDentIndex].x = relX;
+                        dents[activeDentIndex].y = relY;
+                        updateDentPositionsInput();
+                        drawCanvas();
+                    }
+                }
+                
+                e.preventDefault();
+                return false;
+            });
+            
+            // Handle mouse up to stop dragging
+            function handleMouseUp() {
+                if (isDragging) {
+                    // If we were dragging, prevent click behavior
+                    isDragging = false;
+                    updateDentPositionsInput();
+                }
+                isMouseDown = false;
+            }
+            
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('mouseleave', handleMouseUp);
+            
+            // Mobile touch handling
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchMoved = false;
+            const TOUCH_MOVE_THRESHOLD = 5; // pixels
+            let touchTimeout;
+            
+            // Handle touch start
+            canvas.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    touchMoved = false;
+                    
+                    // Handle the touch as a click after a small delay
+                    // This allows us to detect if it's a tap or a drag
+                    touchTimeout = setTimeout(() => {
+                        if (!touchMoved) {
+                            handleCanvasInteraction(e);
+                        }
+                    }, 50);
+                }
+            }, { passive: true });
+            
+            // Handle touch move
+            canvas.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const deltaX = Math.abs(touch.clientX - touchStartX);
+                    const deltaY = Math.abs(touch.clientY - touchStartY);
+                    
+                    if (deltaX > TOUCH_MOVE_THRESHOLD || deltaY > TOUCH_MOVE_THRESHOLD) {
+                        touchMoved = true;
+                        if (isDragging) {
+                            e.preventDefault();
+                            const pos = getCanvasPosition(canvas, touch);
+                            const x = pos.x - dragOffset.x;
+                            const y = pos.y - dragOffset.y;
+                            
+                            // Calculate position relative to the image
+                            const relX = (x - canvas._imageData.x) / canvas._imageData.width;
+                            const relY = (y - canvas._imageData.y) / canvas._imageData.height;
+                            
+                            // Update dent position if within bounds
+                            if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
+                                dents[activeDentIndex].x = relX;
+                                dents[activeDentIndex].y = relY;
+                                updateDentPositionsInput();
+                                drawCanvas();
+                            }
+                            
+                            // Prevent scrolling while dragging
+                            e.stopPropagation();
+                        }
+                    }
+                }
+            }, { passive: false });
+            
+            // Handle touch end
+            canvas.addEventListener('touchend', function(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                    isDragging = false;
+                    updateDentPositionsInput();
+                    drawCanvas();
+                }
+            });
+            
+            // Handle touch cancel
+            canvas.addEventListener('touchcancel', function() {
+                isDragging = false;
+                touchMoved = false;
+            });
+            
+            // Mouse events for desktop
+            canvas.addEventListener('mousedown', function(e) {
+                if (isDragging) {
+                    e.preventDefault();
+                }
+                handleCanvasInteraction(e);
+            });
+            
+            canvas.addEventListener('click', function(e) {
+                handleCanvasInteraction(e);
+            });
+            
+            canvas.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            canvas.addEventListener('mouseleave', function() {
+                isDragging = false;
+            });
+            
+            // Handle dent dragging
+            function handleDrag(e) {
+                e.preventDefault();
+                if (!canvas._imageData) return;
+                
+                const pos = getCanvasPosition(canvas, e);
+                const x = pos.x;
+                const y = pos.y;
+                
+                // Calculate position relative to the image
+                const relX = (x - canvas._imageData.x) / canvas._imageData.width;
+                const relY = (y - canvas._imageData.y) / canvas._imageData.height;
+                
+                // Skip if clicking outside the image
+                if (relX < 0 || relX > 1 || relY < 0 || relY > 1) {
+                    return;
+                }
+                
+                // Check if we're clicking on an existing dent
+                const clickedDentIndex = dents.findIndex(dent => {
+                    const dentX = canvas._imageData.x + (dent.x * canvas._imageData.width);
+                    const dentY = canvas._imageData.y + (dent.y * canvas._imageData.height);
+                    const distance = Math.sqrt(
+                        Math.pow(dentX - x, 2) + 
+                        Math.pow(dentY - y, 2)
+                    );
+                    return distance < 15; // 15px click radius
+                });
+                
+                if (clickedDentIndex !== -1) {
+                    const dent = dents[clickedDentIndex];
+                    const markerX = canvas._imageData.x + (dent.x * canvas._imageData.width);
+                    const markerY = canvas._imageData.y + (dent.y * canvas._imageData.height);
+                    
+                    // Make the clicked dent active and start dragging
+                    activeDentIndex = clickedDentIndex;
+                    isDragging = true;
+                    dragOffset = {
+                        x: x - markerX,
+                        y: y - markerY
+                    };
+                    drawCanvas();
+                    return;
+                }
+                
+                // Only add a new dent if not dragging
+                if (!isDragging) {
+                    // Check if we're too close to an existing dent
+                    const tooClose = dents.some(dent => {
+                        const distance = Math.sqrt(
+                            Math.pow(dent.x - relX, 2) + 
+                            Math.pow(dent.y - relY, 2)
+                        );
+                        return distance < 0.05; // 5% of canvas size
+                    });
+                    
+                    if (!tooClose) {
+                        const newDent = { 
+                            x: relX, 
+                            y: relY, 
+                            description: '',
+                            number: dents.length + 1
+                        };
+                        
+                        dents.push(newDent);
+                        activeDentIndex = dents.length - 1;
+                        updateDentPositionsInput();
+                        drawCanvas();
+                        
+                    }
+                }
+            }
+            
+            // Function to capture canvas as image data URL
+            function captureDiagram() {
+                // Create a temporary canvas to draw the current state
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Set the temporary canvas size to match the original
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                
+                // Draw the current canvas to the temporary canvas
+                tempCtx.drawImage(canvas, 0, 0);
+                
+                // Convert to data URL and set as hidden input value
+                const imageData = tempCanvas.toDataURL('image/png');
+                document.getElementById('diagramImageData').value = imageData;
+                
+                return imageData;
+            }
+            
+            // Handle form submission
+            document.getElementById('createJobCardForm').addEventListener('submit', function(e) {
+    
+                // disable the submit button until the form is submitted and show a loading spinner
+                document.getElementById('jobcardSubmitBtn').disabled = true;
+                document.getElementById('jobcardSubmitBtn').innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...'; 
+
+                // Capture the current diagram state before form submission
+                captureDiagram();
+                
+                // Get the diagram data
+                const diagramData = document.getElementById('diagramImageData').value;
+                
+                // If no diagram data was captured, show an error
+                if (!diagramData) {
+                    e.preventDefault();
+                    alert('Please add a vehicle diagram with damage marks before submitting.');
+                    return false;
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                resizeCanvas();
+                drawCanvas();
+            });
+            
+            // Initialize
+            resizeCanvas();
+            
+            // Get button elements
+            const undoButton = document.getElementById('undoDent');
+            const clearAllButton = document.getElementById('clearAllDents');
+
+            // Function to update button states
+            function updateButtonStates() {
+                undoButton.disabled = dents.length === 0;
+                clearAllButton.disabled = dents.length === 0;
+            }
+
+            // Undo last dent
+            function undoLastDent() {
+                if (dents.length > 0) {
+                    dents.pop();
+                    activeDentIndex = -1;
+                    updateDentPositionsInput();
+                    drawCanvas();
+                    updateButtonStates();
+                }
+            }
+
+            // Clear all dents
+            function clearAllDents() {
+                if (dents.length > 0) {
+                    dents = [];
+                    activeDentIndex = -1;
+                    updateDentPositionsInput();
+                    drawCanvas();
+                    updateButtonStates();
+                    console.log('All dents have been removed');
+                }
+            }
+
+            // Add event listeners for buttons
+            undoButton.addEventListener('click', undoLastDent);
+            clearAllButton.addEventListener('click', clearAllDents);
+
+            // Also add touch event listeners for mobile
+            undoButton.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                undoLastDent();
+            }, { passive: false });
+
+            clearAllButton.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                clearAllDents();
+            }, { passive: false });
+
+            // Call updateButtonStates initially to set the correct button states
+            updateButtonStates();
+
+            // Update button states whenever dents change
+            const originalUpdateDentPositionsInput = updateDentPositionsInput;
+            updateDentPositionsInput = function() {
+                originalUpdateDentPositionsInput.apply(this, arguments);
+                updateButtonStates();
+            };
+        })();
+
+        // Add touch-friendly button styles
+        const style = document.createElement('style');
+        style.textContent = `
+            .btn-group .btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            /* Make buttons larger on touch devices for better usability */
+            @media (hover: none) {
+                .btn-group .btn {
+                    padding: 0.5rem 0.75rem;
+                    font-size: 0.875rem;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+
+        // Store the current files
+        let currentFiles = [];
+        
+        // Function to generate a unique ID for each file
+        function generateFileId(file) {
+            return file.name + file.size + file.lastModified;
+        }
+        
+        // Function to update the file input
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            currentFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            $('#damagePhotos')[0].files = dataTransfer.files;
+            // Update photo count
+            $('#photoCount').text(`${currentFiles.length}/10`);
+            
+            // Toggle upload area visibility
+            if (currentFiles.length >= 10) {
+                $('#uploadArea').hide();
+            } else {
+                $('#uploadArea').show();
+            }
+        }
+        
+        // Function to create preview element
+        function createPreviewElement(file, fileId) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const preview = `
+                    <div class="photo-item position-relative" data-file-id="${fileId}">
+                        <img src="${e.target.result}" class="img-thumbnail rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                        <div class="photo-remove position-absolute top-0 end-0 m-1" style="cursor: pointer; background: rgba(255, 255, 255, 0.8); border-radius: 50%;" data-file-id="${fileId}">
+                            <i data-feather="x" class="text-danger" width="16" height="16"></i>
+                        </div>
+                    </div>
+                `;
+                
+                // If preview already exists, replace it, otherwise append new one
+                const existingPreview = $(`#photoPreview .photo-item[data-file-id="${fileId}"]`);
+                if (existingPreview.length) {
+                    existingPreview.replaceWith(preview);
+                } else {
+                    $('#photoPreview').append(preview);
+                }
+                
+                feather.replace();
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Photo upload preview with append functionality
+        $('#damagePhotos').on('change', function() {
+            const newFiles = Array.from(this.files);
+            
+            // Add new files to current files array (max 5 files)
+            for (const file of newFiles) {
+                if (currentFiles.length >= 10) {
+                    toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+                    break;
+                }
+                
+                // Check file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    toastr.error('File size should not exceed 5MB', 'Error');
+                    continue;
+                }
+                
+                // Check file type
+                if (!file.type.match('image.*')) {
+                    toastr.error('Only image files are allowed', 'Error');
+                    continue;
+                }
+                
+                // Generate unique ID for the file
+                const fileId = generateFileId(file);
+                
+                // Check if file already exists to avoid duplicates
+                const fileExists = currentFiles.some(f => generateFileId(f) === fileId);
+                
+                if (!fileExists) {
+                    // Store the file with its ID
+                    file.uniqueId = fileId;
+                    currentFiles.push(file);
+                    createPreviewElement(file, fileId);
+                } else {
+                    toastr.info('This photo has already been added', 'Duplicate');
+                }
+            }
+            
+            // Reset the file input to allow selecting the same file again
+            $(this).val('');
+            
+            updateFileInput();
+        });
+        
+        // Function to handle file selection
+        function triggerFileInput() {
+            if (currentFiles.length < 10) {
+                $('#damagePhotos').click();
+            } else {
+                toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+            }
+        }
+        
+        // Handle photo removal
+        $(document).on('click', '.photo-remove', function(e) {
+            e.stopPropagation();
+            const fileId = $(this).data('file-id');
+            
+            // Remove the file from currentFiles array
+            currentFiles = currentFiles.filter(file => file.uniqueId !== fileId);
+            
+            // Remove the preview
+            $(`.photo-item[data-file-id="${fileId}"]`).remove();
+            
+            updateFileInput();
+        });
+        
+        // Make upload area clickable
+        $('#uploadArea').on('click', triggerFileInput);
+        
+        // Handle drag and drop
+        $('#uploadArea').on('dragover', function(e) {
+            e.preventDefault();
+            if (currentFiles.length < 5) {
+                $(this).addClass('border-primary bg-light');
+            }
+        });
+        
+        $('#uploadArea').on('dragleave', function(e) {
+            e.preventDefault();
+            $(this).removeClass('border-primary bg-light');
+        });
+        
+        
+        $('#uploadArea').on('drop', function(e) {
+            e.preventDefault();
+            $(this).removeClass('border-primary bg-light');
+            
+            if (currentFiles.length >= 10) {
+                toastr.warning('Maximum 10 photos allowed', 'Limit Reached');
+                return;
+            }
+            
+            const files = e.originalEvent.dataTransfer.files;
+            if (files.length > 0) {
+                $('#damagePhotos')[0].files = files;
+                $('#damagePhotos').trigger('change');
+            }
+        });
+        
+        // Initialize with empty state
+        updateFileInput();
+
+        
+        // Initialize Select2 with custom dropdown options
+        function initializeSelect2WithAddNew(selector, placeholder, modalId) {
+            $(selector).select2({
+                placeholder: placeholder,
+                allowClear: true,
+                dropdownParent: $(selector).parent(),
+                dropdownCssClass: 'select2-add-new-dropdown',
+                templateResult: function(data) {
+                    return data.text;
+                },
+                templateSelection: function(data) {
+                    return data.text;
+                },
+                escapeMarkup: function(markup) {
+                    return markup;
+                }
+            });
+
+            // Add 'Add New' option when dropdown is opened
+            $(selector).on('select2:opening', function() {
+                // Small delay to ensure the dropdown is rendered
+                setTimeout(function() {
+                    // Check if the 'Add New' option already exists
+                    if ($('.select2-add-new-option-container').length === 0) {
+                        // Add 'Add New' option at the bottom of the dropdown
+                        const addNewOption = $(
+                            '<li class="select2-add-new-option-container">' +
+                            '<div class="select2-add-new-option">' +
+                            '<i class="fas fa-plus-circle me-1"></i> Add New ' + // placeholder +
+                            '</div>' +
+                            '</li>'
+                        );
+
+                        // Add click handler for the 'Add New' option
+                        addNewOption.on('mousedown', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            // Close the select2 dropdown first
+                            $(selector).select2('close');
+                            
+                            // Small delay to ensure dropdown is closed
+                            setTimeout(() => {
+                                // Get the modal element
+                                const modalElement = document.getElementById(modalId);
+                                
+                                // Store current scroll position
+                                const scrollY = window.scrollY;
+                                
+                                // Initialize and show the modal
+                                const modal = new bootstrap.Modal(modalElement, {
+                                    backdrop: true,
+                                    keyboard: true
+                                });
+                                
+                                // Show the modal
+                                modal.show();
+                                
+                                // Function to restore scrolling
+                                const restoreScrolling = () => {
+                                    // Re-enable body scrolling
+                                    document.body.style.overflow = '';
+                                    document.body.style.paddingRight = '';
+                                    document.body.classList.remove('modal-open');
+                                    document.body.style.position = '';
+                                    document.body.style.top = '';
+                                    document.body.style.width = '';
+                                    
+                                    // Remove any leftover backdrops
+                                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                                    backdrops.forEach(backdrop => {
+                                        if (backdrop && backdrop.parentNode) {
+                                            backdrop.parentNode.removeChild(backdrop);
+                                        }
+                                    });
+                                    
+                                    // Restore scroll position
+                                    window.scrollTo(0, scrollY);
+                                };
+                                
+                                // Handle modal hidden event
+                                const handleModalHidden = () => {
+                                    restoreScrolling();
+                                    modalElement.removeEventListener('hidden.bs.modal', handleModalHidden);
+                                };
+                                
+                                // Add event listener for modal hidden event
+                                modalElement.addEventListener('hidden.bs.modal', handleModalHidden);
+                                
+                                // Also add a one-time click handler to the modal backdrop
+                                const handleBackdropClick = (e) => {
+                                    if (e.target === modalElement) {
+                                        modal.hide();
+                                        restoreScrolling();
+                                    }
+                                };
+                                
+                                modalElement.addEventListener('click', handleBackdropClick);
+                                
+                                // Cleanup function
+                                const cleanup = () => {
+                                    modalElement.removeEventListener('hidden.bs.modal', handleModalHidden);
+                                    modalElement.removeEventListener('click', handleBackdropClick);
+                                    restoreScrolling();
+                                };
+                                
+                                // Also handle the case where the modal is closed via ESC key
+                                const handleKeyDown = (e) => {
+                                    if (e.key === 'Escape') {
+                                        cleanup();
+                                    }
+                                };
+                                
+                                document.addEventListener('keydown', handleKeyDown);
+                                
+                                // Clean up event listeners when the modal is hidden
+                                modalElement.addEventListener('hidden.bs.modal', () => {
+                                    document.removeEventListener('keydown', handleKeyDown);
+                                    cleanup();
+                                });
+                                
+                            }, 50); // Small delay to ensure dropdown is closed
+                        });
+
+                        // Add the 'Add New' option to the top of the dropdown
+                        const $optionsList = $('.select2-results__options');
+                        if ($optionsList.children().length > 0) {
+                            // If there are existing options, insert at the top
+                            $optionsList.prepend(addNewOption);
+                            // Add a divider after the Add New option
+                            $optionsList.prepend($('<li role="separator" class="dropdown-divider"></li>'));
+                        } else {
+                            // If no options, just add the Add New option
+                            $optionsList.append(addNewOption);
+                        }
+                    }
+                }, 10);
+            });
+        }
+
+        // Initialize all select2 dropdowns with add new functionality
+        initializeSelect2WithAddNew('#existingIssuesList', 'Select Vehicle Issues', 'addNewIssueModal');
+        initializeSelect2WithAddNew('#existingAccessories', 'Select Vehicle Accessories', 'addNewAccessoryModal');
+        initializeSelect2WithAddNew('#existingChecklists', 'Select Service Checklist', 'addNewChecklistModal');
+        initializeSelect2WithAddNew('#vehicleBrand', 'Select Brand', 'addNewBrandModal');
+        initializeSelect2WithAddNew('#vehicleModel', 'Select Model', 'addNewModelModal');
+        
+        // Global solution to fix scrolling issues after modal close
+        const handleGlobalModalClose = function() {
+            // Re-enable body scrolling
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            document.body.classList.remove('modal-open');
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            
+            // Remove any remaining backdrops
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => {
+                if (backdrop && backdrop.parentNode) {
+                    backdrop.parentNode.removeChild(backdrop);
+                }
+            });
+            
+            // Force reflow to ensure styles are applied
+            document.body.offsetHeight;
+        };
+        
+        // Listen for all modal hide events
+        document.addEventListener('hide.bs.modal', function() {
+            // Store scroll position before the modal closes
+            document.body.setAttribute('data-scroll-pos', window.scrollY);
+        });
+        
+        // Listen for all modal hidden events
+        document.addEventListener('hidden.bs.modal', function() {
+            handleGlobalModalClose();
+            
+            // Restore scroll position if it was stored
+            const scrollPos = document.body.getAttribute('data-scroll-pos');
+            if (scrollPos) {
+                window.scrollTo(0, parseInt(scrollPos));
+                document.body.removeAttribute('data-scroll-pos');
+            }
+        });
+        
+        // Also handle the case where modal is removed from DOM
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.removedNodes) {
+                    for (let i = 0; i < mutation.removedNodes.length; i++) {
+                        const node = mutation.removedNodes[i];
+                        if (node.nodeType === 1 && node.classList.contains('modal')) {
+                            handleGlobalModalClose();
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Start observing the document with the configured parameters
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Customer and Vehicle Auto-population
+        document.addEventListener('DOMContentLoaded', function() {
+            const customerMobileInput = document.getElementById('customerMobile');
+            const customerNameInput = document.getElementById('customerName');
+            const searchCustomerBtn = document.getElementById('searchCustomerBtn');
+            const customerSearchFeedback = document.getElementById('customerSearchFeedback');
+            const customerVehiclesModal = new bootstrap.Modal(document.getElementById('customerVehiclesModal'));
+            const vehiclesListDiv = document.getElementById('vehiclesList');
+            const vehicleNumberInput = document.getElementById('vehicleNumber');
+            const vehicleBrandSelect = document.getElementById('vehicleBrand');
+            const vehicleModelSelect = document.getElementById('vehicleModel');
+
+            // Search customer by phone number
+            searchCustomerBtn.addEventListener('click', function() {
+                const phone = customerMobileInput.value.trim();
+                if (!phone || !/^\d{10}$/.test(phone)) {
+                    customerSearchFeedback.textContent = 'Please enter a valid 10-digit mobile number';
+                    customerSearchFeedback.className = 'form-text text-danger small';
+                    return;
+                }
+
+                customerSearchFeedback.textContent = 'Searching...';
+                customerSearchFeedback.className = 'form-text text-primary small';
+
+                // Make AJAX request to find customer
+                fetch(`/api/customer/search/?phone=${encodeURIComponent(phone)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            customerSearchFeedback.textContent = data.error;
+                            customerSearchFeedback.className = 'form-text text-danger small';
+                            return;
+                        }
+
+                        // If customer found, populate customer info
+                        const customer = data.customer;
+                        customerNameInput.value = customer.name || '';
+                        
+                        // Show vehicles modal if customer has vehicles
+                        if (data.vehicles && data.vehicles.length > 0) {
+                            populateVehiclesList(data.vehicles, phone);
+                            customerVehiclesModal.show();
+                        } else {
+                            customerSearchFeedback.textContent = 'Customer found. No vehicles registered for this customer.';
+                            customerSearchFeedback.className = 'form-text text-info small';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error searching for customer:', error);
+                        customerSearchFeedback.textContent = 'Error searching for customer. Please try again.';
+                        customerSearchFeedback.className = 'form-text text-danger small';
+                    });
+            });
+
+            // Function to populate vehicles list in modal
+            function populateVehiclesList(vehicles, phone) {
+                vehiclesListDiv.innerHTML = '';
+                vehicles.forEach(vehicle => {
+                    const vehicleItem = document.createElement('button');
+                    vehicleItem.type = 'button';
+                    vehicleItem.className = 'list-group-item list-group-item-action';
+                    vehicleItem.innerHTML = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${vehicle.make || 'N/A'} ${vehicle.model || ''}</h6>
+                            <small>${vehicle.vehicletype || 'N/A'}-Wheeler</small>
+                        </div>
+                        <p class="mb-1">${vehicle.license_plate_no || 'No plate'}</p>
+                    `;
+                    
+                    vehicleItem.addEventListener('click', function() {
+                        populateVehicleDetails(vehicle);
+                        customerVehiclesModal.hide();
+                    });
+                    
+                    vehiclesListDiv.appendChild(vehicleItem);
+                });
+            }
+
+            // Function to populate vehicle details in the form
+            function populateVehicleDetails(vehicle) {
+                vehicleNumberInput.value = vehicle.license_plate_no || '';
+                
+                // Set brand if exists
+                if (vehicle.jobcardbrand && vehicle.jobcardbrand.id) {
+                    const brandOption = Array.from(vehicleBrandSelect.options).find(
+                        option => option.value == vehicle.jobcardbrand.id
+                    );
+                    if (brandOption) {
+                        vehicleBrandSelect.value = vehicle.jobcardbrand.id;
+                        // Trigger change event to load models
+                        const event = new Event('change');
+                        vehicleBrandSelect.dispatchEvent(event);
+                        
+                        // Set model after a small delay to allow models to load
+                        setTimeout(() => {
+                            if (vehicle.jobcardmodel && vehicle.jobcardmodel.id) {
+                                const modelOption = Array.from(vehicleModelSelect.options).find(
+                                    option => option.value == vehicle.jobcardmodel.id
+                                );
+                                if (modelOption) {
+                                    vehicleModelSelect.value = vehicle.jobcardmodel.id;
+                                }
+                            }
+                        }, 500);
+                    }
+                }
+                
+                customerSearchFeedback.textContent = 'Customer and vehicle information loaded';
+                customerSearchFeedback.className = 'form-text text-success small';
+            }
+        });
+
+        // Function to format a string for use as an ID
+        function formatIdString(str) {
+            return str.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        }
+
+        // Handle Add New Vehicle Issue
+        document.getElementById('saveNewIssueBtn').addEventListener('click', function() {
+            const issueName = document.getElementById('newIssueName').value.trim();
+            if (issueName) {
+                // Create a new option and add it to the select
+                const select = document.getElementById('existingIssuesList');
+                const newOption = new Option(
+                    issueName, 
+                    'new_issue_' + issueName, //formatIdString(issueName), 
+                    true, 
+                    true
+                );
+                select.add(newOption);
+                
+                // Update the select2
+                $(select).trigger('change');
+                
+                // Close the modal and reset the input
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addNewIssueModal'));
+                modal.hide();
+                document.getElementById('newIssueName').value = '';
+            }
+        });
+
+        // Handle Add New Brand
+        document.getElementById('saveNewBrandBtn').addEventListener('click', function() {
+            const brandName = document.getElementById('newBrandName').value.trim();
+            if (brandName) {
+                // Here you would typically make an AJAX call to save the new brand
+                // For now, we'll just add it to the dropdown
+                const select = document.getElementById('vehicleBrand');
+                const newOption = new Option(
+                    brandName, 
+                    'new_brand_' + brandName, //formatIdString(brandName), 
+                    true, 
+                    true
+                );
+                select.add(newOption);
+                
+                // Update the select2
+                $(select).trigger('change');
+                
+                // Close the modal and reset the input
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addNewBrandModal'));
+                modal.hide();
+                document.getElementById('newBrandName').value = '';
+            }
+        });
+
+        // Handle Add New Model
+        document.getElementById('saveNewModelBtn').addEventListener('click', function() {
+            const modelName = document.getElementById('newModelName').value.trim();
+            const brandId = $('#vehicleBrand').val();
+            
+            if (modelName && brandId) {
+                // Here you would typically make an AJAX call to save the new model
+                // For now, we'll just add it to the modelData array and update the dropdown
+                const newModelId = 'new_model_' + modelName; //formatIdString(modelName);
+                modelData.push({
+                    id: newModelId,
+                    name: modelName,
+                    displayname: modelName,
+                    brand: brandId
+                });
+                
+                // Update the model dropdown
+                populateModels(newModelId);
+                
+                // Close the modal and reset the input
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addNewModelModal'));
+                modal.hide();
+                document.getElementById('newModelName').value = '';
+            } else if (!brandId) {
+                alert('Please select a brand first');
+            }
+        });
+
+        // Handle Add New Accessory
+        document.getElementById('saveNewAccessoryBtn').addEventListener('click', function() {
+            const accessoryName = document.getElementById('newAccessoryName').value.trim();
+            if (accessoryName) {
+                // Create a new option and add it to the select
+                const select = document.getElementById('existingAccessories');
+                const newOption = new Option(
+                    accessoryName, 
+                    'new_accessory_' + accessoryName, //formatIdString(accessoryName), 
+                    true, 
+                    true
+                );
+                select.add(newOption);
+                
+                // Update the select2
+                $(select).trigger('change');
+                
+                // Close the modal and reset the input
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addNewAccessoryModal'));
+                modal.hide();
+                document.getElementById('newAccessoryName').value = '';
+            }
+        });
+
+        // Handle Add New Checklist Item
+        document.getElementById('saveNewChecklistBtn').addEventListener('click', function() {
+            const checklistItemName = document.getElementById('newChecklistItemName').value.trim();
+            if (checklistItemName) {
+                // Create a new option and add it to the select
+                const select = document.getElementById('existingChecklists');
+                const newOption = new Option(
+                    checklistItemName, 
+                    'new_checklist_' + checklistItemName, //formatIdString(checklistItemName), 
+                    true, 
+                    true
+                );
+                select.add(newOption);
+                
+                // Update the select2
+                $(select).trigger('change');
+                
+                // Close the modal and reset the input
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addNewChecklistModal'));
+                modal.hide();
+                document.getElementById('newChecklistItemName').value = '';
+            }
+        });
+    });
+</script>
+{% endblock %}

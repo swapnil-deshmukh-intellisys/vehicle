@@ -1,0 +1,265 @@
+<script>
+    $(document).ready(function () {
+        // Initialize variables
+        let vehicleIssues = [];
+        const vehicleIssueSelect = $('#vehicleIssue');
+        const $vehicleIssueForm = $('#vehicleIssueModal form');
+        const $saveBtn = $('#saveVehicleIssueBtn');
+        const vehicleType = '{{ vehicletype }}';  // Get vehicle type from template context
+
+        // Function to load vehicle issues
+        function loadVehicleIssues(selectAfterLoad = null) {
+            return new Promise((resolve) => {
+                if (!vehicleType) {
+                    console.warn('Vehicle type is not specified');
+                    vehicleIssueSelect.empty();
+                    resolve();
+                    return;
+                }
+
+                // Get current selections before making the AJAX call
+                const currentSelections = vehicleIssueSelect.val() || [];
+                
+                // If we're adding a new issue, include it in the current selections
+                if (selectAfterLoad) {
+                    if (Array.isArray(selectAfterLoad)) {
+                        selectAfterLoad.forEach(id => {
+                            if (!currentSelections.includes(id)) {
+                                currentSelections.push(id);
+                            }
+                        });
+                    } else if (!currentSelections.includes(selectAfterLoad)) {
+                        currentSelections.push(selectAfterLoad);
+                    }
+                }
+
+                $.ajax({
+                    url: '{% url "list_vehicle_issues" %}',
+                    type: 'GET',
+                    data: {
+                        vehicletype: vehicleType
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            vehicleIssues = response.data || [];
+                            populateVehicleIssueSelect(vehicleIssues, currentSelections);
+                        } else {
+                            console.error('Error loading vehicle issues:', response.message);
+                            toastr.error('Failed to load vehicle issues');
+                        }
+                        resolve(response);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error loading vehicle issues:', error);
+                        toastr.error('Failed to load vehicle issues. Please refresh the page.');
+                        resolve();
+                    }
+                });
+            });
+        }
+
+        // Function to populate vehicle issue select
+        function populateVehicleIssueSelect(issueList, selectedValues = []) {
+            // Store current scroll position
+            const scrollTop = $(document).scrollTop();
+            
+            // Destroy existing Select2 instance if it exists
+            if ($.fn.select2 && vehicleIssueSelect.hasClass('select2-hidden-accessible')) {
+                vehicleIssueSelect.select2('destroy');
+            }
+
+            // Clear existing options
+            vehicleIssueSelect.empty();
+
+            // Add new options
+            issueList.forEach(function(issue) {
+                vehicleIssueSelect.append($('<option>', {
+                    value: issue.id,
+                    text: issue.text
+                }));
+            });
+
+            // Reinitialize Select2
+            vehicleIssueSelect.select2({
+                placeholder: 'Select Vehicle Issue(s)',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: $('body'),
+                closeOnSelect: false,
+                dropdownCssClass: 'vehicle-issue-select-dropdown',
+                templateResult: function (data) {
+                    if (data.loading) return data.text;
+                    return $('<div>').text(data.text);
+                },
+                templateSelection: function (data) {
+                    return data.text;
+                }
+            });
+
+            // Set selected values if provided
+            if (selectedValues && selectedValues.length > 0) {
+                vehicleIssueSelect.val(selectedValues).trigger('change');
+            }
+
+            // Restore scroll position
+            $(document).scrollTop(scrollTop);
+
+            // Add custom "Add New" option to the dropdown
+            vehicleIssueSelect.on('select2:open', function () {
+                setTimeout(function () {
+                    if ($('.select2-dropdown .add-new-vehicle-issue-option').length === 0) {
+                        const addNewOption = $('<div class="select2-results__option select2-results__option--highlighted add-new-vehicle-issue-option" style="color: #0d6efd; font-weight: bold; cursor: pointer;">+ Add New Vehicle Issue</div>');
+                        $('.select2-dropdown .select2-results').prepend(addNewOption);
+                    }
+                }, 10);
+            });
+
+            // Handle click on the custom Add New option
+            $(document).off('click', '.add-new-vehicle-issue-option').on('click', '.add-new-vehicle-issue-option', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                vehicleIssueSelect.select2('close');
+                $vehicleIssueForm[0].reset();
+                $vehicleIssueForm.find('.is-invalid').removeClass('is-invalid');
+                $vehicleIssueForm.find('.invalid-feedback').remove();
+                const modal = new bootstrap.Modal(document.getElementById('vehicleIssueModal'));
+                modal.show();
+                $('input', $vehicleIssueForm).first().focus();
+            });
+        }
+
+        // Handle form submission
+        $vehicleIssueForm.on('submit', function (e) {
+            e.preventDefault();
+            $vehicleIssueForm.find('.is-invalid').removeClass('is-invalid');
+            $vehicleIssueForm.find('.invalid-feedback').remove();
+
+            // Get the form data
+            const issueName = $('#vehicleIssueName').val().trim();
+
+            // Validate required fields
+            if (!issueName) {
+                $('#vehicleIssueName').addClass('is-invalid')
+                    .after('<div class="invalid-feedback">Issue name is required</div>');
+                return;
+            }
+
+            if (!vehicleType) {
+                toastr.error('Vehicle type is not specified');
+                return;
+            }
+
+            const $submitBtn = $vehicleIssueForm.find('button[type="submit"]');
+            const originalBtnText = $submitBtn.html();
+            $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+            // Prepare form data
+            const formData = new FormData(this);
+            formData.append('vehicletype', vehicleType);
+            formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+            $.ajax({
+                url: '{% url "save_vehicle_issue" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('vehicleIssueModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+
+                        // Get the new issue ID and text from the response
+                        const newIssueId = response.data && response.data.id ? response.data.id.toString() : null;
+                        const newIssueText = response.data && response.data.text ? response.data.text : '';
+
+                        if (newIssueId && newIssueText) {
+                            // Get current selections
+                            const currentSelections = vehicleIssueSelect.val() || [];
+
+                            // Add new issue to the list if not already present
+                            if (!currentSelections.includes(newIssueId)) {
+                                currentSelections.push(newIssueId);
+                                
+                                // Add the new option to the select element
+                                const newOption = new Option(newIssueText, newIssueId, true, true);
+                                vehicleIssueSelect.append(newOption);
+                                
+                                // Update the selection
+                                vehicleIssueSelect.val(currentSelections).trigger('change');
+                                
+                                // Show success message
+                                toastr.success('Vehicle issue added successfully');
+                            } else {
+                                // Just show a message if the issue was already selected
+                                toastr.info('This vehicle issue is already selected');
+                            }
+                            
+                            // Refresh the select2 to show the new option
+                            vehicleIssueSelect.trigger('change');
+                        }
+                    } else {
+                        toastr.error(response.message || 'Failed to add vehicle issue');
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = 'Failed to add vehicle issue. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                        if (xhr.responseJSON.errors) {
+                            Object.entries(xhr.responseJSON.errors).forEach(([field, messages]) => {
+                                const $field = $(`[name="${field}"]`);
+                                $field.addClass('is-invalid');
+                                $field.next('.invalid-feedback').remove();
+                                $field.after(`<div class="invalid-feedback">${Array.isArray(messages) ? messages.join(' ') : messages}</div>`);
+                            });
+                        }
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function () {
+                    $submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize vehicle issues when document is ready
+        loadVehicleIssues();
+
+        // Initialize modal events
+        $('#vehicleIssueModal').on('hidden.bs.modal', function () {
+            $vehicleIssueForm[0].reset();
+            $vehicleIssueForm.find('.is-invalid').removeClass('is-invalid');
+            $vehicleIssueForm.find('.invalid-feedback').remove();
+        });
+
+        // Handle Enter key in form inputs
+        $vehicleIssueForm.on('keypress', 'input', function (e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $vehicleIssueForm.submit();
+            }
+        });
+    });
+</script>

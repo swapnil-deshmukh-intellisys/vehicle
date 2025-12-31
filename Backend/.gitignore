@@ -1,0 +1,17 @@
+# Ignore nohup.out
+nohup.out
+
+# Ignore logs directory
+logs/
+
+# Ignore Git directory
+.git/
+*.pyc
+.venv
+venv
+templates/.well-known/appspecific/com.chrome.devtools.json
+
+# Ignore environment files
+GMS/*.env
+
+tmp

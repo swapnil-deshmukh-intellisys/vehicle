@@ -1,0 +1,209 @@
+<script>
+    const preSelectedJobcardSupervisor = '{{ jobcard_obj.supervisor.id|escapejs }}';
+
+    $(document).ready(function () {
+        // Initialize variables
+        let supervisors = [];
+        const supervisorSelect = $('#supervisor');
+        const $supervisorForm = $('#addNewSupervisorModal form');
+        const $saveBtn = $('#saveNewSupervisorBtn');
+
+        // Function to load supervisors
+        function loadSupervisors() {
+            $.ajax({
+                url: '{% url "list_staff" %}',
+                type: 'GET',
+                data: {
+                    role: 'supervisor'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        supervisors = response.data;
+                        populateSupervisorSelect(supervisors);
+                        // Set the preselected supervisor after populating the select
+                        if (preSelectedJobcardSupervisor && preSelectedJobcardSupervisor !== 'None') {
+                            supervisorSelect.val(preSelectedJobcardSupervisor).trigger('change');
+                        }
+                    } else {
+                        console.error('Error loading supervisors:', response.message);
+                        toastr.error('Failed to load supervisors');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading supervisors:', error);
+                    toastr.error('Failed to load supervisors. Please refresh the page.');
+                }
+            });
+        }
+
+        // Function to populate supervisor select with "Add New" option
+        function populateSupervisorSelect(supervisorList) {
+            // Store current scroll position
+            const scrollTop = $(document).scrollTop();
+
+            // Destroy existing Select2 instance if it exists
+            if ($.fn.select2 && supervisorSelect.hasClass('select2-hidden-accessible')) {
+                supervisorSelect.select2('destroy');
+            }
+
+            supervisorSelect.empty();
+
+            // Add default empty option
+            supervisorSelect.append($('<option value=""></option>').text('Select Supervisor'));
+
+            // Add "Add New" option at the top
+            supervisorSelect.append($('<option value="add_new">+ Add New</option>'));
+
+            // Add existing supervisors
+            supervisorList.forEach(function (supervisor) {
+                supervisorSelect.append($('<option></option>')
+                    .val(supervisor.id)
+                    .text(supervisor.name)
+                );
+            });
+
+            // Initialize Select2
+            supervisorSelect.select2({
+                placeholder: 'Select Supervisor',
+                allowClear: false,
+                width: '100%',
+                dropdownParent: $('body')
+            });
+
+            // Handle select change
+            supervisorSelect.on('change', function () {
+                if ($(this).val() === 'add_new') {
+                    // Reset and show the modal
+                    $supervisorForm[0].reset();
+                    $supervisorForm.find('.is-invalid').removeClass('is-invalid');
+                    $supervisorForm.find('.invalid-feedback').remove();
+                    $('#addNewSupervisorModal').modal('show');
+                    // Focus on first input
+                    $('input', $supervisorForm).first().focus();
+                    // Reset the select to show placeholder
+                    $(this).val('').trigger('change');
+                }
+            });
+
+            // Restore scroll position
+            $(document).scrollTop(scrollTop);
+        }
+
+        // Handle form submission
+        $supervisorForm.on('submit', function (e) {
+            e.preventDefault();
+
+            // Reset previous validation
+            $supervisorForm.find('.is-invalid').removeClass('is-invalid');
+            $supervisorForm.find('.invalid-feedback').remove();
+
+            // Get form data
+            const formData = new FormData(this);
+            formData.append('role', 'supervisor');
+            formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+            // Validate required fields
+            let isValid = true;
+            const requiredFields = [
+                'supervisorfirstname', 'supervisorlastname', 'supervisorphone',
+                'supervisoraadhar', 'supervisoryear_of_experience',
+                'supervisorreference_by_name', 'supervisorreference_by_phone'
+            ];
+
+            requiredFields.forEach(function (field) {
+                const $field = $(`[name="${field}"]`);
+                if (!$field.val().trim()) {
+                    $field.addClass('is-invalid');
+                    $field.after(`<div class="invalid-feedback">This field is required</div>`);
+                    isValid = false;
+                    if (isValid) {
+                        $field.focus();
+                    }
+                }
+            });
+
+            if (!isValid) {
+                return;
+            }
+
+            // Disable button and show loading state
+            const $submitBtn = $(this).find('button[type="submit"]');
+            const originalBtnText = $submitBtn.html();
+            $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+            // Send request to create new supervisor
+            $.ajax({
+                url: '{% url "create_staff" %}',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Reload supervisors to get the new one and update the select
+                        loadSupervisors();
+                        // Hide the modal
+                        $('#addNewSupervisorModal').modal('hide');
+                        // Show success message
+                        toastr.success('Supervisor added successfully');
+                    } else {
+                        toastr.error(response.message || 'Failed to add supervisor');
+                    }
+                },
+                error: function (xhr) {
+                    let errorMessage = 'Failed to add supervisor. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                        if (xhr.responseJSON.errors) {
+                            // Handle field-specific errors
+                            Object.entries(xhr.responseJSON.errors).forEach(([field, messages]) => {
+                                const $field = $(`[name="${field}"]`);
+                                $field.addClass('is-invalid');
+                                $field.next('.invalid-feedback').remove();
+                                $field.after(`<div class="invalid-feedback">${messages.join(' ')}</div>`);
+                            });
+                        }
+                    }
+                    toastr.error(errorMessage);
+                },
+                complete: function () {
+                    $submitBtn.prop('disabled', false).html(originalBtnText);
+                }
+            });
+        });
+
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize supervisors when document is ready
+        loadSupervisors();
+
+        // Initialize modal events
+        $('#addNewSupervisorModal').on('hidden.bs.modal', function () {
+            $supervisorForm[0].reset();
+            $supervisorForm.find('.is-invalid').removeClass('is-invalid');
+            $supervisorForm.find('.invalid-feedback').remove();
+        });
+
+        // Handle Enter key in form inputs
+        $supervisorForm.on('keypress', 'input', function (e) {
+            if (e.which === 13) { // Enter key
+                e.preventDefault();
+                $supervisorForm.submit();
+            }
+        });
+    });
+</script>

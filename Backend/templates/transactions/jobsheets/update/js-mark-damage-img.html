@@ -1,0 +1,555 @@
+<script>
+    /**
+    * VEHICLE DAMAGE DIAGRAM TOOL
+     * 
+     * This script provides an interactive canvas for marking and managing vehicle damage locations.
+     * It supports both mouse and touch interactions, with features for adding, moving, and removing dents.
+     */
+
+    // Utility function to get cookie by name - used for CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $(document).ready(function () {
+        // =============================================
+        // INITIALIZATION
+        // =============================================
+        const canvas = document.getElementById('vehicleCanvas');
+        const ctx = canvas.getContext('2d');
+        const dentPositionsInput = document.getElementById('dentPositions');
+        const canvasLoading = document.getElementById('canvasLoading');
+        const undoButton = document.getElementById('undoDent');
+        const clearAllButton = document.getElementById('clearAllDents');
+        const dentMarksForm = document.getElementById('dentMarksForm');
+        const saveDentMarksBtn = document.getElementById('saveDentMarksBtn');
+        const getDBDiagramImg = '{{ jobcard_obj.diagram_image|default:"" }}';
+        const viewDiagramModalBtn = document.getElementById('viewDiagramModalBtn');
+        const diagramViewer = document.getElementById('diagramViewer');
+        const downloadDiagramBtn = document.getElementById('downloadDiagram');
+
+        // Canvas state
+        const state = {
+            image: new Image(),
+            dents: [],
+            activeDentIndex: -1,
+            isDragging: false,
+            dragOffset: { x: 0, y: 0 },
+            touchMoved: false,
+            TOUCH_MOVE_THRESHOLD: 5, // pixels
+            DRAG_THRESHOLD: 5, // pixels
+            DENT_RADIUS: 10, // pixels
+            MIN_DENT_DISTANCE: 0.05 // 5% of canvas size
+        };
+
+        // =============================================
+        // DISPLAY DIAGRAM IMAGE
+        // =============================================
+        /**
+         * Displays a diagram image in a modal
+         * @param {string} imagePath - Path to the diagram image
+         */
+         function displayDiagramImage(imagePath) {
+            if (!imagePath) {
+                console.error('No image path provided');
+                return;
+            }
+            
+            try {
+                let fullPath;
+                
+                // If it's just a filename, construct the full path
+                if (imagePath.includes('/')) {
+                    fullPath = imagePath;
+                } else {
+                    // Use Django's static URL for the base path
+                    fullPath = `/static/images/vehicles/diagrams/${imagePath}`;
+                }
+
+                console.log("Displaying diagram:", fullPath);
+                
+                const diagramViewer = document.getElementById('diagramViewer');
+                if (!diagramViewer) {
+                    console.error('Diagram viewer element not found');
+                    return;
+                }
+                
+                // Set up error handler
+                diagramViewer.onerror = function() {
+                    console.error('Error loading diagram image. Path:', fullPath);
+                    toastr.error('Failed to load diagram image. Please check the image path.');
+                    // Set a fallback image
+                    diagramViewer.src = '/static/custom-assets/images/placeholder.png';
+                };
+
+                // Set the source last to trigger loading
+                diagramViewer.src = fullPath;
+                
+                // Update download link if it exists
+                const downloadDiagramBtn = document.getElementById('downloadDiagram');
+                if (downloadDiagramBtn) {
+                    downloadDiagramBtn.href = fullPath;
+                    const fileName = imagePath.includes('/') 
+                        ? imagePath.split('/').pop() 
+                        : imagePath;
+                    downloadDiagramBtn.setAttribute('download', fileName);
+                }
+            } catch (error) {
+                console.error('Error in displayDiagramImage:', error);
+                toastr.error('Error displaying diagram: ' + error.message);
+            }
+        } 
+
+        // =============================================
+        // IMAGE HANDLING
+        // =============================================
+
+        /**
+         * Loads a vehicle image and sets up event handlers
+         * @param {string} vehicleType - Type of vehicle (e.g., '2', '3', '4')
+         */
+        function loadVehicleImage(vehicleType) {
+            showLoading(true);
+            resetDents();
+
+            const newImage = new Image();
+            newImage.crossOrigin = 'Anonymous';
+
+            newImage.onload = () => {
+                showLoading(false);
+                state.image = newImage;
+                scheduleRedraw();
+            };
+
+            newImage.onerror = () => {
+                console.error(`Failed to load ${vehicleType} image`);
+                showLoading(false);
+                loadFallbackImage(vehicleType);
+            };
+
+            // Load with cache busting
+            newImage.src = `/static/images/vehicles/${vehicleType}.avif?t=${Date.now()}`;
+        }
+
+        function loadFallbackImage(vehicleType) {
+            state.image = new Image();
+            state.image.onload = () => {
+                resizeCanvas();
+                drawCanvas();
+            };
+            state.image.src = `https://via.placeholder.com/800x400?text=${encodeURIComponent(vehicleType + ' Diagram')}`;
+        }
+
+        // =============================================
+        // CANVAS OPERATIONS
+        // =============================================
+
+        /**
+         * Resizes canvas to fit container while maintaining aspect ratio
+         */
+        function resizeCanvas() {
+            if (!canvas?.parentElement) return;
+
+            const container = canvas.parentElement;
+            const { clientWidth: width, clientHeight: height } = container;
+
+            // Set display size
+            Object.assign(canvas.style, {
+                width: `${width}px`,
+                height: `${height}px`
+            });
+
+            // Handle high DPI displays
+            const scale = window.devicePixelRatio || 1;
+            [canvas.width, canvas.height] = [width, height].map(dim => Math.floor(dim * scale));
+
+            // Reset transform and clear
+            ctx.setTransform(scale, 0, 0, scale, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Redraw if image is loaded
+            if (state.image?.complete && state.image.width > 0) {
+                drawCanvas();
+            }
+        }
+
+        /**
+         * Main drawing function - renders image and dents
+         */
+        function drawCanvas() {
+            if (!canvas?.parentElement || !state.image?.complete || state.image.width === 0) {
+                return;
+            }
+
+            const { clientWidth: displayWidth, clientHeight: displayHeight } = canvas.parentElement;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            try {
+                // Calculate dimensions to maintain aspect ratio
+                const imageAspect = state.image.width / state.image.height;
+                const containerAspect = displayWidth / displayHeight;
+
+                let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+                if (containerAspect > imageAspect) {
+                    drawHeight = displayHeight;
+                    drawWidth = drawHeight * imageAspect;
+                    offsetX = (displayWidth - drawWidth) / 2;
+                } else {
+                    drawWidth = displayWidth;
+                    drawHeight = drawWidth / imageAspect;
+                    offsetY = (displayHeight - drawHeight) / 2;
+                }
+
+                // Store image position/size for click handling
+                canvas._imageData = {
+                    x: offsetX, y: offsetY,
+                    width: drawWidth, height: drawHeight,
+                    scaleX: drawWidth / state.image.width,
+                    scaleY: drawHeight / state.image.height
+                };
+
+                // Draw the vehicle image
+                ctx.drawImage(state.image, offsetX, offsetY, drawWidth, drawHeight);
+
+                // Draw dents
+                state.dents.forEach((dent, index) => {
+                    drawDent(dent, index === state.activeDentIndex);
+                });
+
+            } catch (error) {
+                console.error('Error drawing canvas:', error);
+            }
+        }
+
+        /**
+         * Draws a single dent marker
+         */
+        function drawDent(dent, isActive) {
+            const x = canvas._imageData.x + (dent.x * canvas._imageData.width);
+            const y = canvas._imageData.y + (dent.y * canvas._imageData.height);
+
+            // Draw dent marker
+            ctx.beginPath();
+            ctx.arc(x, y, state.DENT_RADIUS, 0, Math.PI * 2);
+            ctx.fillStyle = isActive ? '#ff4444' : '#ff6b6b';
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw dent number
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText((state.dents.indexOf(dent) + 1).toString(), x, y);
+        }
+
+        // =============================================
+        // DENT MANAGEMENT
+        // =============================================
+
+        function resetDents() {
+            state.dents = [];
+            state.activeDentIndex = -1;
+            updateDentPositionsInput();
+        }
+
+        function updateDentPositionsInput() {
+            dentPositionsInput.value = JSON.stringify(state.dents);
+            updateButtonStates();
+        }
+
+        function undoLastDent() {
+            if (state.dents.length > 0) {
+                state.dents.pop();
+                state.activeDentIndex = -1;
+                updateDentPositionsInput();
+                drawCanvas();
+            }
+        }
+
+        function clearAllDents() {
+            if (state.dents.length > 0) {
+                resetDents();
+                drawCanvas();
+            }
+        }
+
+        // =============================================
+        // EVENT HANDLERS
+        // =============================================
+
+        function handleCanvasInteraction(e) {
+            e.preventDefault();
+            if (!canvas._imageData) return;
+
+            const pos = getCanvasPosition(canvas, e);
+            if (!pos) return;
+
+            const { x, y } = pos;
+            const relX = (x - canvas._imageData.x) / canvas._imageData.width;
+            const relY = (y - canvas._imageData.y) / canvas._imageData.height;
+
+            // Skip if clicking outside the image
+            if (relX < 0 || relX > 1 || relY < 0 || relY > 1) return;
+
+            const clickedDentIndex = findDentAtPosition(x, y);
+
+            if (clickedDentIndex !== -1) {
+                handleDentSelection(clickedDentIndex, x, y);
+            } else {
+                addNewDent(relX, relY);
+            }
+
+            updateDentPositionsInput();
+            drawCanvas();
+        }
+
+        function handleDentDrag(e) {
+            if (!state.isDragging || state.activeDentIndex === -1 || !canvas._imageData) return;
+
+            const pos = getCanvasPosition(canvas, e);
+            if (!pos) return;
+
+            const { x, y } = pos;
+            const relX = (x - canvas._imageData.x) / canvas._imageData.width;
+            const relY = (y - canvas._imageData.y) / canvas._imageData.height;
+
+            // Update dent position if within bounds
+            if (relX >= 0 && relX <= 1 && relY >= 0 && relY <= 1) {
+                state.dents[state.activeDentIndex] = {
+                    ...state.dents[state.activeDentIndex],
+                    x: relX,
+                    y: relY
+                };
+                updateDentPositionsInput();
+                drawCanvas();
+            }
+        }
+
+        // =============================================
+        // HELPER FUNCTIONS
+        // =============================================
+
+        function getCanvasPosition(canvas, event) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            let clientX, clientY;
+
+            if (event.touches) {
+                const touch = event.touches[0] || event.changedTouches[0];
+                if (!touch) return null;
+                clientX = touch.clientX;
+                clientY = touch.clientY;
+            } else if (event.clientX !== undefined) {
+                clientX = event.clientX;
+                clientY = event.clientY;
+            } else {
+                return null;
+            }
+
+            const dpr = window.devicePixelRatio || 1;
+            return {
+                x: (clientX - rect.left) * scaleX / dpr,
+                y: (clientY - rect.top) * scaleY / dpr
+            };
+        }
+
+        function findDentAtPosition(x, y) {
+            return state.dents.findIndex(dent => {
+                const dentX = canvas._imageData.x + (dent.x * canvas._imageData.width);
+                const dentY = canvas._imageData.y + (dent.y * canvas._imageData.height);
+                const distance = Math.hypot(dentX - x, dentY - y);
+                return distance < state.DENT_RADIUS * 2;
+            });
+        }
+
+        function handleDentSelection(index, x, y) {
+            const dent = state.dents[index];
+            state.activeDentIndex = index;
+            state.isDragging = true;
+            state.dragOffset = {
+                x: x - (canvas._imageData.x + (dent.x * canvas._imageData.width)),
+                y: y - (canvas._imageData.y + (dent.y * canvas._imageData.height))
+            };
+        }
+
+        function addNewDent(relX, relY) {
+            // Check minimum distance from existing dents
+            const tooClose = state.dents.some(dent =>
+                Math.hypot(dent.x - relX, dent.y - relY) < state.MIN_DENT_DISTANCE
+            );
+
+            if (!tooClose) {
+                state.dents.push({
+                    x: relX,
+                    y: relY,
+                    description: '',
+                    number: state.dents.length + 1
+                });
+                state.activeDentIndex = state.dents.length - 1;
+            }
+        }
+
+        function captureDiagram() {
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            tempCtx.drawImage(canvas, 0, 0);
+
+            const imageData = tempCanvas.toDataURL('image/png');
+            document.getElementById('diagramImageData').value = imageData;
+            return imageData;
+        }
+
+        function showLoading(show) {
+            canvasLoading.classList.toggle('d-none', !show);
+        }
+
+        function updateButtonStates() {
+            const hasDents = state.dents.length > 0;
+            undoButton.disabled = !hasDents;
+            clearAllButton.disabled = !hasDents;
+        }
+
+        function scheduleRedraw() {
+            requestAnimationFrame(() => {
+                resizeCanvas();
+                drawCanvas();
+            });
+        }
+
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
+
+        // Mouse events
+        canvas.addEventListener('mousedown', handleCanvasInteraction);
+        canvas.addEventListener('mousemove', (e) => {
+            if (state.isDragging) handleDentDrag(e);
+        });
+        canvas.addEventListener('mouseup', () => state.isDragging = false);
+        canvas.addEventListener('mouseleave', () => state.isDragging = false);
+
+        // Touch events
+        let touchStartTime;
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            state.touchMoved = false;
+            handleCanvasInteraction(e);
+        }, { passive: true });
+
+        canvas.addEventListener('touchmove', (e) => {
+            state.touchMoved = true;
+            if (state.isDragging) {
+                e.preventDefault();
+                handleDentDrag(e);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            const isTap = Date.now() - touchStartTime < 200 && !state.touchMoved;
+            if (isTap) {
+                handleCanvasInteraction(e);
+            }
+            state.isDragging = false;
+        });
+
+        // Button events
+        undoButton.addEventListener('click', undoLastDent);
+        clearAllButton.addEventListener('click', clearAllDents);
+
+        // Form submission
+        dentMarksForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const originalText = saveDentMarksBtn.innerHTML;
+            saveDentMarksBtn.disabled = true;
+            saveDentMarksBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+
+            try {
+                captureDiagram();
+                const diagramData = document.getElementById('diagramImageData').value;
+                const jobcardNumber = '{{ jobcard_obj.jobcard_number }}';
+
+                if (!diagramData) {
+                    throw new Error('Please add a vehicle diagram with damage marks before submitting.');
+                }
+
+                const csrftoken = getCookie('csrftoken');
+                if (!csrftoken) {
+                    throw new Error('Security error. Please refresh the page and try again.');
+                }
+
+                const formData = new FormData();
+                formData.append('jobcard_number', jobcardNumber);
+                formData.append('diagram_image', diagramData);
+                formData.append('csrfmiddlewaretoken', csrftoken);
+
+                const response = await fetch('{% url "save_jobcard_mark_damage_img" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': csrftoken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Server error');
+                }
+
+                if (data.status === 'success') {
+                    toastr.success(data.message || 'Diagram saved successfully');
+                    // Display the saved diagram
+                    if (data.diagram_image) {
+                        viewDiagramModalBtn.style.display = 'block';
+                        displayDiagramImage(data.diagram_image);
+                    }
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('dentMarksModal'));
+                    if (modal) modal.hide();
+                    clearAllDents();
+                } else {
+                    throw new Error(data.message || 'Failed to save diagram');
+                }
+            } catch (error) {
+                console.error('Error saving diagram:', error);
+                toastr.error('Error: ' + error.message);
+            } finally {
+                saveDentMarksBtn.disabled = false;
+                saveDentMarksBtn.innerHTML = originalText;
+            }
+        });
+
+        // Window and resize events
+        window.addEventListener('resize', scheduleRedraw);
+        new ResizeObserver(scheduleRedraw).observe(canvas.parentElement);
+
+        // Initialize
+        loadVehicleImage(`{{jobcard_obj.vehicle_type}}`);
+
+        // Check for existing diagram on page load
+        if (getDBDiagramImg) {
+            viewDiagramModalBtn.style.display = 'block';
+            displayDiagramImage(getDBDiagramImg);
+        }
+    });
+</script>

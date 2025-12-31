@@ -1,0 +1,178 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const state = {
+            selectedServices: [],
+            selectedParts: [],
+            jobcardNumber: '{{ jobcard_obj.jobcard_number }}',
+            urls: {
+                services: '{% url "get_jobcard_services" %}',
+                parts: '{% url "get_jobcard_parts" %}'
+            }
+        };
+
+        // Utility functions
+        const formatCurrency = (amount) => `₹${parseFloat(amount || 0).toFixed(2)}`;
+        const formatPercent = (value, prefix = '') =>
+            value > 0 ? `${prefix}${parseFloat(value).toFixed(2)}%` : '0.00%';
+
+        const calculateItemTotals = (item, type) => {
+            const value = parseFloat(item[`${type}_value`] || 0);
+            const quantity = parseInt(item.quantity || 1, 10);
+            const taxRate = parseFloat(item[`${type}_tax`] || 0);
+            const discountRate = parseFloat(item[`${type}_discount`] || 0);
+
+            const subtotal = value * quantity;
+            const tax = (subtotal * taxRate) / 100;
+            const valueWithTax = subtotal + tax;
+            const discount = (valueWithTax * discountRate) / 100;
+            const total = valueWithTax - discount;
+
+            return { subtotal, tax, discount, total, quantity };
+        };    
+        // const calculateItemTotals = (item, type) => {
+        //     const value = parseFloat(item[`${type}_value`] || 0);
+        //     const quantity = parseInt(item.quantity || 1, 10);
+        //     const taxRate = parseFloat(item[`${type}_tax`] || 0);
+        //     const discountRate = parseFloat(item[`${type}_discount`] || 0);
+
+        //     const subtotal = value * quantity;
+        //     const tax = (subtotal * taxRate) / 100;
+        //     const discount = (subtotal * discountRate) / 100;
+        //     const total = subtotal + tax - discount;
+
+        //     return { subtotal, tax, discount, total, quantity };
+        // };
+
+        // Table generation
+        const generateTableRow = (item, type) => {
+            const { subtotal, tax, discount, total } = calculateItemTotals(item, type);
+            const nameKey = `${type}_name`;
+
+            return `
+            <tr>
+                <td>${item[nameKey] || 'N/A'}</td>
+                <td>${item.quantity || 1}</td>
+                <td>${formatCurrency(item[`${type}_value`])}</td>
+                <td>${formatPercent(item[`${type}_tax`], '+')}</td>
+                <td>${formatPercent(item[`${type}_discount`], '-')}</td>
+                <td>${formatCurrency(total)}</td>
+            </tr>`;
+        };
+
+        const generateSection = (items, type, title, icon) => {
+            if (!items || !items.length) {
+                return `
+                <tr class="jc-section-header">
+                    <td colspan="6">${icon} ${title}</td>
+                </tr>
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-2">No ${type} selected</td>
+                </tr>`;
+            }
+
+            const sectionTotals = items.reduce((acc, item) => {
+                const { subtotal, tax, discount, total, quantity } = calculateItemTotals(item, type);
+                return {
+                    subtotal: acc.subtotal + subtotal,
+                    tax: acc.tax + tax,
+                    discount: acc.discount + discount,
+                    total: acc.total + total,
+                    quantity: acc.quantity + quantity
+                };
+            }, { subtotal: 0, tax: 0, discount: 0, total: 0, quantity: 0 });
+
+            const rows = items.map(item => generateTableRow(item, type)).join('');
+
+            return `
+            <tr class="jc-section-header">
+                <td colspan="6">${icon} ${title}</td>
+            </tr>
+            ${rows}
+            <tr class="jc-section-header">
+                <td>${title.toUpperCase()} TOTAL</td>
+                <td>${sectionTotals.quantity}</td>
+                <td>${formatCurrency(sectionTotals.subtotal)}</td>
+                <td>${formatCurrency(sectionTotals.tax)}</td>
+                <td>${formatCurrency(sectionTotals.discount)}</td>
+                <td>${formatCurrency(sectionTotals.total)}</td>
+            </tr>`;
+        };
+
+        const updateJobcardTable = () => {
+            const tableBody = document.querySelector('.jc-table tbody');
+            if (!tableBody) return;
+
+            const partsSection = generateSection(state.selectedParts, 'part', 'PARTS', '⚙️');
+            const servicesSection = generateSection(state.selectedServices, 'service', 'SERVICE', '🔧');
+
+            const grandTotal = (state.selectedServices.reduce((sum, s) =>
+                sum + calculateItemTotals(s, 'service').total, 0) +
+                state.selectedParts.reduce((sum, p) =>
+                    sum + calculateItemTotals(p, 'part').total, 0)
+            ).toFixed(2);
+
+            tableBody.innerHTML = `
+            ${partsSection}
+            ${servicesSection}
+            <tr class="jc-total-row">
+                <td colspan="5">GRAND TOTAL</td>
+                <td>${formatCurrency(grandTotal)}</td>
+            </tr>`;
+
+            updateGrandTotal();
+        };
+
+        // Data fetching
+        const fetchData = async (type) => {
+            if (!state.jobcardNumber) return;
+
+            try {
+                const response = await $.ajax({
+                    url: state.urls[type],
+                    type: 'GET',
+                    data: {
+                        jobcard_number: state.jobcardNumber,
+                        _: new Date().getTime()
+                    }
+                });
+
+                if (response?.status === 'success') {
+                    state[`selected${type.charAt(0).toUpperCase() + type.slice(1)}`] = response[type] || [];
+                    updateJobcardTable();
+                } else {
+                    throw new Error('Invalid response from server');
+                }
+            } catch (error) {
+                console.error(`Error fetching ${type}:`, error);
+                toastr.error('Error', `Failed to load ${type}`, 'danger');
+            }
+        };
+
+        // Update form fields
+        const updateGrandTotal = () => {
+            const calculateSectionTotal = (items, type) => {
+                return items.reduce((sum, item) => {
+                    const { subtotal, tax, discount } = calculateItemTotals(item, type);
+                    return sum + subtotal + tax - discount;
+                }, 0);
+            };
+
+            const serviceTotal = calculateSectionTotal(state.selectedServices, 'service');
+            const partsTotal = calculateSectionTotal(state.selectedParts, 'part');
+            const grandTotal = serviceTotal + partsTotal;
+
+            ['total_services', 'total_parts', 'grand_total'].forEach((field, i) => {
+                const value = [serviceTotal, partsTotal, grandTotal][i].toFixed(2);
+                document.querySelector(`input[name="${field}"]`)?.setAttribute('value', value);
+            });
+        };
+
+        // Initialize
+        const initializePage = () => {
+            fetchData('services');
+            fetchData('parts');
+        };
+
+        initializePage();
+    });
+</script>

@@ -1,0 +1,202 @@
+<div class="modal fade text-start" id="stockInwardModal" tabindex="-1" aria-labelledby="stockInwardModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <small class="modal-title" id="stockInwardModalLabel">Stock Inward</small>
+        <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="post" id="stockInwardForm" action="{% url 'r-inv-stock-inward' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" id="stockInwardId" name="id" value="" />
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-1">
+                <label class="form-label" for="product">Product*</label>
+                <select class="form-select" name="product" id="stockInwardProductSelect" required>
+                  <option value="" hidden selected>Select an option</option>
+                  {% for product in product_catalogues %}
+                  <option value="{{ product.id }}" data-part-number="{{ product.part_number|default:'' }}"
+                    data-code="{{ product.code|default:'' }}">{{ product.name }} | {{ product.brand.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="product-details mb-1" id="selected-product-details" style="display: none;">
+            <div class="row">
+              <div class="col-12">
+                <ul class="list-inline mb-0 py-25 px-50">
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-success mb-25">
+                      <i data-feather="credit-card" class="me-25"></i>
+                      <span id="product-mrp">MRP: 0</span>
+                    </span>
+                  </li>
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-warning mb-25">
+                      <span id="product-gst">GST: 0</span>
+                      <i data-feather="percent" class="ms-25"></i>
+                    </span>
+                  </li>
+                  <li class="list-inline-item">
+                    <span class="badge badge-light-secondary mb-25">
+                      <span id="product-discount">Discount: 0</span>
+                      <i data-feather="percent" class="ms-25"></i>
+                    </span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-8">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Name:</b><span id="product-name"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Brand:</b><span id="product-brand"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Code:</b><span id="product-code"></span>
+                  </li>
+                  <li>
+                    <b>Category:</b><span id="product-category"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Part Number:</b><span id="product-part-number"></span>
+                  </li>
+                  <li>
+                    <b>Available Stock:</b><span class="badge badge-light-secondary" id="product-stock">0</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12 col-md-4">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Model:</b><span id="product-model"></span>
+                  </li>
+                  <li>
+                    <span class="badge" id="product-status"></span>
+                  </li>
+                </ul>
+              </div>
+              <div class="col-12">
+                <ul class="list-style-icons mb-0">
+                  <li>
+                    <b>Description:</b><span id="product-description"></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="supplier">Supplier*</label>
+                <select class="form-select" name="supplier" required>
+                  <option value="" hidden selected>Select an option</option>
+                  {% for supplier in suppliers %}
+                  <option value="{{ supplier.id }}">{{ supplier.supplier }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="supplier_invoice_no">Supplier Invoice No.</label>
+                <input type="text" class="form-control" name="supplier_invoice_no" />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="supplier_invoice_date">Supplier Invoice Date</label>
+                <input type="date" class="form-control" name="supplier_invoice_date" />
+              </div>
+            </div>
+            <div class="col-12 col-md-8">
+              <div class="mb-1">
+                <label class="form-label" for="supplier_invoice_path">Supplier Invoice Path</label>
+                <input type="file" class="form-control" name="supplier_invoice_path" />
+              </div>
+            </div>
+            {% include 'inventory/includes/pricing-fields.html' with price_field_id='rate' price_field_name='rate' price_value='' gst_value='18' discount_value='' purchase_price_value='' show_gst_checkbox=True %}
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="quantity">Quantity*</label>
+                <input type="number" class="form-control" name="quantity" step="1" min="1" required />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="location">Location</label>
+                <input type="text" class="form-control" name="location" />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="rack">Rack</label>
+                <input type="text" class="form-control" name="rack" />
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="mb-1">
+                <label class="form-label" for="warranty">Warranty</label>
+                <input type="datetime-local" class="form-control" name="warranty" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-check form-switch mb-1">
+                <input type="checkbox" class="form-check-input" data-div-id="track-expiry-0" />
+                <label class="form-label" for="check_track_expiry">Track Expiry for this Item?</label>
+              </div>
+            </div>
+            <div class="col-12 col-md-6" id="track-expiry-0" style="display: none;">
+              <div class="mb-1">
+                <label class="form-label" for="expiry_date">Expiry Date*</label>
+                <input type="date" class="form-control" name="expiry_date" />
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="mb-1">
+                <label class="form-label" for="remarks">Remarks</label>
+                <textarea class="form-control" name="remarks"></textarea>
+              </div>
+            </div>
+            <div class="col-12 col-md-6" id="track-expiry-0" style="display: none;">
+              <div class="mb-1">
+                <label class="form-label" for="expiry_date">Expiry Date*</label>
+                <input type="date" class="form-control" name="expiry_date" />
+              </div>
+            </div>
+            <div class="col-12 text-end">
+              <div class="mb-1">
+                <button type="submit" class="btn btn-sm btn-success" id="stockInwardSubmitBtn">
+                  <span class="btn-text">Submit</span>
+                  <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>

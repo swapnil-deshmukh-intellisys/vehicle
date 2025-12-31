@@ -1,0 +1,1327 @@
+{% extends "index.html" %}
+
+{% load static %}
+
+{% load invoice_estimate_filters %}
+{% load custom_filters %}
+
+{% block title %}View Estimate{% endblock %}
+
+{% block style %}
+<style>
+    .estimate-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: #fff;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+    }
+    
+    .estimate-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .estimate-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .estimate-title h4 {
+        font-size: 1.5rem;
+        color: #5e50ee;
+        font-weight: 600;
+    }
+    
+    .company-logo {
+        max-width: 150px;
+        max-height: 80px;
+    }
+    
+    .estimate-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+    
+    .estimate-info-box {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        width: 48%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    }
+    
+    .estimate-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 25px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .estimate-table th, .estimate-table td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        padding: 12px 15px;
+        text-align: left;
+    }
+    
+    .estimate-table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .estimate-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .estimate-total {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 30px;
+    }
+    
+    .estimate-total-box {
+        width: 350px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .estimate-total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .estimate-total-row:last-child {
+        background-color: #f8f9fa;
+        font-weight: bold;
+        border-bottom: none;
+        color: #5e50ee;
+    }
+    
+    .terms-conditions {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+    
+    .signature-area {
+        margin-top: 60px;
+        display: flex;
+        justify-content: flex-end;
+    }
+    
+    .signature-box {
+        text-align: center;
+    }
+    
+    .signature-title {
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #495057;
+        margin-top: 30px;
+        font-size: 14px;
+    }
+    
+    .terms-conditions h5 {
+        margin-bottom: 10px;
+    }
+    
+    .terms-conditions ul {
+        padding-left: 20px;
+    }
+    
+    .tax-info {
+        font-size: 12px;
+        color: #666;
+        text-align: center;
+    }
+    
+    .original-mark {
+        display: inline-block;
+        border: 1px solid #ddd;
+        padding: 2px 8px;
+        font-size: 12px;
+        color: #777;
+        margin-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-fluid p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Estimates</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{%url 'r-txn-estimates' %}">Estimates</a>
+                                </li>
+                                <li class="breadcrumb-item active">View Estimate
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                <div class="mb-1 breadcrumb-right">
+                    <div class="dropdown">
+                        <button class="btn-icon btn btn-primary btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i data-feather="grid"></i>
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="#" id="printEstimate">
+                                <i class="me-1" data-feather="printer"></i>
+                                <span class="align-middle">Print</span>
+                            </a>
+                            <a class="dropdown-item" href="#" id="downloadEstimate">
+                                <i class="me-1" data-feather="download"></i>
+                                <span class="align-middle">Download</span>
+                            </a>
+                            <a class="dropdown-item" href="#" id="shareEstimate">
+                                <i class="me-1" data-feather="share-2"></i>
+                                <span class="align-middle">Share</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="v-txn-estimates" class="estimate-preview-wrapper">
+                <div class="container-fluid p-4 bg-white shadow-sm rounded" id="estimateContent" style="max-width: 900px; margin: 0 auto;">
+                                    <div class="mb-1">
+                                        <!-- Top row with TAX ESTIMATE and Company Name -->
+                                        <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-1">
+                                            <div class="d-flex align-items-center">
+                                                <span class="text-primary fw-bold me-2" style="font-size: 0.9rem;">ESTIMATE</span>
+                                                <!-- <span class="border border-dark px-1 py-0 bg-light" style="font-size: 0.7rem;"><strong>ORIGINAL FOR RECIPIENT</strong></span> -->
+                                            </div>
+                                            <div class="text-end">
+                                                <h6 class="mb-0" style="font-size: 0.95rem;">{{estimate.garage.tagline}}</h6>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Second row with Logo and Address -->
+                                        <div class="d-flex">
+                                            <div class="d-flex" style="width: 60%">
+                                                {% if estimate.garage.logo %}
+                                                <div class="me-2" style="width: 200px; height: 80px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee; padding: 5px;">
+                                                    <img src="../../../{{estimate.garage.logo}}" alt="Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                                </div>
+                                                {% endif %}
+                                                <div class="ps-1">
+                                                    <h6 class="mb-0 fw-bold">{{estimate.garage.name}}</h6>
+                                                    <p class="mb-0 small">{{estimate.garage.address}}</p>
+                                                    <p class="mb-0 small">{{estimate.garage.city.name}}, {{estimate.garage.state}}, {{estimate.garage.postal_code}}</p>
+                                                    <p class="mb-0 small"><strong>Mobile:</strong>{{estimate.garage.phone_number}} {% if estimate.garage.gst %}| <strong>GSTIN:</strong> {{estimate.garage.gst}}{% endif %}</p>
+                                                </div>
+                                            </div>
+                                            <div class="border-start ps-2 ms-2" style="width: 40%">
+                                                <!-- Estimate information on the right side of vertical line -->
+                                                <table class="small" style="width: 100%">
+                                                    <tr style="line-height: 1.2">
+                                                        <td style="width: 100px"><strong>Estimate No:</strong></td>
+                                                        <td><strong>{{ estimate.estimateid }}</strong></td>
+                                                    </tr>
+                                                    <tr style="line-height: 1.2">
+                                                        <td><strong>Estimate Date:</strong></td>
+                                                        <td>{{ estimate.estimatedate|date:"d/m/Y" }}</td>
+                                                    </tr>
+                                                    <tr style="line-height: 1.2">
+                                                        <td><strong>Due Date:</strong></td>
+                                                        <td>
+                                                            {% if estimate.duedate %}
+                                                            {{ estimate.duedate|date:"d/m/Y" }}
+                                                            {% else %}
+                                                            {{ estimate.estimatedate|date:"d/m/Y"|add_days:7 }}
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Estimate info section removed as it's now displayed next to the address -->
+                                    
+                                    <div class="row g-0 mb-2" style="display: flex; flex-wrap: nowrap;">
+                                        <div class="col-md-6 pe-md-1" style="flex: 1; margin-right: 10px;">
+                                            <div class="border rounded p-2 h-100" style="background-color: #f8f9fa; height: 100%;">
+                                                <div class="d-flex align-items-center border-bottom pb-1 mb-1">
+                                                    <h6 class="text-primary mb-0" style="font-size: 0.9rem; white-space: nowrap;"><strong>BILL TO</strong></h6>
+                                                </div>
+                                                <div class="px-1">
+                                                    <p class="mb-0 small fw-bold">{{ estimate.customer.name }}</p>
+                                                    {% if estimate.customer.address %}
+                                                    <p class="mb-0 small">{{ estimate.customer.address }}</p>
+                                                    {% endif %}
+                                                    {% if estimate.customer.pincode %}
+                                                    <p class="mb-0 small">Pincode: {{ estimate.customer.pincode }}</p>
+                                                    {% endif %}
+                                                    
+                                                    <table class="small" style="width: 100%; margin-top: 5px;">
+                                                        {% if estimate.customer.phone %}
+                                                        <tr style="line-height: 1.2">
+                                                            <td style="width: 60px; padding: 0;"><strong>Mobile:</strong></td>
+                                                            <td style="padding: 0;">{{ estimate.customer.phone }}</td>
+                                                        </tr>
+                                                        {% endif %}
+                                                        {% if estimate.customer.gst and estimate.customer.gst != "--" %}
+                                                        <tr style="line-height: 1.2">
+                                                            <td style="padding: 0;"><strong>GSTIN:</strong></td>
+                                                            <td style="padding: 0;">{{ estimate.customer.gst }}</td>
+                                                        </tr>
+                                                        {% endif %}
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 ps-md-1" style="flex: 1; margin-left: 10px;">
+                                            <div class="border rounded p-2 h-100" style="background-color: #f8f9fa; height: 100%;">
+                                                <div class="d-flex align-items-center border-bottom pb-1 mb-1">
+                                                    <h6 class="text-primary mb-0" style="font-size: 0.9rem; white-space: nowrap;"><strong>VEHICLE DETAILS</strong></h6>
+                                                </div>
+                                                <div class="px-1">
+                                                    <table class="small" style="width: 100%">
+                                                        {% if estimate.pono and estimate.pono != "--" %}
+                                                        <tr style="line-height: 1.2">
+                                                            <td style="width: 60px; padding: 0;"><strong>P.O. No:</strong></td>
+                                                            <td style="padding: 0;">{{ estimate.pono }}</td>
+                                                        </tr>
+                                                        {% endif %}
+                                                    </table>
+                                                    
+                                                    {% if estimate.vehicle.registration_no %}
+                                                    <p class="mb-0 small fw-bold">{{ estimate.vehicle.registration_no }}</p>
+                                                    {% endif %}
+                                                    {% if estimate.vehicle.model and estimate.vehicle.model != "--" %}
+                                                    <p class="mb-0 small">{{ estimate.vehicle.model }}</p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if estimate.estimate_services.all %}
+                                    <div class="estimate-items mb-1">
+                                        <div class="d-flex align-items-center border-bottom pb-1 mb-1">
+                                            <h6 class="text-primary mb-0" style="font-size: 0.95rem;"><strong>SERVICES</strong></h6>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-striped" id="services-table" data-dt-init="false">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th width="40%">DESCRIPTION</th>
+                                                        <th class="text-center" width="8%">QTY</th>
+                                                        <th class="text-end" width="12%">RATE</th>
+                                                        <th class="text-center" width="10%">TAX (%)</th>
+                                                        <th class="text-center" width="10%">DISC (%)</th>
+                                                        <th class="text-end" width="15%">AMOUNT</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for svc in estimate.estimate_services.all %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if svc.service_source == 'service' %}
+                                                                {{ svc.service.name }}
+                                                            {% else %}
+                                                                {{ svc.service_name }}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">{{ svc.quantity|default:"1" }}</td>
+                                                        <td class="text-end">{{ svc.service_value|floatformat:2 }}</td>
+                                                        <td class="text-center">{{ svc.service_tax|floatformat:1 }}</td>
+                                                        <td class="text-center">{{ svc.service_discount|floatformat:1 }}</td>
+                                                        <td class="text-end">
+                                                            {% with total_value=svc.service_value|multiply:svc.quantity|default:"1" %}
+                                                            {% with discount_value=total_value|multiply:svc.service_discount|divide:100 %}
+                                                            {% with taxable_value=total_value|subtract:discount_value %}
+                                                            {% with tax_value=taxable_value|multiply:svc.service_tax|divide:100 %}
+                                                            {% with final_amount=taxable_value|add:tax_value %}
+                                                            {{ final_amount|floatformat:2 }}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if estimate.estimate_product_catalogues.all %}
+                                    <div class="estimate-items mb-1">
+                                        <div class="d-flex align-items-center border-bottom pb-1 mb-1">
+                                            <h6 class="text-primary mb-0" style="font-size: 0.95rem;"><strong>PARTS</strong></h6>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered table-striped" id="parts-table" data-dt-init="false">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th width="40%">DESCRIPTION</th>
+                                                        <th class="text-center" width="8%">QTY</th>
+                                                        <th class="text-end" width="12%">RATE</th>
+                                                        <th class="text-center" width="10%">TAX (%)</th>
+                                                        <th class="text-center" width="10%">DISC (%)</th>
+                                                        <th class="text-end" width="15%">AMOUNT</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for part in estimate.estimate_product_catalogues.all %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if part.part_source == 'inventory' %}
+                                                                {{ part.part.name }}
+                                                            {% else %}
+                                                                {{ part.part_name }}
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-center">{{ part.quantity|default:"1" }}</td>
+                                                        <td class="text-end">{{ part.part_value|floatformat:2 }}</td>
+                                                        <td class="text-center">{{ part.part_tax|floatformat:1 }}</td>
+                                                        <td class="text-center">{{ part.part_discount|floatformat:1 }}</td>
+                                                        <td class="text-end">
+                                                            {% with total_value=part.part_value|multiply:part.quantity|default:"1" %}
+                                                            {% with discount_value=total_value|multiply:part.part_discount|divide:100 %}
+                                                            {% with taxable_value=total_value|subtract:discount_value %}
+                                                            {% with tax_value=taxable_value|multiply:part.part_tax|divide:100 %}
+                                                            {% with final_amount=taxable_value|add:tax_value %}
+                                                            {{ final_amount|floatformat:2 }}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                            {% endwith %}
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="d-flex flex-wrap mt-1">
+                                        <div style="flex: 7; margin-right: 10px;">
+                                            <div class="terms-conditions border rounded p-2" style="background-color: #f8f9fa; height: 100%;">
+                                                <div class="d-flex align-items-center border-bottom pb-1 mb-1">
+                                                    <h6 class="text-primary mb-0" style="font-size: 0.95rem;"><strong>TERMS AND CONDITIONS</strong></h6>
+                                                </div>
+                                                {% if estimate.garage.terms_and_conditions %}
+                                                    {% with terms=estimate.garage.terms_and_conditions %}
+                                                        {% if '\n' in terms or '\r' in terms %}
+                                                            {# Multi-line input - display as paragraphs #}
+                                                            <div class="small">
+                                                                {{ terms|linebreaksbr }}
+                                                            </div>
+                                                        {% elif "," in terms %}
+                                                            {# Comma-separated values - display as list #}
+                                                            {% with items=terms|split:"," %}
+                                                                {% if items %}
+                                                                    <ul class="ps-3 mb-0 small">
+                                                                        {% for item in items %}
+                                                                            <li>{{ item|striptags|title|truncatechars:150 }}</li>
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                {% else %}
+                                                                    <div class="small">{{ terms|linebreaksbr }}</div>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        {% elif "." in terms %}
+                                                            {# Sentences separated by periods #}
+                                                            {% with items=terms|split:"." %}
+                                                                {% if items %}
+                                                                    <ul class="ps-3 mb-0 small">
+                                                                        {% for item in items %}
+                                                                            {% if item.strip %}
+                                                                                <li>{{ item|striptags|title|truncatechars:150 }}.</li>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </ul>
+                                                                {% else %}
+                                                                    <div class="small">{{ terms|linebreaksbr }}</div>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        {% else %}
+                                                            {# Single line of text #}
+                                                            <div class="small">
+                                                                {{ terms|linebreaksbr }}
+                                                            </div>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div style="flex: 5;">
+                                            <div class="estimate-total-box border rounded p-2" style="background-color: #f8f9fa; height: 100%;">
+                                                <div class="text-center mb-1">
+                                                    <div class="d-flex align-items-center border-bottom pb-1">
+                                                        <h6 class="text-primary mb-0" style="font-size: 0.95rem;"><strong>ESTIMATE SUMMARY</strong></h6>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="py-1">
+                                                    <div class="d-flex justify-content-between" style="line-height: 1.8;">
+                                                        <span class="text-muted">Subtotal:</span>
+                                                        <span>INR {{ estimate.subtotal|floatformat:2 }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="d-flex justify-content-between" style="line-height: 1.8;">
+                                                        <span class="text-muted">Discount:</span>
+                                                        <span>INR {{ estimate.discount_amount|default:"0"|floatformat:2 }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="d-flex justify-content-between" style="line-height: 1.8;">
+                                                        <span class="text-muted">Taxable Amount:</span>
+                                                        <span>INR {{ estimate.taxable_amount|floatformat:2 }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="d-flex justify-content-between" style="line-height: 1.8;">
+                                                        <span class="text-muted">Tax:</span>
+                                                        <span>INR {{ estimate.tax_amount|floatformat:2 }}</span>
+                                                    </div>
+                                                    
+                                                    <hr class="my-2">
+                                                    
+                                                    <div class="d-flex justify-content-between" style="line-height: 1.8;">
+                                                        <span class="text-primary" style="font-size: 1.1rem;">Estimate Total:</span>
+                                                        <span class="text-primary" style="font-size: 1.1rem;">INR {{ estimate.total_amount|floatformat:2 }}</span>
+                                                    </div>
+                                                    
+                                                    <div class="d-flex justify-content-between" style="line-height: 1.8;">
+                                                        <span class="text-muted">Received Amount:</span>
+                                                        <span>INR {{ estimate.paid_amount|default:"0.00"|floatformat:2 }}</span>
+                                                    </div>
+                                                    
+                                                    <div style="border-top: 1px solid #dee2e6; padding: 8px 0 0 0;">
+                                                        <p class="mb-0" style="font-size: 11px; color: #333; line-height: 1.3;">
+                                                            <strong>Amount in words:</strong> {{ estimate.total_amount|num_to_words|title }} Rupees Only
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="margin: 30px 0 20px 0; text-align: right;">
+                                        <div style="display: inline-block; width: 100%;">
+                                            <div style="width: 220px; margin-left: auto;">
+                                                {% if estimate.garage.authorized_signatory %}
+                                                    <!-- Display authorized signatory image if available -->
+                                                    <div style="text-align: center; margin-bottom: 5px;">
+                                                        <div style="width: 180px; height: 60px; margin: 0 auto; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid #eee; padding: 5px;">
+                                                            {% with signatory_path=estimate.garage.authorized_signatory %}
+                                                                {% if signatory_path|slice:":4" != 'http' %}
+                                                                    <img src="/{{ signatory_path|default:'' }}" alt="Authorized Signatory" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'border-top: 1px solid #000; width: 100%; height: 100%; margin: 0;\'></div>'">
+                                                                {% else %}
+                                                                    <img src="{{ signatory_path }}" alt="Authorized Signatory" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'border-top: 1px solid #000; width: 100%; height: 100%; margin: 0;\'></div>'">
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <!-- Fallback to line if no signatory image -->
+                                                    <div style="border-top: 1px solid #000; width: 180px; margin: 25px auto 10px auto;"></div>
+                                                {% endif %}
+                                                <p class="mb-0" style="font-size: 10px; color: #666; text-align: center; margin: 5px 0 0 0; line-height: 1.2;">AUTHORISED SIGNATORY</p>
+                                                <p class="mb-0" style="font-size: 11px; font-weight: 600; text-align: center; margin: 0; line-height: 1.3;">{{ estimate.garage.name|title }}</p>
+                                                {% if estimate.garage.gst %}
+                                                    <p class="mb-0" style="font-size: 10px; color: #666; text-align: center; margin: 2px 0 0 0; line-height: 1.2;">GST: {{ estimate.garage.gst }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+            </section>
+
+            <!-- Action Buttons -->
+            <div class="row mt-1">
+                <div class="col-12 text-center">
+                    <button class="btn btn-primary me-2" id="printEstimateBtn">
+                        <i data-feather="printer" class="me-1"></i>
+                        Print
+                    </button>
+                    <button class="btn btn-outline-primary me-2" id="downloadPdfBtn">
+                        <i data-feather="download" class="me-1"></i>
+                        Download
+                    </button>
+                    <button class="btn btn-outline-primary" id="shareEstimateBtn">
+                        <i data-feather="share-2" class="me-1"></i>
+                        Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- Required Dependencies -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        feather.replace();
+        
+        // Prevent DataTables auto-initialization
+        document.querySelectorAll('table').forEach(table => {
+            table.classList.remove('dataTable');
+        });
+        // Add class to prevent DataTables from auto-initializing
+        $('#services-table, #parts-table').addClass('no-datatable');
+        
+        // If jQuery and DataTables are available, properly initialize or disable
+        if (typeof $ !== 'undefined' && $.fn.dataTable) {
+            // Check if tables are already initialized as DataTables
+            if ($.fn.dataTable.isDataTable('#services-table')) {
+                $('#services-table').DataTable().destroy();
+            }
+            
+            if ($.fn.dataTable.isDataTable('#parts-table')) {
+                $('#parts-table').DataTable().destroy();
+            }
+        }
+        
+        document.getElementById('printEstimateBtn').addEventListener('click', function() {
+            const printContent = document.getElementById('estimateContent').innerHTML;
+            const originalContent = document.body.innerHTML;
+            
+            // Create a temporary container to measure content
+            const tempContainer = document.createElement('div');
+            tempContainer.style.visibility = 'hidden';
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.width = '210mm';
+            tempContainer.style.padding = '15mm';
+            tempContainer.innerHTML = printContent;
+            document.body.appendChild(tempContainer);
+            
+            // Calculate scale factor to fit content on one page
+            const pageHeight = 1122; // A4 height in pixels at 96dpi
+            const contentHeight = tempContainer.scrollHeight;
+            const scale = Math.min(1, (pageHeight / contentHeight) * 0.95); // 95% of available height
+            
+            // Remove temporary container
+            document.body.removeChild(tempContainer);
+            
+            // Set the body content with calculated scale
+            document.body.innerHTML = `
+                <div style="width: 100%; min-height: 100vh; background: white; display: flex; flex-direction: column; align-items: center;">
+                    <div id="printContainer" style="transform: scale(${scale}); transform-origin: top center; width: 210mm; min-height: 297mm; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                        ${printContent}
+                    </div>
+                    <div style="margin: 20px 0; text-align: center;">
+                        <button onclick="window.location.reload()" style="padding: 10px 20px; background: #7367f0; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 0 10px;">
+                            Close Print View
+                        </button>
+                        <button onclick="window.print()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 0 10px;">
+                            Print Now
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // Add print-specific styles
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @page {
+                    size: A4;
+                    margin: 0;
+                }
+                
+                body {
+                    margin: 0;
+                    padding: 0;
+                    background: white;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                    width: 100%;
+                    height: 100%;
+                }
+                
+                #printContainer {
+                    width: 210mm;
+                    min-height: 297mm;
+                    padding: 15mm;
+                    box-sizing: border-box;
+                    background: white;
+                    margin: 0 auto;
+                }
+                
+                @media print {
+                    body {
+                        background: white;
+                        height: 100%;
+                    }
+                    
+                    #printContainer {
+                        transform: none !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        box-shadow: none !important;
+                    }
+                    
+                    .no-print {
+                        display: none !important;
+                    }
+                    }
+                    
+                    /* Ensure BILL TO and VEHICLE DETAILS stay side by side in print */
+                    .row.g-0 {
+                        display: flex !important;
+                        flex-wrap: nowrap !important;
+                    }
+                    
+                    .col-md-6 {
+                        flex: 1 !important;
+                        margin: 0 5px !important;
+                    }
+                    
+                    .pe-md-1 {
+                        padding-right: 0.25rem !important;
+                    }
+                    
+                    .ps-md-1 {
+                        padding-left: 0.25rem !important;
+                    }                  
+                    /* Ensure signature is at the bottom */
+                    .signature-area {
+                        position: absolute !important;
+                        bottom: 30px !important;
+                        right: 40px !important;
+                    }
+                    button { 
+                        display: none !important; 
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Adjust scaling if content is too tall
+            setTimeout(() => {
+                const container = document.getElementById('printContainer');
+                const contentHeight = container.scrollHeight;
+                const pageHeight = 1123; // A4 height in pixels at 96dpi
+                
+                if (contentHeight > pageHeight) {
+                    const scale = Math.min(0.85, (pageHeight / contentHeight) * 0.9);
+                    container.style.transform = `scale(${scale})`;
+                    container.style.transformOrigin = 'top center';
+                }
+                
+                // Trigger print after adjustments
+                setTimeout(() => {
+                    window.print();
+                    
+                    // Restore original content after print
+                    setTimeout(() => {
+                        document.body.innerHTML = originalContent;
+                        window.location.reload();
+                    }, 500);
+                }, 100);
+            }, 100);
+        });
+        
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function() {
+            const downloadBtn = this;
+            
+            try {
+                // Get the estimate content
+                const element = document.getElementById('estimateContent');
+                
+                // Create a clone of the element to avoid affecting the original
+                const elementClone = element.cloneNode(true);
+                elementClone.id = 'estimateContentClone';
+                elementClone.style.display = 'block';
+                elementClone.style.visibility = 'hidden';
+                document.body.appendChild(elementClone);
+                
+                // PDF options
+                const originalStyles = {
+                    className: element.className,
+                    padding: element.style.padding,
+                    margin: element.style.margin,
+                    width: element.style.width,
+                    maxWidth: element.style.maxWidth
+                };
+
+                // Apply print-specific styles
+                element.classList.remove('shadow-sm', 'rounded', 'card');
+                element.style.boxShadow = 'none';
+                element.style.border = 'none';
+                element.style.padding = '20px';
+                element.style.maxWidth = '210mm';
+                element.style.margin = '0 auto';
+                element.style.backgroundColor = '#fff';
+                
+                // Add a print-specific class for better control
+                element.classList.add('print-version');
+                
+                const opt = {
+                    margin: [5, 5, 5, 5], // Reduced from [15, 15, 15, 15]
+                    filename: `estimate-{{ estimate.estimateid }}.pdf`,
+                    image: { 
+                        type: 'jpeg',
+                        quality: 0.98
+                    },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#fff',
+                        scrollX: 0,
+                        scrollY: 0,
+                        ignoreElements: (el) => {
+                            return el.classList && 
+                                (el.classList.contains('no-print') || 
+                                 el.classList.contains('d-print-none'));
+                        }
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait',
+                        compress: true
+                    },
+                    pagebreak: { 
+                        mode: 'avoid-all',
+                        avoid: ['tr', 'td', 'th', 'div', 'p', 'img', 'table']
+                    },
+                    onclone: function(clonedDoc) {
+                        // Add print-specific styles
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            @page {
+                                size: A4;
+                                margin: 15mm 15mm 15mm 15mm;
+                                padding: 0;
+                            }
+                            @media print {
+                                @import url('{% static "app-assets/fonts/inter/inter.css" %}');
+                                
+                                html, body {
+                                    width: 100%;
+                                    min-height: 100%;
+                                    margin: 0 !important;
+                                    padding: 0 !important;
+                                    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+                                    line-height: 1.6;
+                                    color: #2D3748 !important;
+                                    font-size: 14px !important;
+                                    background: #fff !important;
+                                    -webkit-print-color-adjust: exact !important;
+                                    print-color-adjust: exact !important;
+                                }
+                                #estimateContent {
+                                    width: 100% !important;
+                                    max-width: 180mm !important; /* Standard width for A4 with margins */
+                                    margin: 0 auto !important;
+                                    padding: 0 !important;
+                                    box-shadow: none !important;
+                                    border: none !important;
+                                }
+                                .container-fluid {
+                                    width: 100% !important;
+                                    padding: 0 15px !important;
+                                    margin: 0 auto !important;
+                                    max-width: 100% !important;
+                                }
+                                .border {
+                                    border-color: #eee !important;
+                                }
+                                .text-primary {
+                                    color: #2c3e50 !important;
+                                }
+                                .bg-light, .bg-white, .bg-light *, .bg-white * {
+                                    background-color: #fff !important;
+                                    -webkit-print-color-adjust: exact !important;
+                                }
+                                .shadow-sm, .shadow, .shadow-* {
+                                    box-shadow: none !important;
+                                }
+                                .no-print, .d-print-none, .btn, .action-buttons {
+                                    display: none !important;
+                                }
+                                /* Ensure tables don't break across pages */
+                                table {
+                                    page-break-inside: auto !important;
+                                }
+                                tr {
+                                    page-break-inside: avoid !important;
+                                    page-break-after: auto !important;
+                                }
+                                thead {
+                                    display: table-header-group !important;
+                                }
+                                tfoot {
+                                    display: table-footer-group !important;
+                                }
+                                /* Improve text readability */
+                                p, span, div, td, th, li, a {
+                                    font-size: 10px !important;
+                                    line-height: 1.2 !important;
+                                    color: #333 !important;
+                                }
+                                h1, h2, h3, h4, h5, h6 {
+                                    color: #000 !important;
+                                    page-break-after: avoid !important;
+                                }
+                                /* Ensure links are visible in print */
+                                a[href]::after {
+                                    content: " (" attr(href) ")";
+                                    font-size: 90%;
+                                }
+                            }
+                            /* Modern Estimate Header */
+                            .estimate-header {
+                                border-bottom: 2px solid #4F46E5 !important;
+                                margin-bottom: 24px !important;
+                                padding-bottom: 12px !important;
+                            }
+                            
+                            .estimate-title {
+                                color: #1A202C !important;
+                                font-size: 24px !important;
+                                font-weight: 700 !important;
+                                margin: 0 0 5px 0 !important;
+                                letter-spacing: -0.5px !important;
+                            }
+                            
+                            .estimate-subtitle {
+                                color: #718096 !important;
+                                font-size: 14px !important;
+                                font-weight: 400 !important;
+                                margin: 0 !important;
+                            }
+                            
+                            /* Modern Table Styles */
+                            .table {
+                                width: 100% !important;
+                                margin-bottom: 2rem !important;
+                                border-collapse: separate !important;
+                                border-spacing: 0 !important;
+                                border-radius: 8px !important;
+                                overflow: hidden !important;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+                            }
+                            
+                            .table thead th {
+                                background-color: #F7FAFC !important;
+                                padding: 14px 20px !important;
+                                border: none !important;
+                                font-weight: 600 !important;
+                                text-align: left !important;
+                                font-size: 12px !important;
+                                color: #4A5568 !important;
+                                text-transform: uppercase !important;
+                                letter-spacing: 0.05em !important;
+                                border-bottom: 1px solid #E2E8F0 !important;
+                            }
+                            
+                            .table tbody tr:not(:last-child) {
+                                border-bottom: 1px solid #EDF2F7 !important;
+                            }
+                            
+                            .table tbody tr:hover {
+                                background-color: #F8FAFC !important;
+                            }
+                            
+                            .table tbody td {
+                                padding: 14px 20px !important;
+                                border: none !important;
+                                vertical-align: middle !important;
+                                font-size: 13.5px !important;
+                                color: #2D3748 !important;
+                            }
+                            
+                            .table tfoot td {
+                                padding: 14px 20px !important;
+                                font-weight: 600 !important;
+                                background-color: #F7FAFC !important;
+                                border-top: 2px solid #E2E8F0 !important;
+                                border-bottom: none !important;
+                            }
+                            
+                            /* Modern Spacing */
+                            .mb-3 {
+                                margin-bottom: 1.5rem !important;
+                            }
+                            
+                            .mb-4 {
+                                margin-bottom: 2rem !important;
+                            }
+                            
+                            .py-3 {
+                                padding-top: 1rem !important;
+                                padding-bottom: 1rem !important;
+                            }
+                            
+                            /* Modern Text Styles */
+                            .text-primary {
+                                color: #4F46E5 !important;
+                            }
+                            
+                            .text-muted {
+                                color: #718096 !important;
+                            }
+                            
+                            .text-uppercase {
+                                letter-spacing: 0.05em !important;
+                            }
+                            
+                            /* Status Badges */
+                            .badge {
+                                padding: 4px 10px !important;
+                                border-radius: 9999px !important;
+                                font-weight: 500 !important;
+                                font-size: 12px !important;
+                                letter-spacing: 0.02em !important;
+                            }
+                            
+                            .badge-success {
+                                background-color: #ECFDF5 !important;
+                                color: #059669 !important;
+                            }
+                            
+                            .badge-warning {
+                                background-color: #FFFBEB !important;
+                                color: #D97706 !important;
+                            }
+                            
+                            .badge-danger {
+                                background-color: #FEF2F2 !important;
+                                color: #DC2626 !important;
+                            }
+                            
+                            /* Modern Card Styles */
+                            .border {
+                                border: 1px solid #E2E8F0 !important;
+                                border-radius: 8px !important;
+                                padding: 20px !important;
+                                margin-bottom: 20px !important;
+                                background: #FFFFFF !important;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.04) !important;
+                            }
+                            
+                            /* Modern Typography */
+                            h1, h2, h3, h4, h5, h6 {
+                                color: #1A202C !important;
+                                margin-top: 0 !important;
+                                margin-bottom: 1rem !important;
+                                font-weight: 600 !important;
+                                line-height: 1.3 !important;
+                            }
+                            
+                            /* Modern Buttons */
+                            .btn {
+                                padding: 8px 16px !important;
+                                border-radius: 6px !important;
+                                font-weight: 500 !important;
+                                font-size: 13px !important;
+                                text-transform: none !important;
+                                letter-spacing: 0.02em !important;
+                                transition: all 0.2s ease !important;
+                            }
+                            
+                            .btn-primary {
+                                background-color: #4F46E5 !important;
+                                border-color: #4F46E5 !important;
+                            }
+                            
+                            .btn-primary:hover {
+                                background-color: #4338CA !important;
+                                border-color: #4338CA !important;
+                                transform: translateY(-1px) !important;
+                                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+                            }
+                            /* Ensure proper spacing in tables */
+                            table {
+                                border-collapse: collapse !important;
+                                width: 100% !important;
+                                margin-bottom: 15px !important;
+                            }
+                            th, td {
+                                padding: 4px 6px !important;
+                                border: 1px solid #eee !important;
+                                vertical-align: top !important;
+                            }
+                            th {
+                                background-color: #f8f9fa !important;
+                                font-weight: bold !important;
+                                text-align: left !important;
+                            }
+                            .estimate-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                margin: 15px 0;
+                                font-size: 11px;
+                            }
+                            .estimate-table th {
+                                background-color: #f8f9fa;
+                                text-align: left;
+                                padding: 8px 10px;
+                                border: 1px solid #dee2e6;
+                                font-weight: 600;
+                            }
+                            .estimate-table td {
+                                padding: 8px 10px;
+                                border: 1px solid #dee2e6;
+                                vertical-align: top;
+                            }
+                            .text-right { text-align: right; }
+                            .text-center { text-align: center; }
+                            .mt-3 { margin-top: 1rem; }
+                            .mt-4 { margin-top: 1.5rem; }
+                            .mb-3 { margin-bottom: 1rem; }
+                            .mb-4 { margin-bottom: 1.5rem; }
+                            .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+                            .py-3 { padding-top: 1rem; padding-bottom: 1rem; }
+                            .border-top { border-top: 1px solid #dee2e6; }
+                            .border-bottom { border-bottom: 1px solid #dee2e6; }
+                            .fw-bold { font-weight: 600; }
+                            .text-muted { color: #6c757d !important; }
+                        `;
+                        clonedDoc.head.appendChild(style);
+                        return Promise.resolve();
+                    }
+                };
+
+                // Generate and save PDF
+                await html2pdf()
+                    .set(opt)
+                    .from(element)
+                    .toPdf()
+                    .get('pdf')
+                    .then(pdf => {
+                        pdf.save(opt.filename);
+                        // Show success message
+                        toastr.success('Estimate downloaded successfully.', 'Success', {
+                            closeButton: true,
+                            progressBar: true,
+                            positionClass: 'toast-bottom-right',
+                            timeOut: 3000,
+                            extendedTimeOut: 1000
+                        });
+                    });
+
+                // Restore original styles
+                element.className = originalStyles.className;
+                element.style.padding = originalStyles.padding;
+                element.style.margin = originalStyles.margin;
+                element.style.width = originalStyles.width;
+                element.style.maxWidth = originalStyles.maxWidth;
+                
+            } catch (error) {
+                let errorMessage = 'Failed to generate PDF. ';
+                
+                // Add more specific error messages based on the error type
+                if (error.message && error.message.includes('timed out')) {
+                    errorMessage += 'The operation took too long. ';
+                } else if (error.message && error.message.includes('network')) {
+                    errorMessage += 'Network error occurred. ';
+                }
+                
+                errorMessage += 'Please try again or contact support if the problem persists.';
+                
+                toastr.error(errorMessage, 'PDF Generation Failed', {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    timeOut: 7000,
+                    extendedTimeOut: 2000
+                });
+            } finally {
+                // Clean up after download
+                
+                // Remove the cloned element if it exists
+                if (elementClone && elementClone.parentNode) {
+                    elementClone.parentNode.removeChild(elementClone);
+                }
+                
+                // Show success message
+                const successToast = document.createElement('div');
+                successToast.style.position = 'fixed';
+                successToast.style.bottom = '20px';
+                successToast.style.right = '20px';
+                successToast.style.backgroundColor = '#28a745';
+                successToast.style.color = 'white';
+                successToast.style.padding = '10px 20px';
+                successToast.style.borderRadius = '4px';
+                successToast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+                successToast.style.zIndex = '9999';
+                successToast.style.transition = 'opacity 0.5s';
+                successToast.innerHTML = '<i class="fas fa-check-circle"></i> PDF downloaded successfully!';
+                document.body.appendChild(successToast);
+                
+                // Remove the toast after 3 seconds
+                setTimeout(() => {
+                    successToast.style.opacity = '0';
+                    setTimeout(() => {
+                        if (successToast.parentNode) {
+                            successToast.parentNode.removeChild(successToast);
+                        }
+                    }, 500);
+                }, 3000);
+            }
+        });
+        
+        document.getElementById('shareEstimateBtn').addEventListener('click', function() {
+            try {
+                // First trigger the download functionality
+                document.getElementById('downloadPdfBtn').click();
+                
+                // Then show sharing options
+                const element = document.getElementById('estimateContent');
+                
+                // Get the customer's mobile number from the BILL TO section
+                let customerMobile = '';
+                const mobileElements = document.querySelectorAll('.estimate-info-box');
+                mobileElements.forEach(element => {
+                    const text = element.textContent.trim();
+                    if (text.includes('Mobile:')) {
+                        const mobileMatch = text.match(/Mobile:\s*(\d+)/);
+                        if (mobileMatch && mobileMatch[1]) {
+                            customerMobile = mobileMatch[1];
+                        }
+                    }
+                });
+                
+                // Clean the mobile number (remove spaces, special characters)
+                customerMobile = customerMobile.replace(/\D/g, '');
+                
+                // If customer mobile is not found or invalid, use a default
+                if (!customerMobile || customerMobile.length < 10) {
+                    customerMobile = '{{ estimate.customer.phone }}';
+                }
+                
+                // Add the static number
+                const staticNumber = '6207627817';
+                
+                // Create WhatsApp Web URLs with the phone numbers
+                // Format: https://web.whatsapp.com/send?phone=PHONENUMBER&text=MESSAGE
+                const customerWhatsappUrl = `https://web.whatsapp.com/send?phone=${customerMobile}&text=Please find attached the estimate ${encodeURIComponent('{{ estimate.estimateid }}')} from ${encodeURIComponent('{{ estimate.garage.name }}')}. Thank you for your garage!`;
+                const staticWhatsappUrl = `https://web.whatsapp.com/send?phone=${staticNumber}&text=Please find attached the estimate ${encodeURIComponent('{{ estimate.estimateid }}')} from ${encodeURIComponent('{{ estimate.garage.name }}')}. Thank you for your garage!`;
+                
+                // Create a modal for user to choose which number to send to
+                const modalHtml = `
+                    <div class="modal fade" id="whatsappModal" tabindex="-1" aria-labelledby="whatsappModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="whatsappModalLabel">Send Estimate via WhatsApp</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>The estimate PDF has been downloaded to your computer. You can now share it via WhatsApp by following these steps:</p>
+                                    <ol class="list-group list-group-numbered mb-3">
+                                        <li class="list-group-item d-flex align-items-start">
+                                            <div class="ms-2 me-auto">
+                                                <div class="fw-bold">Click one of the buttons below to open WhatsApp</div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item d-flex align-items-start">
+                                            <div class="ms-2 me-auto">
+                                                <div class="fw-bold">Click the attachment icon (📎)</div>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item d-flex align-items-start">
+                                            <div class="ms-2 me-auto">
+                                                <div class="fw-bold">Select the downloaded PDF</div>
+                                                <small>Look for: estimate-{{ estimate.estimateid }}.pdf</small>
+                                            </div>
+                                        </li>
+                                    </ol>
+                                    <div class="d-grid gap-2">
+                                        <a href="${customerWhatsappUrl}" target="_blank" class="btn btn-primary mb-1">
+                                            <i class="fa fa-user me-2"></i>Open WhatsApp - Customer (${customerMobile})
+                                        </a>
+                                        <a href="${staticWhatsappUrl}" target="_blank" class="btn btn-secondary mb-1">
+                                            <i class="fa fa-building me-2"></i>Open WhatsApp - Office (${staticNumber})
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Append modal to body
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = modalHtml;
+                document.body.appendChild(modalContainer);
+                
+                // Initialize and show the modal
+                const whatsappModal = new bootstrap.Modal(document.getElementById('whatsappModal'));
+                whatsappModal.show();
+                
+                // Clean up modal when hidden
+                document.getElementById('whatsappModal').addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(modalContainer);
+                });
+                
+            } catch (error) {
+                console.error('Error in share functionality:', error);
+                let errorMessage = 'Error preparing estimate for sharing. ';
+                
+                if (error.message && error.message.includes('network')) {
+                    errorMessage += 'Network error occurred. ';
+                } else if (error.message && error.message.includes('timeout')) {
+                    errorMessage += 'The operation timed out. ';
+                }
+                
+                errorMessage += 'Please try again or contact support if the problem persists.';
+                
+                toastr.error(errorMessage, 'Sharing Error', {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    timeOut: 7000,
+                    extendedTimeOut: 2000
+                });
+            }
+        });
+        
+        // Top-right action buttons
+        const setupActionButton = (buttonId, targetId) => {
+            document.getElementById(buttonId).addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById(targetId).click();
+            });
+        };
+        
+        setupActionButton('downloadEstimate', 'downloadPdfBtn');
+        setupActionButton('printEstimate', 'printEstimateBtn');
+        setupActionButton('shareEstimate', 'shareEstimateBtn');
+    });
+</script>
+{% endblock %}

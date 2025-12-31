@@ -1,0 +1,196 @@
+{% extends "index.html" %}
+
+{% block title %}u-accounts-cc{% endblock %}
+
+{% block style %}
+<style>
+    .form-container {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+
+    .form-section {
+        padding: 2rem;
+    }
+    .form-section h4 {
+        color: #4b5563;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    .form-section h4:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 3px;
+        background-color: #7367f0;
+        border-radius: 2px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #7367f0;
+        box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.2);
+    }
+    .btn-primary {
+        background-color: #7367f0;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+    .btn-outline-secondary {
+        padding: 0.5rem 1.5rem;
+    }
+    .form-actions {
+        border-top: 1px solid #eaeaea;
+        padding: 1.5rem 2rem;
+        background-color: #f9fafb;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-cc' %}">List CC</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Update CC
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="u-accounts-cc">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-6">
+                        <div class="card form-container">
+                            <form method="post" action="{% url 'u-accounts-cc' cc_obj.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row g-0">
+                                    <!-- Form Fields -->
+                                    <div class="col-12">
+                                        <div class="form-section">
+                                            <h4>CC Details</h4>
+                                            <div class="row">
+                                                <div class="col-12 mb-1">
+                                                    <label class="form-label" for="name">
+                                                        <i data-feather="tag" class="font-medium-2 me-50"></i>
+                                                        Name <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="name" name="name" value="{{cc_obj.name}}" placeholder="Enter cc name" required />
+                                                </div>
+                                                
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <label class="form-label" for="from_value">
+                                                        <i data-feather="minimize-2" class="font-medium-2 me-50"></i>
+                                                        From Value (CC) <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="number" class="form-control" id="from_value" name="from_value" 
+                                                           value="{{ cc_obj.from_value }}" min="0" step="1" required />
+                                                    <small class="text-muted">e.g., 100, 150, 200</small>
+                                                </div>
+
+                                                <div class="col-12 col-md-6 mb-1">
+                                                    <label class="form-label" for="to_value">
+                                                        <i data-feather="maximize-2" class="font-medium-2 me-50"></i>
+                                                        To Value (CC) <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="number" class="form-control" id="to_value" name="to_value" 
+                                                           value="{{ cc_obj.to_value }}" min="0" step="1" required />
+                                                    <small class="text-muted">Must be greater than From Value</small>
+                                                </div>
+                                                
+                                                <div class="col-12 mb-1">
+                                                    <label class="form-label" for="status">
+                                                        <i data-feather="toggle-right" class="font-medium-2 me-50"></i>
+                                                        Status <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="status" name="status" required>
+                                                        <option value="active" {% if cc_obj.status == 'active' %} selected {% endif %}>Active</option>
+                                                        <option value="inactive" {% if cc_obj.status == 'inactive' %} selected {% endif %}>Inactive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Form Actions -->
+                                        <div class="form-actions d-flex justify-content-between">
+                                            <button type="reset" class="btn btn-outline-secondary waves-effect">
+                                                <i data-feather="refresh-ccw" class="me-25"></i> Reset
+                                            </button>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-25"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Feather Icons
+        if (feather) {
+            feather.replace({ width: 16, height: 16 });
+        }
+
+        // Form validation
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const fromValue = parseInt(document.getElementById('from_value').value);
+                const toValue = parseInt(document.getElementById('to_value').value);
+                
+                if (toValue <= fromValue) {
+                    e.preventDefault();
+                    toastr['error']('To Value must be greater than From Value', 'Validation Error', {
+                        closeButton: true,
+                        tapToDismiss: false,
+                        progressBar: true,
+                        showMethod: 'fadeIn',
+                        hideMethod: 'fadeOut',
+                        timeOut: 3000
+                    });
+                    return false;
+                }
+                return true;
+            });
+        }
+    });
+</script>
+{% endblock %}

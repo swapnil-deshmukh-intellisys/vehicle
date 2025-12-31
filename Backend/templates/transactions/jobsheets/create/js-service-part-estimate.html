@@ -1,0 +1,1011 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let selectedServices = [];
+        let selectedParts = [];
+
+        const serviceObjs = [
+            {% for service in service_objs %}
+        {
+            id: "{{ service.id }}",
+            text: "{{ service.name|escapejs }}",
+            code: "{{ service.code|default:''|escapejs }}",
+            price: parseFloat("{{ service.price|default:0 }}"),
+            tax: parseFloat("{{ service.gst|default:0 }}")
+        }{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    ];
+    const productObjs = [
+        {% for product in product_catalogues_objs %}
+    {
+        id: "{{ product.id }}",
+            text: "{{ product.name|escapejs }}",
+                part_number: "{{ product.part_number|default:''|escapejs }}",
+                    price: parseFloat("{{ product.price|default:0 }}"),
+                        tax: parseFloat("{{ product.gst|default:0 }}")
+    } {% if not forloop.last %}, {% endif %}
+    {% endfor %}
+    ];
+
+    function fetchJobcardServices() {
+        const jobcardNumber = '{{ new_jobcard_number }}';
+        if (!jobcardNumber) return;
+
+        $.ajax({
+            url: '{% url "get_jobcard_services" %}',
+            type: 'GET',
+            data: { jobcard_number: jobcardNumber },
+            success: function (response) {
+                if (response.status === 'success') {
+                    selectedServices = response.services || [];
+                    updateServiceList();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching services:', error);
+                showToast('Error', 'Failed to load services', 'danger');
+            }
+        });
+    }
+    function fetchJobcardParts() {
+        const jobcardNumber = '{{ new_jobcard_number }}';
+        if (!jobcardNumber) return;
+
+        $.ajax({
+            url: '{% url "get_jobcard_parts" %}',
+            type: 'GET',
+            data: { jobcard_number: jobcardNumber },
+            success: function (response) {
+                if (response.status === 'success') {
+                    selectedParts = response.parts || [];
+                    updatePartsList();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error fetching parts:', error);
+                showToast('Error', 'Failed to load parts', 'danger');
+            }
+        });
+    }
+    function resetServiceForm() {
+        const form = document.getElementById('serviceForm');
+        if (form) {
+            form.reset();
+            if ($.fn.select2 && $('#serviceSelect').hasClass('select2-hidden-accessible')) {
+                $('#serviceSelect').val(null).trigger('change');
+            }
+            $('input[name*="servicequantity"]').val('1');
+            $('input[name*="servicetax"]').val('18');
+            // reset GST-includes checkbox
+            $('input[name*="serviceprice_includes_gst"]').prop('checked', false);
+            // reset stored unit prices
+            $('input[name="fromdb_servicevalue"]').data('unitPrice', 0);
+            $('input[name="fromuser_servicevalue"]').data('unitPrice', 0);
+            // reset totals
+            updateTotalsForBase('fromdb_service');
+            updateTotalsForBase('fromuser_service');
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').hide();
+        }
+    }
+    function resetPartsForm() {
+        const form = document.getElementById('partForm');
+        if (form) {
+            form.reset();
+            if ($.fn.select2 && $('#partSelect').hasClass('select2-hidden-accessible')) {
+                $('#partSelect').val(null).trigger('change');
+            }
+            $('input[name*="partquantity"]').val('1');
+            $('input[name*="parttax"]').val('18');
+            // reset GST-includes checkbox
+            $('input[name*="partprice_includes_gst"]').prop('checked', false);
+            // reset stored unit prices
+            $('input[name="fromdb_partvalue"]').data('unitPrice', 0);
+            $('input[name="fromuser_partvalue"]').data('unitPrice', 0);
+            // reset totals
+            updateTotalsForBase('fromdb_part');
+            updateTotalsForBase('fromuser_part');
+            $('.is-invalid').removeClass('is-invalid');
+            $('.invalid-feedback').hide();
+        }
+    }
+    function saveService(serviceData, callback) {
+        const saveBtn = $('#saveServiceBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('serviceChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ new_jobcard_number }}');
+        formData.append('service_id', serviceData.id || '');
+        formData.append('service_source', serviceData.type === 'existing' ? 'internal' : 'external');
+        formData.append('service_name', serviceData.name);
+        formData.append('code', serviceData.code || '');
+        formData.append('quantity', serviceData.quantity);
+        formData.append('service_value', serviceData.value);
+        formData.append('service_tax', serviceData.tax || 0);
+        // Discount (computed client-side; only send %)
+        formData.append('service_discount', serviceData.discount || 0);
+
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "save_jobcard_service" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardServices();
+                    resetServiceForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Service saved successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to save service';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to save service';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function savePart(partData, callback) {
+        const saveBtn = $('#savePartBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('partsChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
+
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ new_jobcard_number }}');
+        formData.append('part_id', partData.id || '');
+        formData.append('part_source', partData.type === 'existing' ? 'internal' : 'external');
+        formData.append('part_name', partData.name);
+        formData.append('part_number', partData.part_number || '');
+        formData.append('quantity', partData.quantity);
+        formData.append('part_value', partData.value);
+        formData.append('part_tax', partData.tax || 0);
+        // Discount (computed client-side; only send %)
+        formData.append('part_discount', partData.discount || 0);
+
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "save_jobcard_part" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardParts();
+                    resetPartsForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Part saved successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to save part';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to save part';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function updateService(itemId, serviceData, callback) {
+        const saveBtn = $('#saveServiceBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('serviceChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
+
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ new_jobcard_number }}');
+        formData.append('item_id', itemId);
+        formData.append('service_id', serviceData.id || '');
+        formData.append('service_source', serviceData.type === 'existing' ? 'internal' : 'external');
+        formData.append('service_name', serviceData.name);
+        formData.append('code', serviceData.code || '');
+        formData.append('quantity', serviceData.quantity);
+        formData.append('service_value', serviceData.value);
+        formData.append('service_tax', serviceData.tax || 0);
+
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "update_jobcard_service" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardServices();
+                    resetServiceForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Service updated successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to update service';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to update service';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function updatePart(itemId, partData, callback) {
+        const saveBtn = $('#savePartBtn');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('partsChargesModal'));
+
+        saveBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...');
+
+        const formData = new FormData();
+        formData.append('jobcard_number', '{{ new_jobcard_number }}');
+        formData.append('item_id', itemId);
+        formData.append('part_id', partData.id || '');
+        formData.append('part_source', partData.type === 'existing' ? 'internal' : 'external');
+        formData.append('part_name', partData.name);
+        formData.append('part_number', partData.part_number || '');
+        formData.append('quantity', partData.quantity);
+        formData.append('part_value', partData.value);
+        formData.append('part_tax', partData.tax || 0);
+
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajax({
+            url: '{% url "update_jobcard_part" %}',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function (response) {
+                if (response.status === 'success') {
+                    fetchJobcardParts();
+                    resetPartsForm();
+                    if (modal) modal.hide();
+                    showToast('Success', response.message || 'Part updated successfully', 'success');
+                    if (callback) callback(null, response);
+                } else {
+                    const errorMsg = response.message || 'Failed to update part';
+                    showToast('Error', errorMsg, 'danger');
+                    if (callback) callback(errorMsg);
+                }
+            },
+            error: function (xhr, status, error) {
+                const errorMsg = xhr.responseJSON?.message || error || 'Failed to update part';
+                showToast('Error', errorMsg, 'danger');
+                if (callback) callback(errorMsg);
+            },
+            complete: function () {
+                saveBtn.prop('disabled', false).text('Save');
+            }
+        });
+    }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function showToast(title, message, type = 'info') {
+        if ($('.toast-container').length === 0) {
+            $('body').append('<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>');
+        }
+
+        const toastId = 'toast-' + Date.now();
+        const toastHtml = `
+              <div class="toast align-items-center text-white bg-${type} border-0" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="d-flex">
+                      <div class="toast-body">
+                          <strong>${title}</strong><br>${message}
+                      </div>
+                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+              </div>
+          `;
+
+        $('.toast-container').append(toastHtml);
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, {
+            delay: 3000,
+            autohide: true
+        });
+        toast.show();
+
+        toastEl.addEventListener('hidden.bs.toast', function () {
+            $(this).remove();
+        });
+    }
+    function initializeSelect2Jspe() {
+        if ($.fn.select2) {
+            if ($('#serviceSelect').length) {
+                $('#serviceSelect').select2({
+                    width: '100%',
+                    dropdownParent: $('#serviceChargesModal'),
+                    data: serviceObjs,
+                    placeholder: 'Select a service',
+                    allowClear: true
+                }).on('change', function () {
+                    const selectedId = $(this).val();
+                    if (selectedId) {
+                        const selectedService = serviceObjs.find(service => service.id === selectedId);
+                        if (selectedService) {
+                            const $svcPrice = $('input[name="fromdb_servicevalue"]');
+                            const svcUnit = parseFloat(selectedService.price || 0);
+                            $svcPrice.data('unitPrice', svcUnit);
+                            const svcQty = 1;
+                            $svcPrice.val((svcUnit * svcQty).toFixed(2));
+                            $('input[name="fromdb_servicetax"]').val(selectedService.tax || '18');
+                            $('input[name="fromdb_servicequantity"]').val('1');
+                            updateTotalsForBase('fromdb_service');
+                        }
+                    }
+                });
+            }
+
+            if ($('#partSelect').length) {
+                $('#partSelect').select2({
+                    width: '100%',
+                    dropdownParent: $('#partsChargesModal'),
+                    data: productObjs,
+                    placeholder: 'Select a part',
+                    allowClear: true
+                }).on('change', function () {
+                    const selectedId = $(this).val();
+                    if (selectedId) {
+                        const selectedPart = productObjs.find(part => part.id === selectedId);
+                        if (selectedPart) {
+                            const $partPrice = $('input[name="fromdb_partvalue"]');
+                            const partUnit = parseFloat(selectedPart.price || 0);
+                            $partPrice.data('unitPrice', partUnit);
+                            const partQty = 1;
+                            $partPrice.val((partUnit * partQty).toFixed(2));
+                            $('input[name="fromdb_parttax"]').val(selectedPart.tax || '18');
+                            $('input[name="fromdb_partquantity"]').val('1');
+                            updateTotalsForBase('fromdb_part');
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    $('.modal').on('shown.bs.modal', function () {
+        initializeSelect2Jspe();
+        // ensure totals are correct when modal opens
+        updateTotalsForBase('fromdb_service');
+        updateTotalsForBase('fromuser_service');
+        updateTotalsForBase('fromdb_part');
+        updateTotalsForBase('fromuser_part');
+    });
+
+    const serviceOptions = document.querySelectorAll('.service-option');
+    const existingServiceSection = document.getElementById('existingServiceSection');
+    const newServiceSection = document.getElementById('newServiceSection');
+    const partOptions = document.querySelectorAll('.part-option');
+    const existingPartSection = document.getElementById('existingPartSection');
+    const newPartSection = document.getElementById('newPartSection');
+
+    serviceOptions.forEach(option => {
+        option.addEventListener('change', function () {
+            if (this.checked) {
+                if (this.value === 'existing') {
+                    resetServiceForm();
+                    existingServiceSection.style.display = 'block';
+                    newServiceSection.style.display = 'none';
+                    document.getElementById('existingService').checked = true;
+                    document.getElementById('newService').checked = false;
+                } else {
+                    resetServiceForm();
+                    existingServiceSection.style.display = 'none';
+                    newServiceSection.style.display = 'block';
+                    document.getElementById('existingService').checked = false;
+                    document.getElementById('newService').checked = true;
+                }
+            }
+        });
+    });
+
+    partOptions.forEach(option => {
+        option.addEventListener('change', function () {
+            if (this.checked) {
+                if (this.value === 'existing') {
+                    resetPartsForm();
+                    existingPartSection.style.display = 'block';
+                    newPartSection.style.display = 'none';
+                    document.getElementById('existingPart').checked = true;
+                    document.getElementById('newPart').checked = false;
+                } else {
+                    resetPartsForm();
+                    existingPartSection.style.display = 'none';
+                    newPartSection.style.display = 'block';
+                    document.getElementById('existingPart').checked = false;
+                    document.getElementById('newPart').checked = true;
+                }
+            }
+        });
+    });
+
+    const serviceModal = document.getElementById('serviceChargesModal');
+    const partsModal = document.getElementById('partsChargesModal');
+    if (serviceModal) {
+        serviceModal.addEventListener('hidden.bs.modal', function () {
+            resetServiceForm();
+            existingServiceSection.style.display = 'block';
+            newServiceSection.style.display = 'none';
+            document.getElementById('existingService').checked = true;
+            document.getElementById('newService').checked = false;
+        });
+    }
+    if (partsModal) {
+        partsModal.addEventListener('hidden.bs.modal', function () {
+            resetPartsForm();
+            existingPartSection.style.display = 'block';
+            newPartSection.style.display = 'none';
+            document.getElementById('existingPart').checked = true;
+            document.getElementById('newPart').checked = false;
+        });
+    }
+
+    $('#saveServiceBtn').on('click', function () {
+        const isNewService = $('#newService').is(':checked');
+        let isValid = true;
+        let serviceData = {};
+
+        $('#serviceChargesModal .is-invalid').removeClass('is-invalid');
+        $('#serviceChargesModal .invalid-feedback').remove();
+
+        if (isNewService) {
+            const serviceName = $('input[name="fromuser_servicename"]');
+            const servicePrice = $('input[name="fromuser_servicevalue"]');
+            const quantity = $('input[name="fromuser_servicequantity"]');
+
+            if (!serviceName.val()) {
+                showError(serviceName, 'Please enter a service name');
+                isValid = false;
+            }
+            if (!servicePrice.val()) {
+                showError(servicePrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                {
+                    const qtyVal = parseInt(quantity.val()) || 1;
+                    const svcUnit = parseFloat(servicePrice.data('unitPrice')) || ((parseFloat(servicePrice.val()) || 0) / qtyVal);
+                    serviceData = {
+                        type: 'new',
+                        name: serviceName.val(),
+                        code: $('input[name="fromuser_servicecode"]').val() || '',
+                        value: svcUnit,
+                        quantity: qtyVal,
+                        tax: parseFloat($('input[name="fromuser_servicetax"]').val()) || 0,
+                        discount: parseFloat($('input[name="fromuser_servicediscount"]').val()) || 0,
+                        discount_amount: parseFloat($('input[name="fromuser_servicediscount_amount"]').val()) || 0,
+                        purchase_price: parseFloat($('input[name="fromuser_servicepurchase_price"]').val()) || svcUnit
+                    };
+                }
+                saveService(serviceData);
+            }
+        } else {
+            const selectedOption = $('#serviceSelect').select2('data')[0];
+            const servicePrice = $('input[name="fromdb_servicevalue"]');
+            const quantity = $('input[name="fromdb_servicequantity"]');
+
+            if (!selectedOption?.id) {
+                showError($('#serviceSelect').next('.select2-container'), 'Please select a service');
+                isValid = false;
+            }
+            if (!servicePrice.val()) {
+                showError(servicePrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                const selectedService = serviceObjs.find(service => service.id === selectedOption.id);
+                const qtyVal = parseInt(quantity.val()) || 1;
+                const svcUnit = parseFloat(servicePrice.data('unitPrice')) || ((parseFloat(servicePrice.val()) || 0) / qtyVal);
+                serviceData = {
+                    type: 'existing',
+                    id: selectedOption.id,
+                    name: selectedOption.text,
+                    code: selectedService?.code || '',
+                    value: svcUnit,
+                    quantity: parseInt(quantity.val()),
+                    tax: parseFloat($('input[name="fromdb_servicetax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromdb_servicediscount"]').val()) || 0,
+                    discount_amount: parseFloat($('input[name="fromdb_servicediscount_amount"]').val()) || 0,
+                    purchase_price: parseFloat($('input[name="fromdb_servicepurchase_price"]').val()) || (parseFloat(servicePrice.val()) || 0)
+                };
+                saveService(serviceData);
+            }
+        }
+    });
+
+    $('#savePartBtn').on('click', function () {
+        const isNewPart = $('#newPart').is(':checked');
+        let isValid = true;
+        let partData = {};
+
+        $('#partsChargesModal .is-invalid').removeClass('is-invalid');
+        $('#partsChargesModal .invalid-feedback').remove();
+
+        if (isNewPart) {
+            const partName = $('input[name="fromuser_partname"]');
+            const partPrice = $('input[name="fromuser_partvalue"]');
+            const quantity = $('input[name="fromuser_partquantity"]');
+
+            if (!partName.val()) {
+                showError(partName, 'Please enter a part name');
+                isValid = false;
+            }
+            if (!partPrice.val()) {
+                showError(partPrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                const qtyVal = parseInt(quantity.val()) || 1;
+                const partUnit = parseFloat(partPrice.data('unitPrice')) || ((parseFloat(partPrice.val()) || 0) / qtyVal);
+                partData = {
+                    type: 'new',
+                    name: partName.val(),
+                    part_number: $('input[name="fromuser_partnumber"]').val() || '',
+                    value: partUnit,
+                    quantity: qtyVal,
+                    tax: parseFloat($('input[name="fromuser_parttax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromuser_partdiscount"]').val()) || 0,
+                    discount_amount: parseFloat($('input[name="fromuser_partdiscount_amount"]')).val() || 0,
+                    purchase_price: parseFloat($('input[name="fromuser_partpurchase_price"]')).val() || partUnit
+                };
+                savePart(partData);
+            }
+        } else {
+            const selectedOption = $('#partSelect').select2('data')[0];
+            const partPrice = $('input[name="fromdb_partvalue"]');
+            const quantity = $('input[name="fromdb_partquantity"]');
+
+            if (!selectedOption?.id) {
+                showError($('#partSelect').next('.select2-container'), 'Please select a part');
+                isValid = false;
+            }
+            if (!partPrice.val()) {
+                showError(partPrice, 'Please enter a price');
+                isValid = false;
+            }
+            if (!quantity.val() || quantity.val() < 1) {
+                showError(quantity, 'Please enter a valid quantity');
+                isValid = false;
+            }
+
+            if (isValid) {
+                const selectedPart = productObjs.find(part => part.id === selectedOption.id);
+                partData = {
+                    type: 'existing',
+                    id: selectedOption.id,
+                    name: selectedOption.text,
+                    part_number: selectedPart?.part_number || '',
+                    value: parseFloat(partPrice.val()),
+                    quantity: parseInt(quantity.val()),
+                    tax: parseFloat($('input[name="fromdb_parttax"]').val()) || 0,
+                    discount: parseFloat($('input[name="fromdb_partdiscount"]').val()) || 0,
+                    discount_amount: parseFloat($('input[name="fromdb_partdiscount_amount"]').val()) || 0,
+                    purchase_price: parseFloat($('input[name="fromdb_partpurchase_price"]').val()) || (parseFloat(partPrice.val()) || 0)
+                };
+                savePart(partData);
+            }
+        }
+    });
+
+    function showError(input, message) {
+        const formGroup = $(input).closest('.form-group, .mb-3, .form-floating');
+        formGroup.addClass('has-error');
+
+        let feedback = formGroup.find('.invalid-feedback');
+        if (!feedback.length) {
+            feedback = $('<div class="invalid-feedback d-block"></div>');
+            formGroup.append(feedback);
+        }
+        feedback.text(message);
+        formGroup.addClass('is-invalid');
+    }
+
+    function clearValidation(input) {
+        const formGroup = $(input).closest('.form-group, .mb-3, .form-floating');
+        formGroup.removeClass('has-error is-invalid');
+        formGroup.find('.invalid-feedback').remove();
+    }
+
+    // Update discount amount and purchase price for given base (eg 'fromdb_service', 'fromuser_part')
+    function updateTotalsForBase(base, selfUpdate = true) {
+        const valueInput = $(`input[name="${base}value"]`);
+        const qtyInput = $(`input[name="${base}quantity"]`);
+        const discountPercentInput = $(`input[name="${base}discount"]`);
+        const discountAmountInput = $(`input[name="${base}discount_amount"]`);
+        const purchasePriceInput = $(`input[name="${base}purchase_price"]`);
+        const taxInput = $(`input[name="${base}tax"]`);
+        const includeGstCheckbox = $(`input[name="${base}price_includes_gst"]`);
+
+        const qty = parseFloat(qtyInput.val()) || 1;
+        const discountPercent = parseFloat(discountPercentInput.val()) || 0;
+        const gst = parseFloat(taxInput.val()) || 0;
+        const includeGst = includeGstCheckbox.length ? includeGstCheckbox.is(':checked') : false;
+
+        // Determine unit price (prefer stored data-unitPrice)
+        let unitPrice = parseFloat(valueInput.data('unitPrice'));
+        if (isNaN(unitPrice) || unitPrice === undefined) {
+            // Fallback: treat current value as total and derive unit
+            const raw = parseFloat(valueInput.val()) || 0;
+            unitPrice = qty ? (raw / qty) : raw;
+            valueInput.data('unitPrice', unitPrice);
+        }
+
+        // Ensure displayed price reflects unitPrice * qty
+        if (selfUpdate) {
+            valueInput.val((unitPrice * qty).toFixed(2));
+        }
+
+        // Compute base unit price (exclude GST if price is GST inclusive)
+        const baseUnit = includeGst && gst > 0 ? (unitPrice / (1 + gst / 100)) : unitPrice;
+        const discountAmountUnit = (baseUnit * discountPercent) / 100;
+
+        if (discountAmountInput.length) {
+            discountAmountInput.val(discountAmountUnit.toFixed(2));
+        }
+        if (purchasePriceInput.length) {
+            const purchaseVal = Math.max(0, (baseUnit - discountAmountUnit)).toFixed(2);
+            purchasePriceInput.val(purchaseVal);
+            // If discount present, keep purchase price readonly
+            if (discountPercent > 0) {
+                purchasePriceInput.prop('readonly', true);
+            } else {
+                purchasePriceInput.prop('readonly', false);
+            }
+        }
+    }
+
+    // bind handlers to keep discount/purchase price updated
+    ['fromdb_service', 'fromuser_service', 'fromdb_part', 'fromuser_part'].forEach(base => {
+        // quantity, discount, tax changes affect totals
+        $(`input[name="${base}quantity"], input[name="${base}discount"], input[name="${base}tax"]`).on('input change', function () {
+            updateTotalsForBase(base);
+        });
+
+        // price input: keep unitPrice as data, display price = unitPrice * qty
+        $(`input[name="${base}value"]`).on('input', function () {
+            const $this = $(this);
+            const qty = parseFloat($(`input[name="${base}quantity"]`).val()) || 1;
+            const raw = parseFloat($this.val()) || 0;
+            // store unit price (raw interpreted as total for qty)
+            const unit = qty ? (raw / qty) : raw;
+            $this.data('unitPrice', unit);
+            updateTotalsForBase(base, false);
+        });
+
+        // checkbox change
+        $(`input[name="${base}price_includes_gst"]`).on('change', function () {
+            updateTotalsForBase(base);
+        });
+    });
+
+
+    function updateServiceList() {
+        const servicesList = $('#selectedServicesList');
+        const serviceCount = $('#serviceItemCount');
+        const serviceCountBadge = $('#serviceCount');
+        const serviceTotalAmountBadge = $('#serviceTotalAmount');
+
+        let totalServiceAmount = 0;
+        selectedServices.forEach(service => {
+            const subtotal = (service.service_value || 0) * (service.quantity || 1);
+            const tax = (subtotal * (service.service_tax || 0)) / 100;
+            const total = subtotal + tax;
+            totalServiceAmount += total;
+        });
+
+        serviceCountBadge.text(selectedServices.length);
+        serviceTotalAmountBadge.text(totalServiceAmount.toFixed(2));
+
+        if (selectedServices.length === 0) {
+            servicesList.html(`
+              <div class="text-center text-muted py-3">
+                  <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                  <p class="mb-0 small">No services selected</p>
+                  <p class="mb-0 extra-small text-muted">Click "Add Services" to get started</p>
+              </div>
+          `);
+            serviceCount.text('0');
+            updateGrandTotal();
+            return;
+        }
+
+        let servicesHtml = `<div class="list-group list-group-flush" ${selectedServices.length > 3 ? 'style="max-height: 300px; overflow-y: auto;"' : ''}>`;
+
+        selectedServices.forEach((service) => {
+            const total = calculateItemTotal(service);
+            const unitValue = getUnitPrice(service) || 0;
+
+            servicesHtml += `
+              <div class="list-group-item" data-service-id="${service.id}">
+                  <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between align-items-start mb-1">
+                              <span class="service-name">${service.service_name}</span>
+                              <span class="service-price">₹${total}</span>
+                          </div>
+                          <div class="service-details">
+                              <span class="quantity">${service.quantity} × ₹${unitValue.toFixed(2)}</span>
+                              ${service.service_tax > 0 ? `<span class="badge tax-badge">+${service.service_tax}% Tax</span>` : ''}
+                              ${service.service_discount > 0 ? `<span class="badge discount-badge">-${service.service_discount}% Off</span>` : ''}
+                          </div>
+                      </div>
+                      <button class="btn btn-sm btn-link text-danger p-0 remove-item" data-type="service" data-id="${service.id}" title="Remove service">
+                          <i class="fas fa-times"></i>
+                      </button>
+                  </div>
+              </div>`;
+        });
+
+        servicesHtml += '</div>';
+        servicesList.html(servicesHtml);
+        serviceCount.text(selectedServices.length);
+        updateGrandTotal();
+    }
+
+    function updatePartsList() {
+        const partsList = $('#selectedPartsList');
+        const partsCount = $('#partsItemCount');
+        const partsCountBadge = $('#partsCount');
+        const partsTotalAmountBadge = $('#partsTotalAmount');
+
+        let totalPartsAmount = 0;
+        selectedParts.forEach(part => {
+            const subtotal = (part.part_value || 0) * (part.quantity || 1);
+            const tax = (subtotal * (part.part_tax || 0)) / 100;
+            const total = subtotal + tax;
+            totalPartsAmount += total;
+        });
+
+        partsCountBadge.text(selectedParts.length);
+        partsTotalAmountBadge.text(totalPartsAmount.toFixed(2));
+
+        if (selectedParts.length === 0) {
+            partsList.html(`
+              <div class="text-center text-muted py-3">
+                  <i class="fas fa-cog fa-2x mb-2 d-block opacity-50"></i>
+                  <p class="mb-0 small">No parts selected</p>
+                  <p class="mb-0 extra-small text-muted">Click "Add Parts" to get started</p>
+              </div>
+          `);
+            partsCount.text('0');
+            updateGrandTotal();
+            return;
+        }
+
+        let partsHtml = `<div class="list-group list-group-flush" ${selectedParts.length > 3 ? 'style="max-height: 300px; overflow-y: auto;"' : ''}>`;
+
+        selectedParts.forEach((part) => {
+            const total = calculateItemTotal(part);
+            const unitValue = getUnitPrice(part) || 0;
+
+            partsHtml += `
+              <div class="list-group-item" data-part-id="${part.id}">
+                  <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                          <div class="d-flex justify-content-between align-items-start mb-1">
+                              <span class="service-name">${part.part_name}</span>
+                              <span class="service-price">₹${total}</span>
+                          </div>
+                          <div class="service-details">
+                              <span class="quantity">${part.quantity} × ₹${unitValue.toFixed(2)}</span>
+                              ${part.part_tax > 0 ? `<span class="badge tax-badge">+${part.part_tax}% Tax</span>` : ''}
+                              ${part.part_discount > 0 ? `<span class="badge discount-badge">-${part.part_discount}% Off</span>` : ''}
+                          </div>
+                      </div>
+                      <button class="btn btn-sm btn-link text-danger p-0 remove-item" data-type="part" data-id="${part.id}" title="Remove part">
+                          <i class="fas fa-times"></i>
+                      </button>
+                  </div>
+              </div>`;
+        });
+
+        partsHtml += '</div>';
+        partsList.html(partsHtml);
+        partsCount.text(selectedParts.length);
+        updateGrandTotal();
+    }
+
+    function getUnitPrice(item) {
+        if (item.service_purchase_price) return parseFloat(item.service_purchase_price);
+        if (item.part_purchase_price) return parseFloat(item.part_purchase_price);
+        const value = item.service_value || item.part_value || 0;
+        const discount = item.service_discount || item.part_discount || 0;
+        return value * (1 - (discount / 100));
+    }
+
+    function calculateItemTotal(item) {
+        const unitValue = getUnitPrice(item) || 0;
+        const tax = item.service_tax || item.part_tax || 0;
+        const quantity = item.quantity || 1;
+
+        const subtotal = unitValue * quantity;
+        const taxAmount = (subtotal * tax) / 100;
+        return (subtotal + taxAmount).toFixed(2);
+    }
+
+    function animateValueChange(elementId) {
+        const element = $('#' + elementId);
+        element.addClass('updating');
+        setTimeout(() => {
+            element.removeClass('updating');
+        }, 300);
+    }
+
+    function updateGrandTotal() {
+        let serviceSubtotal = 0;
+        let serviceTaxTotal = 0;
+        let serviceTotal = 0;
+
+        selectedServices.forEach(service => {
+            const subtotal = (service.service_value || 0) * (service.quantity || 1);
+            const tax = (subtotal * (service.service_tax || 0)) / 100;
+
+            serviceSubtotal += subtotal;
+            serviceTaxTotal += tax;
+            serviceTotal += subtotal + tax;
+        });
+
+        let partsSubtotal = 0;
+        let partsTaxTotal = 0;
+        let partsTotal = 0;
+
+        selectedParts.forEach(part => {
+            const subtotal = (part.part_value || 0) * (part.quantity || 1);
+            const tax = (subtotal * (part.part_tax || 0)) / 100;
+
+            partsSubtotal += subtotal;
+            partsTaxTotal += tax;
+            partsTotal += subtotal + tax;
+        });
+
+        const grandTotal = serviceTotal + partsTotal;
+
+        $('.grand-total-amount').text(`₹${grandTotal.toFixed(2)}`);
+
+        $('#serviceSubtotal').text(`₹${serviceSubtotal.toFixed(2)}`);
+        $('#serviceTaxAmount').text(`₹${serviceTaxTotal.toFixed(2)}`);
+        $('#serviceTotal').text(`₹${serviceTotal.toFixed(2)}`);
+
+        $('#partsSubtotal').text(`₹${partsSubtotal.toFixed(2)}`);
+        $('#partsTaxAmount').text(`₹${partsTaxTotal.toFixed(2)}`);
+        $('#partsTotal').text(`₹${partsTotal.toFixed(2)}`);
+
+        $('#grandTotal').text(`₹${grandTotal.toFixed(2)}`);
+
+        $('input[name="total_services"]').val(serviceTotal.toFixed(2));
+        $('input[name="total_parts"]').val(partsTotal.toFixed(2));
+        $('input[name="grand_total"]').val(grandTotal.toFixed(2));
+
+        animateValueChange('serviceSubtotal');
+        animateValueChange('serviceTaxAmount');
+        animateValueChange('serviceTotal');
+        animateValueChange('partsSubtotal');
+        animateValueChange('partsTaxAmount');
+        animateValueChange('partsTotal');
+        animateValueChange('grandTotal');
+    }
+
+    $(document).on('click', '.remove-item', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const type = $(this).data('type');
+        const id = $(this).data('id');
+        const jobcardNumber = '{{ new_jobcard_number }}';
+
+        if (!jobcardNumber) {
+            showToast('Error', 'Jobcard number not found', 'danger');
+            return;
+        }
+
+        const url = type === 'service' ? '{% url "delete_jobcard_service" %}' : '{% url "delete_jobcard_part" %}';
+        const itemText = type === 'service' ? 'service' : 'part';
+
+        if (confirm(`Are you sure you want to remove this ${itemText}?`)) {
+            const button = $(this);
+            button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: {
+                    jobcard_number: jobcardNumber,
+                    item_id: id,
+                    csrfmiddlewaretoken: getCookie('csrftoken')
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        if (type === 'service') {
+                            selectedServices = selectedServices.filter(s => s.id != id);
+                            updateServiceList();
+                        } else {
+                            selectedParts = selectedParts.filter(p => p.id != id);
+                            updatePartsList();
+                        }
+                        showToast('Success', `${itemText.charAt(0).toUpperCase() + itemText.slice(1)} removed successfully`, 'success');
+                    } else {
+                        showToast('Error', response.message || `Failed to remove ${itemText}`, 'danger');
+                        button.prop('disabled', false).html('<i class="fas fa-times"></i>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    showToast('Error', `Failed to remove ${itemText}: ${error}`, 'danger');
+                    button.prop('disabled', false).html('<i class="fas fa-times"></i>');
+                }
+            });
+        }
+    });
+
+    function initializePage() {
+        initializeSelect2Jspe();
+        fetchJobcardServices();
+        fetchJobcardParts();
+    }
+
+    initializePage();
+  
+  });
+</script>

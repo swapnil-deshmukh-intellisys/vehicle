@@ -1,0 +1,144 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}c-roles{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0">Roles</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-roles' %}">List</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Create Roles
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Basic Inputs start -->
+                <section id="basic-input">
+                    <div class="row justify-content-center">
+                        <div class="col-12 col-md-9">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="post" action="{% url 'c-roles' %}">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-12 mb-1">
+                                                <label class="form-label" for="role">Role Name</label>
+                                                <input type="text" name="role" class="form-control trimwhitespace text-nowrap"
+                                                pattern="[a-zA-Z0-9_-]+"
+                                                title="Only letters, numbers, underscores (_), and hyphens (-) are allowed."
+                                                autofocus required />
+                                            </div>
+                                            <div class="col-12 mb-1">
+                                                <div class="form-check form-check-dark">
+                                                    <input class="form-check-input" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all modules">
+                                                    <label class="form-check-label" for="selectAll">Select All Modules & Submodules</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 mb-1">
+                                                <div class="table-responsive">
+                                                    <table class="table mb-0 table-sm table-striped table-hover">
+                                                        <table class="table mb-0 table-sm table-striped table-hover">
+                                                            <tbody>
+                                                                {% for module in modules %}
+                                                                    {% get_color forloop.counter0 as module_color %}
+                                                                    
+                                                                    <!-- Display only modules that have allowed submodules -->
+                                                                    <tr>
+                                                                        <td class="text-nowrap fw-bolder">
+                                                                            <span class="cursor-pointer" data-bs-toggle="collapse" data-bs-target="#collapse{{ module.id }}" aria-expanded="false">
+                                                                                {{ module.name }} <i data-feather="chevron-down"></i>
+                                                                            </span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <div class="form-check {{ module_color }}">
+                                                                                <input class="form-check-input" type="checkbox" id="selectAll{{ module.id }}">
+                                                                                <label class="form-check-label" for="selectAll{{ module.id }}">Select All</label>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                        
+                                                                    {% for submodule in module.submodules.all %}
+                                                                    <tr class="collapse" id="collapse{{ module.id }}">
+                                                                        <td class="text-nowrap fw-bolder">{{ submodule.name }}</td>
+                                                                        <td>
+                                                                            <div class="d-flex">
+                                                                                {% for permission in submodule.permissions.all %}
+                                                                                <div class="form-check {{ module_color }} d-flex">
+                                                                                    <input class="form-check-input me-1" type="checkbox" name="permissions" value="{{ permission.id }}">
+                                                                                    <label class="form-check-label me-1" for="{{ permission }}">{{ permission.permission_type|capfirst }}</label>
+                                                                                </div>
+                                                                                {% endfor %}
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                    {% endfor %}
+                                                                {% endfor %}
+                                                            </tbody>
+                                                        </table>                                                                                                                                                                                                          
+                                                    </table>                                                
+                                                </div>
+                                            </div>
+                                            <div class="col-12 text-center">
+                                                <button type="submit" class="btn btn-success me-1 waves-effect waves-float waves-light">Submit</button>
+                                                <button type="reset" class="btn btn-outline-secondary waves-effect">Reset</button>
+                                            </div>
+                                        </div>
+                                    </form> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Basic Inputs end -->
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select all "Select All" checkboxes
+        document.querySelectorAll("[id^='selectAll']").forEach(selectAllCheckbox => {
+            selectAllCheckbox.addEventListener("change", function () {
+                // Extract module ID from the checkbox ID
+                let moduleId = this.id.replace("selectAll", "");
+                
+                // Find all related checkboxes under this module
+                let relatedCheckboxes = document.querySelectorAll(`#collapse${moduleId} [type="checkbox"]`);
+                
+                // Toggle all checkboxes based on "Select All" state
+                relatedCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

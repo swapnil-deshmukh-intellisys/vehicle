@@ -1,0 +1,248 @@
+{% extends "index.html" %}
+
+{% block title %}Update Booking #{{ booking_obj.id }}{% endblock %}
+
+{% block style %}
+<style>
+    .section-divider {
+        border-top: 1px solid #ebe9f1;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+    .section-divider span {
+        position: absolute;
+        top: -12px;
+        left: 10px;
+        background: white;
+        padding: 0 10px;
+        color: #7367f0;
+        font-weight: 600;
+    }
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    .info-card {
+        border-left: 3px solid #7367f0;
+        padding-left: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Update Booking</h2>
+                        <div class="breadcrumb-wrapper">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'r-accounts-bookings' %}">List Bookings</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="{% url 'v-accounts-bookings' booking_obj.id %}">Booking #{{ booking_obj.id }}</a>
+                                </li>
+                                <li class="breadcrumb-item active">Update</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-body">
+            <section id="u-accounts-bookings">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">
+                                    <i class="fas fa-edit me-25"></i>
+                                    Update Booking #{{ booking_obj.id }}
+                                </h4>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge bg-primary text-white me-1">
+                                        {{ booking_obj.booking_status.displayname|default:booking_obj.booking_status.name|title }}
+                                    </span>
+                                    <small class="text-muted ms-1">
+                                        <i class="far fa-calendar-alt me-25"></i>
+                                        {{ booking_obj.booking_date }} at {{ booking_obj.booking_slot }}
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <form method="post" action="{% url 'u-accounts-bookings' booking_obj.id %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Booking Status -->
+                                    <div class="form-section">
+                                        <div class="section-divider">
+                                            <span>Booking Status</span>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="booking_status">Status</label>
+                                                    <select class="select2 form-select" id="booking_status" name="booking_status" required>
+                                                        {% for status in booking_status_choices %}
+                                                        <option value="{{ status.id }}" {% if booking_obj.booking_status_id == status.id %}selected{% endif %}>
+                                                            {{ status.displayname|default:status.name|title }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-1" id="cancel_reason_container" {% if booking_obj.booking_status != 'cancelled' %}style="display: none;"{% endif %}>
+                                                    <label class="form-label" for="cancel_reason">Cancellation Reason</label>
+                                                    <textarea class="form-control" id="cancel_reason" name="cancel_reason" rows="2" {% if booking_obj.booking_status != 'cancelled' %}disabled{% endif %}>{{ booking_obj.cancel_reason|default:'' }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Information -->
+                                    <div class="form-section">
+                                        <div class="section-divider">
+                                            <span>Payment Information</span>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="payment_status">Payment Status</label>
+                                                    <select class="select2 form-select" id="payment_status" name="payment_status" required>
+                                                        {% for value, label in payment_status_choices %}
+                                                        <option value="{{ value }}" {% if booking_obj.payment_status == value %}selected{% endif %}>
+                                                            {{ label }}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="payment_method">Payment Method</label>
+                                                    <input type="text" class="form-control" id="payment_method" name="payment_method" 
+                                                           value="{{ booking_obj.payment_method|default:'' }}" placeholder="e.g., Credit Card, UPI, etc.">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="booking_amount">Booking Amount (₹)</label>
+                                                    <input type="number" step="0.01" class="form-control" id="booking_amount" 
+                                                           name="booking_amount" value="{{ booking_obj.booking_amount|default:'0.00' }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="total_amount">Total Amount (₹)</label>
+                                                    <input type="number" step="0.01" class="form-control" id="total_amount" 
+                                                           name="total_amount" value="{{ booking_obj.total_amount|default:'0.00' }}" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional Information -->
+                                    <div class="form-section">
+                                        <div class="section-divider">
+                                            <span>Additional Information</span>
+                                        </div>
+                                        <div class="mb-1">
+                                            <label class="form-label" for="suggestion">Suggestion / Notes</label>
+                                            <textarea class="form-control" id="suggestion" name="suggestion" rows="3">{{ booking_obj.suggestion|default:'' }}</textarea>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input type="checkbox" class="form-check-input" id="required_estimate" 
+                                                   name="required_estimate" {% if booking_obj.required_estimate %}checked{% endif %}>
+                                            <label class="form-check-label" for="required_estimate">Estimate Required</label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Form Actions -->
+                                    <div class="form-section">
+                                        <div class="d-flex justify-content-between">
+                                            <button type="button" class="btn btn-outline-secondary waves-effect" onclick="window.history.back();">
+                                                <i data-feather="x" class="me-25"></i>
+                                                <span>Cancel</span>
+                                            </button>
+                                            <div>
+                                                <a href="{% url 'v-accounts-bookings' booking_obj.id %}" class="btn btn-outline-secondary me-1 waves-effect">
+                                                    <i data-feather="eye" class="me-25"></i>
+                                                    <span>View</span>
+                                                </a>
+                                                <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                    <i data-feather="save" class="me-25"></i>
+                                                    <span>Save Changes</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // Show/hide cancellation reason based on booking status
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('booking_status');
+        const cancelReasonContainer = document.getElementById('cancel_reason_container');
+        const cancelReasonInput = document.getElementById('cancel_reason');
+        
+        // Get the current status name from the selected option
+        const currentStatus = statusSelect.options[statusSelect.selectedIndex].text.toLowerCase();
+        
+        // Initial check
+        if (currentStatus === 'cancelled') {
+            cancelReasonContainer.style.display = 'block';
+            cancelReasonInput.disabled = false;
+            cancelReasonInput.required = true;
+        } else {
+            cancelReasonContainer.style.display = 'none';
+            cancelReasonInput.disabled = true;
+            cancelReasonInput.required = false;
+        }
+        
+        // Add event listener for changes
+        statusSelect.addEventListener('change', function() {
+            const selectedStatus = this.options[this.selectedIndex].text.toLowerCase();
+            
+            if (selectedStatus === 'cancelled') {
+                cancelReasonContainer.style.display = 'block';
+                cancelReasonInput.disabled = false;
+                cancelReasonInput.required = true;
+            } else {
+                cancelReasonContainer.style.display = 'none';
+                cancelReasonInput.disabled = true;
+                cancelReasonInput.required = false;
+            }
+        });
+    });
+
+    // Auto-calculate total amount if booking amount changes
+    document.getElementById('booking_amount').addEventListener('change', function() {
+        const bookingAmount = parseFloat(this.value) || 0;
+        const totalAmountInput = document.getElementById('total_amount');
+        
+        // Only auto-update if total amount is empty or matches the previous booking amount
+        if (!totalAmountInput.value || parseFloat(totalAmountInput.value) === {{ booking_obj.booking_amount|default:'0' }}) {
+            totalAmountInput.value = bookingAmount.toFixed(2);
+        }
+    });
+</script>
+{% endblock %}

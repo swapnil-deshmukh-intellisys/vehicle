@@ -1,0 +1,58 @@
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const radioButtons = document.querySelectorAll('input[name="userType"]');
+    const modalElement = document.getElementById('selectToShareModal');
+    
+    // Get jobcard UUID from template
+    const jobcardUUID = '{{ jobcard_obj.random_uuid|default:"" }}';
+    
+    // Validate required elements
+    if (!jobcardUUID) {
+        const errorMsg = 'Jobcard Random UUID not found';
+        console.error(errorMsg);
+        if (typeof toastr !== 'undefined') toastr.error(errorMsg);
+        return;
+    }
+
+    if (!modalElement) {
+        const errorMsg = 'Modal element not found';
+        console.error(errorMsg);
+        if (typeof toastr !== 'undefined') toastr.error(errorMsg);
+        return;
+    }
+
+    // Generate URLs for customer and mechanic
+    const customerUrl = "{% url 'v-txn-job-sheets-customer' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', jobcardUUID);
+    const mechanicUrl = "{% url 'v-txn-job-sheets-mechanic' '00000000-0000-0000-0000-000000000000' %}".replace('00000000-0000-0000-0000-000000000000', jobcardUUID);
+
+    // Reset radio buttons
+    const resetRadioButtons = () => {
+        radioButtons.forEach(radio => radio.checked = false);
+    };
+
+    // Handle radio button selection
+    const handleRadioChange = (event) => {
+        if (event.target.checked) {
+            const modal = bootstrap.Modal.getInstance(modalElement) || 
+                         new bootstrap.Modal(modalElement);
+            modal.hide();
+            
+            // Open appropriate URL based on selection
+            const url = event.target.value === 'customer' ? customerUrl : mechanicUrl;
+            window.open(url, '_blank');
+        }
+    };
+
+    // Event Listeners
+    radioButtons.forEach(radio => {
+        radio.addEventListener('change', handleRadioChange);
+    });
+
+    modalElement.addEventListener('hidden.bs.modal', resetRadioButtons);
+    modalElement.addEventListener('show.bs.modal', resetRadioButtons);
+
+    // Initial reset
+    resetRadioButtons();
+});
+</script>

@@ -1,0 +1,392 @@
+{% extends "index.html" %}
+
+{% block title %}u-accounts-banner{% endblock %}
+
+{% block style %}
+<style>
+    .form-container {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    .image-upload-section {
+        background-color: #f8f9fa;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid #eaeaea;
+        height: 100%;
+    }
+    .image-preview {
+        width: 310px;
+        height: 75px;
+        border: 2px dashed #d1d5db;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+    .image-preview:hover {
+        border-color: #7367f0;
+    }
+    .image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+    }
+    .image-upload-btn {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    .image-upload-text {
+        font-size: 0.75rem;
+        color: #6b7280;
+        text-align: center;
+        margin: 0.5rem 0 0;
+        line-height: 1.4;
+    }
+    .form-section {
+        padding: 2rem;
+    }
+    .form-section h4 {
+        color: #4b5563;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    .form-section h4:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 40px;
+        height: 3px;
+        background-color: #7367f0;
+        border-radius: 2px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #7367f0;
+        box-shadow: 0 0 0 2px rgba(115, 103, 240, 0.2);
+    }
+    .btn-primary {
+        background-color: #7367f0;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+    .btn-outline-secondary {
+        padding: 0.5rem 1.5rem;
+    }
+    .form-actions {
+        border-top: 1px solid #eaeaea;
+        padding: 1.5rem 2rem;
+        background-color: #f9fafb;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-accounts-banner' %}">List Banner</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Update Banner
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="u-accounts-banner">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="card form-container">
+                            <form method="post" action="{% url 'u-accounts-banner' banner_obj.id %}" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row g-0">
+                                    <!-- Left Side - Image Upload Section -->
+                                    <div class="col-12 col-md-4">
+                                        <div class="image-upload-section">
+                                            <div class="image-preview" id="imagePreview">
+                                                {% if banner_obj.image_path %}
+                                                    <img src="../../../{{ banner_obj.image_path }}" alt="Current Image" class="img-fluid">
+                                                {% else %}
+                                                    <i data-feather="image" class="font-large-1 text-muted"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-center w-100">
+                                                <label for="bannerImage" class="btn btn-primary btn-sm waves-effect waves-float waves-light image-upload-btn">
+                                                    <i data-feather="upload" class="me-25"></i>
+                                                    <span id="uploadButtonText">Upload Image</span>
+                                                    <input type="file" id="bannerImage" name="banner_img" accept="image/avif" class="d-none" />
+                                                </label>
+                                                <p class="image-upload-text">
+                                                    <small>Recommended: 1240×300px<br>AVIF format only<br>Max size: 2MB</small>
+                                                </p>
+                                                <small id="imageError" class="text-danger d-none"></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Right Side - Form Fields -->
+                                    <div class="col-12 col-md-8">
+                                        <div class="form-section">
+                                            <h4>Banner Details</h4>
+                                            <div class="row">
+                                                <div class="col-12 mb-1">
+                                                    <label class="form-label" for="status">
+                                                        <i data-feather="toggle-right" class="font-medium-2 me-50"></i>
+                                                        Status <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="status" name="status" required>
+                                                        <option value="active" {% if banner_obj.status == 'active' %} selected {% endif %}>Active</option>
+                                                        <option value="inactive" {% if banner_obj.status == 'inactive' %} selected {% endif %}>Inactive</option>
+                                                    </select>
+                                                </div> 
+                                                <div class="col-12 mb-1">
+                                                    <label class="form-label" for="from_value">
+                                                        <i data-feather="list" class="font-medium-2 me-50"></i>
+                                                        Order <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="number" class="form-control" id="order" name="order" min="0" step="1" value="{{banner_obj.order}}" placeholder="e.g., 1, 2, 3..." required />
+                                                </div>
+                                                <div class="col-12 mb-1">
+                                                    <label class="form-label" for="city_id">
+                                                        <i data-feather="map-pin" class="font-medium-2 me-50"></i>
+                                                        City <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="city_id" name="city_id" required>
+                                                        <option value="" disabled selected>Select a city</option>
+                                                        {% for city in city_objs %}
+                                                            <option value="{{ city.id }}" {% if banner_obj.city.id == city.id %} selected {% endif %}>{{ city.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>      
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Form Actions -->
+                                        <div class="form-actions d-flex justify-content-between">
+                                            <button type="reset" class="btn btn-outline-secondary waves-effect">
+                                                <i data-feather="refresh-ccw" class="me-25"></i> Reset
+                                            </button>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-25"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Feather Icons
+        if (feather) {
+            feather.replace({ width: 16, height: 16 });
+        }
+
+        // Image validation and preview
+        const imageInput = document.getElementById('bannerImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const imageError = document.getElementById('imageError');
+        const submitBtn = document.querySelector('button[type="submit"]');
+        let isValidImage = false;
+
+        function validateImage(file) {
+            // Reset state
+            imageError.classList.add('d-none');
+            
+            // If no file is selected, it's optional - enable submit
+            if (!file) {
+                if (submitBtn) submitBtn.disabled = false;
+                return Promise.resolve(true);
+            }
+            
+            // Validate file type if file is provided
+            const validTypes = ['image/avif'];
+            if (!validTypes.includes(file.type.toLowerCase())) {
+                showImageError('Please upload a valid AVIF image');
+                if (submitBtn) submitBtn.disabled = true;
+                return Promise.resolve(false);
+            }
+            
+            // Validate file size (2MB max) if file is provided
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                showImageError('Image size should be less than 2MB');
+                if (submitBtn) submitBtn.disabled = true;
+                return Promise.resolve(false);
+            }
+            
+            // Additional validation for image dimensions and aspect ratio
+            return new Promise((resolve) => {
+                // For AVIF images, we need special handling
+                const fileType = file.type.toLowerCase();
+                if (fileType === 'image/avif') {
+                    try {
+                        // Create object URL with error handling
+                        const objectUrl = URL.createObjectURL(file);
+                        
+                        // Create a new image element to test loading
+                        const testImg = new Image();
+                        testImg.onload = function() {
+                            // Check dimensions for AVIF files
+                            const expectedWidth = 1240;
+                            const expectedHeight = 300;
+                            
+                            // Allow a small tolerance (±5px) for image dimensions
+                            const widthInRange = Math.abs(testImg.width - expectedWidth) <= 5;
+                            const heightInRange = Math.abs(testImg.height - expectedHeight) <= 5;
+                            
+                            if (!widthInRange || !heightInRange) {
+                                showImageError(`Image dimensions must be 1240×300px (yours: ${testImg.width}×${testImg.height}px)`);
+                                if (submitBtn) submitBtn.disabled = true;
+                                resolve(false);
+                                return;
+                            }
+                            
+                            // Successfully loaded and dimensions are correct - update preview
+                            imagePreview.innerHTML = `<img src="${objectUrl}" alt="Preview">`;
+                            imageError.classList.add('d-none');
+                            if (submitBtn) submitBtn.disabled = false;
+                            resolve(true);
+                        };
+                        
+                        testImg.onerror = function() {
+                            // Failed to load AVIF - show fallback message
+                            imagePreview.innerHTML = `<div class="text-center p-2">
+                                <i data-feather="file" class="font-large-1 text-primary mb-1"></i>
+                                <p class="mb-0">AVIF file selected</p>
+                                <small class="text-muted">Preview not available</small>
+                            </div>`;
+                            // Still allow submission since the file might be valid
+                            imageError.classList.add('d-none');
+                            if (submitBtn) submitBtn.disabled = false;
+                            // Re-initialize feather icons if they're used
+                            if (typeof feather !== 'undefined') {
+                                feather.replace();
+                            }
+                            resolve(true);
+                        };
+                        
+                        // Start loading the image
+                        testImg.src = objectUrl;
+                    } catch (error) {
+                        console.error('Error creating preview for AVIF:', error);
+                        // Show fallback for any errors
+                        imagePreview.innerHTML = `<div class="text-center p-2">
+                            <i data-feather="file" class="font-large-1 text-primary mb-1"></i>
+                            <p class="mb-0">AVIF file selected</p>
+                            <small class="text-muted">Preview not available</small>
+                        </div>`;
+                        // Still allow submission
+                        imageError.classList.add('d-none');
+                        if (submitBtn) submitBtn.disabled = false;
+                        // Re-initialize feather icons if they're used
+                        if (typeof feather !== 'undefined') {
+                            feather.replace();
+                        }
+                        resolve(true);
+                    }
+                } else {
+                    // This shouldn't happen since we're only accepting AVIF files
+                    showImageError('Please upload a valid AVIF image');
+                    if (submitBtn) submitBtn.disabled = true;
+                    resolve(false);
+                }
+            });
+        }
+
+        function showImageError(message) {
+            imageError.textContent = message;
+            imageError.classList.remove('d-none');
+            if (imageInput) imageInput.value = '';
+            imagePreview.innerHTML = '<i data-feather="image" class="font-large-1 text-muted"></i>';
+            if (feather) feather.replace();
+            // Don't disable submit on error, just show the error message
+        }
+
+        // Initialize form state - enable submit by default since image is optional
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
+
+        // Check if there's an existing image and update button text
+        const uploadButtonText = document.getElementById('uploadButtonText');
+        const existingImage = document.querySelector('#imagePreview img');
+        if (existingImage && uploadButtonText) {
+            uploadButtonText.textContent = 'Change Image';
+        }
+
+        // Handle file input change
+        const fileInput = document.getElementById('bannerImage');
+        fileInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const isValid = await validateImage(file);
+                if (!isValid) {
+                    fileInput.value = ''; // Clear the invalid file
+                    if (submitBtn) submitBtn.disabled = true;
+                } else {
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            } else {
+                // No file selected - keep submit enabled since image is optional
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+        
+        // Form submission validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            // If we have a file input with files and submit is disabled, prevent submission
+            if (fileInput.files.length > 0 && submitBtn && submitBtn.disabled) {
+                e.preventDefault();
+                return false;
+            }
+            // The form will submit normally if all validations pass
+        });
+    });
+</script>
+{% endblock %}

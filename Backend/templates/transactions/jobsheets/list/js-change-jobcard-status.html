@@ -1,0 +1,86 @@
+<script>
+    document.querySelectorAll('.update-status').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const jobcardId = this.dataset.jobcardId;
+            const newStatus = this.dataset.status;
+            const statusBadge = this.closest('[data-jobcard-id]')?.querySelector('.dropdown-toggle') || this.closest('.card, .list-item, .row')?.querySelector('.dropdown-toggle');
+            const dropdownMenu = this.closest('.dropdown-menu');
+            const dropdownItems = dropdownMenu.querySelectorAll('.dropdown-item');
+            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const originalText = this.innerHTML;
+
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to ${newStatus} this job card?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update it!',
+                cancelButtonText: 'No, cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Show loading state
+                    this.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Updating...';
+
+                    // Send AJAX request
+                    fetch(`/jobcards/${jobcardId}/update-status/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            'status': newStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message and reload
+                            Swal.fire({
+                                title: 'Updated!',
+                                text: 'Job card status has been updated.',
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                data.message || 'Failed to update status',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while updating status',
+                            'error'
+                        );
+                    })
+                    .finally(() => {
+                        // Restore button text if not reloading
+                        if (!data || !data.success) {
+                            this.innerHTML = originalText;
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    // User cancelled the action
+                    Swal.fire(
+                        'Cancelled',
+                        'Job card status remains unchanged',
+                        'info'
+                    );
+                }
+            });
+        });
+    });   
+</script>

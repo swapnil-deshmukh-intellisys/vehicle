@@ -1,0 +1,327 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-txn-services{% endblock %}
+
+{% block style %}{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0"><a href="{% url 'r-transactions' %}">Invoices</a></h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item active">Services
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Responsive tables start -->
+                <div class="row" id="r-txn-services">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">  
+                                <div> 
+                                    <button type="button" class="btn btn-icon btn-outline-success waves-effect" data-bs-toggle="modal" data-bs-target="#c-txn-services-modal">
+                                        <i data-feather='plus-square'></i>
+                                    </button>
+                                    {% if services %} 
+                                    <button type="button"  id="delServices" class="btn btn-icon btn-outline-danger waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete services">
+                                        <i data-feather='trash-2'></i>
+                                    </button>
+                                    {% endif %}  
+                                </div>                                
+                                {% if services %} 
+                                <div>
+                                    <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputServices" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputServices', 'tableServices')"/>
+                                    </div>
+                                </div>  
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if services %} 
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-sm table-striped table-hover" id="tableServices">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="text-nowrap form-check-success">
+                                                    <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select all"> 
+                                                    Name
+                                                </th>
+                                                <th scope="col" class="text-nowrap">Price</th>
+                                                <th scope="col" class="text-nowrap">GST</th>
+                                                <th scope="col" class="text-nowrap">Discount</th>
+                                                <th scope="col" class="text-nowrap">Notes</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for service in services %}
+                                            <tr>
+                                                <td class="text-nowrap d-flex">
+                                                    <form method="post" class="form-check-success">
+                                                        {% csrf_token %}
+                                                        <input  class="form-check-input me-1" type="checkbox" name="checkedServices" value="{{service.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select service">  
+                                                    </form>  
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#u-txn-services-modal-{{service.id}}">
+                                                        {{service.name}}
+                                                    </a>                                            
+                                                </td> 
+                                                <td class="text-nowrap">{{service.price}}</td>
+                                                <td class="text-nowrap">{{service.gst}}</td>
+                                                <td class="text-nowrap">{{service.discount}}</td>
+                                                <td class="text-nowrap">{{service.notes}}</td>
+                                            </tr>                                                                                                                                                                                                                                                               
+                                            <!-- Update Services Modal -->
+                                            <div class="modal fade text-start" id="u-txn-services-modal-{{service.id}}" tabindex="-1" aria-labelledby="u-txn-services-modal-label-{{service.id}}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <small class="modal-title" id="u-txn-services-modal-label-{{service.id}}">Update Service - [{{service.name}}]</small>
+                                                            <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post" action="{% url 'u-txn-services' service.id %}">
+                                                                {% csrf_token %}
+                                                                <div class="row">
+                                                                    <div class="col-12 col-md-3">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="name">Name<span class="text-danger">*</span></label>
+                                                                            <input type="text" class="form-control" name="name" value="{{service.name}}" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-3">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="price">Price</label>
+                                                                            <input type="number" class="form-control" name="price" step="0.01" min="0" value="{{service.price}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-3">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="gst">GST</label>
+                                                                            <input type="number" class="form-control" name="gst" step="0.01" min="0" value="{{service.gst}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 col-md-3">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="discount">Discount</label>
+                                                                            <input type="number" class="form-control" name="discount" step="0.01" min="0" value="{{service.discount}}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12">
+                                                                        <div class="mb-1">
+                                                                            <label class="form-label" for="notes">Notes</label>
+                                                                            <textarea class="form-control" name="notes">{{service.notes}}</textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12 text-end">   
+                                                                        <div class="mb-1">                                                                 
+                                                                            <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                                                                        </div> 
+                                                                    </div>
+                                                                </div>  
+                                                            </form>   
+                                                        </div>                                                 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Update Services Modal -->                                  
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <div class="card-header">
+                                        <div>                                    
+                                            Showing {{ services.start_index }} to {{ services.end_index }} of {{ services.paginator.count }} entries
+                                        </div>
+                                        <div> 
+                                            {% if services.has_other_pages %}
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-success">  
+    
+                                                        <!-- First Page Link -->
+                                                        {% if services.number > 1 %}
+                                                        <li class="page-item first">
+                                                            <a href="?page=1" class="page-link">First</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item first disabled">
+                                                            <span class="page-link">First</span>
+                                                        </li>
+                                                        {% endif %}   
+    
+                                                        <!-- Previous Page Link -->
+                                                        {% if services.has_previous %}
+                                                        <li class="page-item prev">
+                                                            <a href="?page={{ services.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item prev disabled">
+                                                            <span class="page-link" aria-label="Previous"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                        {% for page in services.paginator.page_range %}
+                                                            {% if page >= services.number|add:'-1' and page <= services.number|add:'1' %}
+                                                                {% if page == services.number %}
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ page }}</span>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="page-item">
+                                                                    <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                                </li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+    
+                                                        <!-- Next Page Link -->
+                                                        {% if services.has_next %}
+                                                        <li class="page-item next">
+                                                            <a href="?page={{ services.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item next disabled">
+                                                            <span class="page-link" aria-label="Next"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Last Page Link -->
+                                                        {% if services.number < services.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ services.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                    </ul>
+                                                </nav>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="avatar bg-light-danger avatar-xl">
+                                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                    </div>
+                                    <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to add services.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive tables end -->                                                                                                                                                                                    
+                <!-- Create Services Modal -->
+                <div class="modal fade text-start" id="c-txn-services-modal" tabindex="-1" aria-labelledby="c-txn-services-modal-label" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <small class="modal-title" id="c-txn-services-modal-label">Add Service</small>
+                                <button type="button" class="btn-close p-50" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'r-txn-services' %}">
+                                    {% csrf_token %}
+                                    <div class="row">
+                                        <div class="col-12 col-md-3">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="name">Name<span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" name="name" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="price">Price</label>
+                                                <input type="number" class="form-control" name="price" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="gst">GST</label>
+                                                <input type="number" class="form-control" name="gst" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="discount">Discount</label>
+                                                <input type="number" class="form-control" name="discount" step="0.01" min="0">
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="mb-1">
+                                                <label class="form-label" for="notes">Notes</label>
+                                                <textarea class="form-control" name="notes"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 text-end">   
+                                            <div class="mb-1">                                                                 
+                                                <button type="submit" class="btn btn-sm btn-success">Submit</button>
+                                            </div> 
+                                        </div>
+                                    </div> 
+                                </form>   
+                            </div>                                                 
+                        </div>
+                    </div>
+                </div>
+                <!-- Create Services Modal --> 
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const delServicesButton = document.getElementById("delServices");
+
+        delServicesButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            document.querySelectorAll('input[name="checkedServices"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-txn-services' %}";
+
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+    });
+</script>
+{% endblock %}

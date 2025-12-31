@@ -1,0 +1,741 @@
+/* Sidebar Menu Improvements - Professional Blue Gradient Theme */
+
+/* Contain sidebar elements properly */
+.main-menu {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.main-menu .main-menu-content {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Add space between logo and first menu item */
+.main-menu .navigation > li:first-child {
+    margin-top: 20px !important;
+}
+
+/* Remove only horizontal padding from navigation container that causes spacing */
+.main-menu .main-menu-content .navigation-main {
+    padding: 0 !important;
+}
+
+.main-menu .navigation {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+.main-menu .navigation > li {
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* Fix text cutoff issues by ensuring proper padding and text overflow handling */
+.main-menu .navigation > li > a {
+    padding: 12px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+.main-menu .navigation > li > a > span {
+    flex: 1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    margin-left: 12px !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+}
+
+/* Professional glossy blue gradient for active menu items */
+.main-menu .navigation > li.active > a,
+.main-menu .navigation > li.sidebar-group-active > a,
+.main-menu .navigation > li.open > a {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 50%, #2c5aa0 100%) !important;
+    background-size: 200% 200% !important;
+    animation: glossyShine 3s ease-in-out infinite !important;
+    color: #ffffff !important;
+    border-radius: 0 8px 8px 0 !important;
+    margin: 2px 8px 2px 0 !important;
+    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    padding-left: 0 !important;
+    max-width: calc(100% - 8px) !important;
+}
+
+/* Glossy shine animation for professional look */
+@keyframes glossyShine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Add subtle shine overlay effect */
+.main-menu .navigation > li.active > a::before,
+.main-menu .navigation > li.sidebar-group-active > a::before,
+.main-menu .navigation > li.open > a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shine 2s infinite;
+    z-index: 1;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Ensure text and icons are above the shine effect */
+.main-menu .navigation > li.active > a > span,
+.main-menu .navigation > li.active > a > i,
+.main-menu .navigation > li.active > a > svg {
+    position: relative !important;
+    z-index: 2 !important;
+    color: #ffffff !important;
+}
+
+/* Hover effects for non-active items */
+.main-menu .navigation > li:not(.active):not(.sidebar-group-active):not(.open) > a:hover {
+    /* background: linear-gradient(135deg, #e8f4fd 0%, #d1e9f8 100%) !important; */
+    color: #2c5aa0 !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Fix submenu active states */
+.main-menu .navigation .menu-content > li.active > a {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    margin: 1px 4px !important;
+    padding: 8px 16px !important;
+}
+
+/* Ensure proper spacing for icons */
+.main-menu .navigation > li > a > i,
+.main-menu .navigation > li > a > svg {
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 20px !important;
+    flex-shrink: 0 !important;
+}
+
+/* Dark theme overrides */
+.dark-layout .main-menu .navigation > li.active > a,
+.dark-layout .main-menu .navigation > li.sidebar-group-active > a,
+.dark-layout .main-menu .navigation > li.open > a {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 50%, #2c5aa0 100%) !important;
+    color: #ffffff !important;
+}
+
+.dark-layout .main-menu .navigation > li:not(.active):not(.sidebar-group-active):not(.open) > a:hover {
+    background: linear-gradient(135deg, #3a4a5c 0%, #2d3748 100%) !important;
+    color: #4a90e2 !important;
+}
+
+/* Semi-dark theme overrides */
+.semi-dark-layout .main-menu .navigation > li.active > a,
+.semi-dark-layout .main-menu .navigation > li.sidebar-group-active > a,
+.semi-dark-layout .main-menu .navigation > li.open > a {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 50%, #2c5aa0 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Bordered layout adjustments */
+.bordered-layout .main-menu .navigation > li.active > a,
+.bordered-layout .main-menu .navigation > li.sidebar-group-active > a,
+.bordered-layout .main-menu .navigation > li.open > a {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 50%, #2c5aa0 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* Collapsed menu adjustments */
+.menu-collapsed .main-menu:not(.expanded) .navigation > li.active > a {
+    background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%) !important;
+    border-radius: 8px !important;
+    margin: 2px 8px !important;
+}
+
+/* Ensure proper text visibility in all states */
+.main-menu .navigation > li > a .menu-title {
+    color: inherit !important;
+    font-weight: 500 !important;
+    font-size: 0.9rem !important;
+}
+
+/* Additional text styling for better visibility */
+.main-menu .navigation > li > a span.menu-title,
+.main-menu .navigation > li > a > span:not(.badge) {
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+}
+
+/* Mobile responsiveness - Higher specificity to override inline styles */
+@media (max-width: 991.98px) {
+    /* Force remove excessive spacing with higher specificity */
+    body .main-content,
+    body .app-content,
+    body .content-area-wrapper,
+    body .content-wrapper,
+    body .content-body {
+        padding-top: 10px !important;
+        margin-top: 10px !important;
+    }
+    
+    /* Override any inline styles on body */
+    body[style] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    /* Force header navbar to be compact */
+    .header-navbar.navbar {
+        min-height: 60px !important;
+        height: 60px !important;
+        padding: 0.25rem 1rem !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Remove all excessive top spacing from page elements */
+    .page-title,
+    .breadcrumb-wrapper,
+    .content-header,
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 0 !important;
+        margin-bottom: 5px !important;
+        padding-top: 0 !important;
+        padding-bottom: 2px !important;
+    }
+    
+    /* Compact table and card spacing */
+    .card,
+    .card-body,
+    .table-responsive,
+    .dataTables_wrapper,
+    .table-container {
+        margin-top: 5px !important;
+        margin-bottom: 5px !important;
+        padding-top: 5px !important;
+    }
+    
+    /* Remove Bootstrap default spacing */
+    .row {
+        margin-top: 0 !important;
+        margin-bottom: 5px !important;
+    }
+    
+    .col-12, .col-md-6, .col-lg-4, .col-sm-12 {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+@media (max-width: 991.98px) {
+    /* Mobile sidebar adjustments */
+    .main-menu {
+        width: 280px !important;
+        z-index: 1050 !important;
+        transform: translateX(-100%) !important;
+        transition: transform 0.3s ease-in-out !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Show sidebar when active */
+    .main-menu.show {
+        transform: translateX(0) !important;
+    }
+    
+    /* Body overlay when menu is open */
+    body.menu-open::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+    }
+    
+    /* Adjust main content for mobile - minimal spacing */
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding-top: 70px !important;
+        min-height: calc(100vh - 70px) !important;
+    }
+    
+    /* Ensure content appears below header navbar - minimal spacing */
+    .content-wrapper,
+    .content-body {
+        margin-left: 0 !important;
+        padding-left: 0 !important;
+        width: 100% !important;
+        padding-top: 5px !important;
+    }
+    
+    /* Fix header positioning - compact */
+    .header-navbar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1040 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        height: 60px !important;
+        min-height: 60px !important;
+        max-height: 60px !important;
+    }
+    
+    /* Ensure all content containers start below navbar - minimal spacing */
+    .app-content,
+    .content-area-wrapper {
+        padding-top: 70px !important;
+        margin-top: 0 !important;
+    }
+    
+    .main-menu .navigation > li > a {
+        padding: 16px 12px 16px 0 !important;
+        font-size: 1rem !important;
+        min-height: 56px !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+    
+    .main-menu .navigation > li > a > span {
+        margin-left: 12px !important;
+        font-size: 1rem !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Active items on mobile */
+    .main-menu .navigation > li.active > a,
+    .main-menu .navigation > li.sidebar-group-active > a,
+    .main-menu .navigation > li.open > a {
+        margin: 4px 0 !important;
+        border-radius: 0 12px 12px 0 !important;
+        box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4) !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding-left: 0 !important;
+    }
+    
+    /* Increase touch targets */
+    .main-menu .navigation > li {
+        margin-bottom: 4px !important;
+    }
+    
+    /* Logo spacing on mobile */
+    .main-menu .navigation > li:first-child {
+        margin-top: 24px !important;
+    }
+    
+    /* Icons sizing for mobile */
+    .main-menu .navigation > li > a > i,
+    .main-menu .navigation > li > a > svg {
+        width: 24px !important;
+        height: 24px !important;
+        margin-right: 16px !important;
+        font-size: 1.2rem !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Fix hamburger button visibility and functionality */
+    #mobile-menu-toggle {
+        display: block !important;
+        background: #3b82f6 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 12px !important;
+        color: white !important;
+        cursor: pointer !important;
+        z-index: 1060 !important;
+        position: relative !important;
+    }
+    
+    #mobile-menu-toggle:hover {
+        background: #2563eb !important;
+        transform: scale(1.05) !important;
+    }
+    
+    #mobile-menu-toggle i {
+        font-size: 1.5rem !important;
+        color: white !important;
+    }
+    
+    /* Fix header spacing on mobile */
+    .header-navbar {
+        padding: 0.75rem 1rem !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .navbar-container {
+        width: 100% !important;
+        justify-content: space-between !important;
+    }
+}
+
+/* Tablet responsiveness */
+@media (max-width: 1199.98px) and (min-width: 992px) {
+    .main-menu {
+        width: 240px !important;
+    }
+    
+    .main-menu .navigation > li > a {
+        padding: 14px 16px !important;
+        min-height: 48px !important;
+        max-width: 100% !important;
+    }
+    
+    .main-menu .navigation > li > a > span {
+        font-size: 0.95rem !important;
+    }
+    
+    .main-menu .navigation > li.active > a,
+    .main-menu .navigation > li.sidebar-group-active > a,
+    .main-menu .navigation > li.open > a {
+        margin: 3px 6px 3px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
+        max-width: calc(100% - 6px) !important;
+    }
+    
+    .main-menu .navigation > li:not(.active):not(.sidebar-group-active):not(.open) > a:hover {
+        margin: 3px 6px 3px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
+        max-width: calc(100% - 6px) !important;
+    }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1400px) {
+    .main-menu {
+        width: 260px !important;
+    }
+    
+    .main-menu .navigation > li > a {
+        padding: 14px 18px !important;
+        min-height: 52px !important;
+        max-width: 100% !important;
+    }
+    
+    .main-menu .navigation > li > a > span {
+        font-size: 1rem !important;
+        margin-left: 18px !important;
+    }
+    
+    .main-menu .navigation > li.active > a,
+    .main-menu .navigation > li.sidebar-group-active > a,
+    .main-menu .navigation > li.open > a {
+        margin: 3px 8px 3px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
+        box-shadow: 0 5px 18px rgba(74, 144, 226, 0.35) !important;
+        max-width: calc(100% - 8px) !important;
+    }
+    
+    .main-menu .navigation > li:not(.active):not(.sidebar-group-active):not(.open) > a:hover {
+        margin: 3px 8px 3px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
+        max-width: calc(100% - 8px) !important;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .main-menu .navigation > li > a {
+        min-height: 56px !important;
+        padding: 16px 20px !important;
+        cursor: pointer !important;
+    }
+    
+    .main-menu .navigation > li > a:active {
+        background: linear-gradient(135deg, #e8f4fd 0%, #d1e9f8 100%) !important;
+        transform: scale(0.98) !important;
+        transition: all 0.1s ease !important;
+    }
+    
+    .main-menu .navigation > li.active > a:active {
+        transform: scale(0.98) !important;
+        box-shadow: 0 2px 8px rgba(74, 144, 226, 0.5) !important;
+    }
+    
+    /* Ensure icons are clickable */
+    .main-menu .navigation > li > a > i,
+    .main-menu .navigation > li > a > svg {
+        pointer-events: none !important;
+    }
+    
+    .main-menu .navigation > li > a > span {
+        pointer-events: none !important;
+    }
+}
+
+/* Fix icon selection and clickability */
+.main-menu .navigation > li > a {
+    cursor: pointer !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.main-menu .navigation > li > a * {
+    pointer-events: none !important;
+}
+
+/* Ensure proper z-index for mobile menu */
+@media (max-width: 991.98px) {
+    .main-menu {
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    .main-menu.show {
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Additional containment fixes for mobile */
+    .main-menu .main-menu-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        padding: 0 !important;
+    }
+    
+    .main-menu .navigation {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    .main-menu .navigation > li {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Remove any body margins that could cause left spacing */
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    /* Ensure full width content containers - minimal spacing */
+    .app-content,
+    .content-area-wrapper,
+    .content-wrapper,
+    .content-body {
+        margin: 0 !important;
+        padding: 5px 15px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin-top: 70px !important;
+    }
+    
+    /* Fix specific content blocks - minimal spacing */
+    .card,
+    .card-body,
+    .table-responsive,
+    .dataTables_wrapper {
+        margin-top: 0 !important;
+        margin-bottom: 5px !important;
+        padding-top: 5px !important;
+    }
+    
+    /* Ensure search and filter elements are visible - minimal spacing */
+    .row,
+    .col-12,
+    .col-md-6,
+    .col-lg-4 {
+        margin-top: 0 !important;
+        margin-bottom: 5px !important;
+    }
+    
+    /* Specific fixes for invoice page spacing - very compact */
+    .page-title,
+    .breadcrumb-wrapper {
+        margin-bottom: 3px !important;
+        padding-bottom: 2px !important;
+    }
+    
+    /* Reduce spacing between sections - very compact */
+    .content-header {
+        margin-bottom: 3px !important;
+        padding-bottom: 2px !important;
+    }
+    
+    /* Fix table container spacing - very compact */
+    .table-container,
+    .dataTables_wrapper {
+        margin-top: 5px !important;
+        padding-top: 0 !important;
+    }
+    
+    /* Override any framework default spacing */
+    * {
+        margin-top: 0 !important;
+    }
+    
+    /* Force compact layout for all elements */
+    body * {
+        line-height: 1.2 !important;
+    }
+}
+
+/* Mobile-only navbar width fix */
+@media (max-width: 767.98px) {
+    .header-navbar.floating-nav {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        z-index: 1100 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .floating-nav .navbar-container.content,
+    .floating-nav .navbar-container,
+    .floating-nav .content {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 0.5rem 0.5rem !important;
+        margin: 0 !important;
+        flex: 1 !important;
+    }
+
+    /* Override Bootstrap container constraints on mobile */
+    .header-navbar .container,
+    .header-navbar .container-fluid,
+    .header-navbar .container-sm,
+    .header-navbar .container-md,
+    .header-navbar .container-lg,
+    .header-navbar .container-xl,
+    .header-navbar .container-xxl {
+        max-width: none !important;
+        width: 100% !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    .main-content {
+        padding-top: 60px !important;
+        margin-left: 0 !important;
+    }
+}
+
+/* Desktop - keep original behavior */
+@media (min-width: 768px) {
+    .main-content {
+        margin-left: 80px !important;
+    }
+}
+
+/* AGGRESSIVE MOBILE SPACING OVERRIDE - HIGHEST PRIORITY */
+@media (max-width: 991.98px) {
+    /* Force compact header with maximum specificity */
+    body .header-navbar.navbar.navbar-expand-lg,
+    html body .header-navbar.navbar,
+    .header-navbar {
+        padding: 0.2rem 0.5rem !important;
+        margin: 0 !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1050 !important;
+    }
+    
+    /* Force all content containers to start immediately after header */
+    html body .main-content,
+    html body .app-content,
+    html body .content-area-wrapper,
+    html body .content-wrapper,
+    html body .content-body {
+        padding-top: 55px !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Remove ALL top spacing from page elements */
+    html body .page-title,
+    html body .breadcrumb-wrapper,
+    html body .content-header,
+    html body h1, html body h2, html body h3, html body h4, html body h5, html body h6 {
+        margin-top: 0 !important;
+        margin-bottom: 2px !important;
+        padding-top: 0 !important;
+        padding-bottom: 1px !important;
+    }
+    
+    /* Compact all cards and tables */
+    html body .card,
+    html body .card-body,
+    html body .table-responsive,
+    html body .dataTables_wrapper,
+    html body .table-container {
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+    
+    /* Remove Bootstrap row/column spacing */
+    html body .row {
+        margin-top: 0 !important;
+        margin-bottom: 2px !important;
+    }
+    
+    html body .col-12, 
+    html body .col-md-6, 
+    html body .col-lg-4, 
+    html body .col-sm-12,
+    html body [class*="col-"] {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 2px !important;
+    }
+    
+    /* Override any framework spacing */
+    html body * {
+        margin-top: 0 !important;
+    }
+    
+    /* Force compact search and filter areas */
+    html body .dataTables_filter,
+    html body .dataTables_length,
+    html body .dataTables_info,
+    html body .dataTables_paginate {
+        margin-top: 2px !important;
+        margin-bottom: 2px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+}

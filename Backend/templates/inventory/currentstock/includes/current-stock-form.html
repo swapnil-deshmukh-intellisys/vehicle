@@ -1,0 +1,152 @@
+{% load custom_filters %}
+<div class="row">
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="code">HSN Code</label>
+            <input type="text" class="form-control trimwhitespace" name="code" value="{{product_catalogues_obj.code|default:''}}">
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="part_number">Part Number</label>
+            <input type="text" class="form-control" name="part_number" value="{{product_catalogues_obj.part_number|default:''}}">
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="brand">Product Brand</label>
+            <select class="select2 form-select" name="brand">
+                <option value="" hidden selected>Select an option</option>
+                {% for brand in product_brands %}
+                    <option value="{{ brand.id }}" {% if product_catalogues_obj.brand.id == brand.id %}selected{% endif %}>{{ brand.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="cc">CC</label>
+            <input type="text" class="form-control" name="cc" value="{{product_catalogues_obj.cc|default:''}}">
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="mb-1">
+            <label class="form-label" for="name">Product Name<span class="text-danger">*</span></label>
+            <input type="text" class="form-control" name="name" value="{{product_catalogues_obj.name|default:''}}" required>
+        </div>
+    </div>
+    <div class="col-12 col-md-5">
+        <div class="mb-1">
+            <label class="form-label" for="category">Product Category<span class="text-danger">*</span></label>
+            <select class="select2 form-select" name="category" required>
+                {% if not product_catalogues_obj %}<option value="" hidden selected>Select an option</option>{% endif %}
+                {% for category in product_categories %}
+                    <option value="{{ category.id }}" {% if product_catalogues_obj.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="sub_category">Sub Category</label>
+            <input type="text" class="form-control" name="sub_category" value="{{product_catalogues_obj.sub_category|default:''}}">
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="mb-1">
+            <label class="form-label" for="model">Model</label>
+            <select id="model_selector" name="model" class="form-select">
+                <option value="" hidden selected>Please select a brand first</option>
+            </select>
+            <div class="invalid-feedback">Please select a model</div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="mb-1">
+            <label class="form-label" for="product_brands">Supported Brand</label>
+            <select id="product_brands" name="product_brands" class="select2 form-select" multiple="multiple">
+                {% for productbrands in product_brands %}
+                    <option value="{{productbrands.id}}" {% if productbrands.id in selected_product_brands_ids %}selected{% endif %}>{{productbrands.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="mb-1">
+            <label class="form-label" for="product_model">Supported Model</label>
+            <select id="product_model" name="product_model" class="select2 form-select" multiple="multiple">
+                {% for productmodel in product_model_objs %}
+                    <option value="{{productmodel.id}}" {% if productmodel.id in selected_product_model_ids %}selected{% endif %}>{{productmodel.name}} | {{productmodel.brand.name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="mb-1">
+            <label class="form-label" for="description">Description</label>
+            <textarea class="form-control" name="description">{{product_catalogues_obj.description}}</textarea>
+        </div>
+    </div>
+    {% include 'inventory/includes/pricing-fields.html' with price_value=product_catalogues_obj.price gst_value=product_catalogues_obj.gst discount_value=product_catalogues_obj.discount purchase_price_value=product_catalogues_obj.purchase_price show_gst_checkbox=True price_includes_gst=product_catalogues_obj.price_includes_gst %}
+    <div class="col-12 col-md-{% if is_update %}3{% else %}6{% endif %}">
+        <div class="mb-1">
+            <label class="form-label" for="measuring_unit">Measuring Unit<span class="text-danger">*</span></label>
+            <select class="select2 form-select" name="measuring_unit" required>
+                {% if not product_catalogues_obj %}<option value="" hidden selected>Select an option</option>{% endif %}
+                <option value="units" {% if product_catalogues_obj.measuring_unit == 'units' %}selected{% endif %}>units</option>
+                <option value="pcs" {% if product_catalogues_obj.measuring_unit == 'pcs' %}selected{% endif %}>pieces</option>
+                <option value="qty" {% if product_catalogues_obj.measuring_unit == 'qty' %}selected{% endif %}>quantity</option>
+                <option value="pair" {% if product_catalogues_obj.measuring_unit == 'pair' %}selected{% endif %}>pair</option>
+                <option value="mtr" {% if product_catalogues_obj.measuring_unit == 'mtr' %}selected{% endif %}>meter</option>
+                <option value="cm" {% if product_catalogues_obj.measuring_unit == 'cm' %}selected{% endif %}>centimeter</option>
+                <option value="sqft" {% if product_catalogues_obj.measuring_unit == 'sqft' %}selected{% endif %}>square foot</option>
+                <option value="l" {% if product_catalogues_obj.measuring_unit == 'l' %}selected{% endif %}>litre</option>
+                <option value="ml" {% if product_catalogues_obj.measuring_unit == 'ml' %}selected{% endif %}>millilitre</option>
+                <option value="can" {% if product_catalogues_obj.measuring_unit == 'can' %}selected{% endif %}>can</option>
+                <option value="pouch" {% if product_catalogues_obj.measuring_unit == 'pouch' %}selected{% endif %}>pouch</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="min_stock">Min Stock Level</label>
+            <input type="number" class="form-control" name="min_stock" step="1" min="0" value="{{product_catalogues_obj.min_stock|default:0}}">
+        </div>
+    </div>
+    {% if is_update %}
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="inward_stock">Inward Stock</label>
+            <input type="number" class="form-control" name="inward_stock" step="1" min="0" value="{{product_catalogues_obj.inward_stock}}" readonly>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="mb-1">
+            <label class="form-label" for="outward_stock">Outward Stock</label>
+            <input type="number" class="form-control" name="outward_stock" step="1" min="0" value="{{product_catalogues_obj.outward_stock}}" readonly>
+        </div>
+    </div>
+    {% endif %}
+    <div class="col-12 d-flex justify-content-between mt-2">
+        <button type="button" class="btn btn-outline-secondary waves-effect" onclick="window.history.back();">
+            <i data-feather="x" class="me-25"></i>
+            <span>Cancel</span>
+        </button>
+        <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+            <i data-feather="save" class="me-50"></i>
+            <span>Save Current Stock</span>
+        </button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    {% if product_catalogues_obj.brand.id and product_catalogues_obj.model %}
+        setTimeout(function() {
+            if (window.initializeModelSelector) {
+                window.initializeModelSelector('{{ product_catalogues_obj.brand.id }}', '{{ product_catalogues_obj.model }}');
+            }
+        }, 500);
+    {% endif %}
+});
+</script>

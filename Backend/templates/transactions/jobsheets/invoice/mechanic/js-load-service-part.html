@@ -1,0 +1,95 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const state = {
+            selectedServices: [],
+            selectedParts: [],
+            jobcardNumber: '{{ jobcard_obj.jobcard_number }}',
+            urls: {
+                services: '{% url "get_jobcard_services" %}',
+                parts: '{% url "get_jobcard_parts" %}'
+            }
+        };
+
+        // Table generation
+        const generateTableRow = (item, type) => {
+            const nameKey = `${type}_name`;
+            return `
+            <tr>
+                <td>${item[nameKey] || 'N/A'}</td>
+                <td>${item.quantity || 1}</td>
+            </tr>`;
+        };
+
+        const generateSection = (items, type, title, icon) => {
+            if (!items || !items.length) {
+                return `
+                <tr class="jc-section-header">
+                    <td colspan="2">${icon} ${title}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="text-center text-muted py-2">No ${type} selected</td>
+                </tr>`;
+            }
+
+            const totalQuantity = items.reduce((sum, item) => {
+                return sum + (parseInt(item.quantity || 1, 10));
+            }, 0);
+
+            const rows = items.map(item => generateTableRow(item, type)).join('');
+
+            return `
+            <tr class="jc-section-header">
+                <td colspan="2">${icon} ${title}</td>
+            </tr>
+            ${rows}
+            <tr class="jc-section-header">
+                <td>${title.toUpperCase()} TOTAL</td>
+                <td>${totalQuantity}</td>
+            </tr>`;
+        };
+
+        const updateJobcardTable = () => {
+            const tableBody = document.querySelector('.jc-table tbody');
+            if (!tableBody) return;
+
+            const partsSection = generateSection(state.selectedParts, 'part', 'PARTS', '⚙️');
+            const servicesSection = generateSection(state.selectedServices, 'service', 'SERVICE', '🔧');
+
+            tableBody.innerHTML = `
+            ${partsSection}
+            ${servicesSection}`;
+        };
+
+        // Data fetching
+        const fetchData = async (type) => {
+            if (!state.jobcardNumber) return;
+
+            try {
+                const response = await $.ajax({
+                    url: state.urls[type],
+                    type: 'GET',
+                    data: {
+                        jobcard_number: state.jobcardNumber,
+                        _: new Date().getTime()
+                    }
+                });
+
+                if (response?.status === 'success') {
+                    state[`selected${type.charAt(0).toUpperCase() + type.slice(1)}`] = response[type] || [];
+                    updateJobcardTable();
+                }
+            } catch (error) {
+                console.error(`Error fetching ${type}:`, error);
+                toastr.error('Error', `Failed to load ${type}`, 'danger');
+            }
+        };
+
+        // Initialize
+        const initializePage = () => {
+            fetchData('services');
+            fetchData('parts');
+        };
+
+        initializePage();
+    });
+</script>

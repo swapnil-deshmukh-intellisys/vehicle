@@ -1,0 +1,270 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}r-accounts-servicecategory{% endblock %}
+
+{% block style %}
+<style>
+    /* shri */
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0;
+    }
+    .content-header-title {
+        display: inline-block;
+        margin-right: 1px;
+        vertical-align: middle;
+    }
+    .breadcrumb-wrapper {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -4px; /* Adjust as needed */
+    }
+    /* shri */
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% block content %}
+<div class="app-content content ">
+        <div class="content-overlay"></div>
+        <div class="header-navbar-shadow"></div>
+        <div class="content-wrapper container-xxl p-0">
+            <div class="content-header row">
+                <div class="content-header-left col-md-9 col-12 mb-2">
+                    <div class="row breadcrumbs-top">
+                        <div class="col-12">
+                            <h2 class="content-header-title float-start mb-0 title">Accounts</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item active">List Service Category
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+                    <div class="mb-1 breadcrumb-right">
+                        <!-- <div class="dropdown">
+                            <button class="btn-icon btn btn-success btn-round btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i data-feather="grid"></i></button>
+                            <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="app-todo.html"><i class="me-1" data-feather="check-square"></i><span class="align-middle">Todo</span></a><a class="dropdown-item" href="app-chat.html"><i class="me-1" data-feather="message-square"></i><span class="align-middle">Chat</span></a><a class="dropdown-item" href="app-email.html"><i class="me-1" data-feather="mail"></i><span class="align-middle">Email</span></a><a class="dropdown-item" href="app-calendar.html"><i class="me-1" data-feather="calendar"></i><span class="align-middle">Calendar</span></a></div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <div class="content-body">
+                <!-- Responsive tables start -->
+                <div class="row" id="r-accounts-servicecategory">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">  
+                                <div>   
+                                    <a href="{% url 'c-accounts-servicecategory' %}" class="btn btn-icon btn-outline-success waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Add Records">
+                                        <i data-feather='plus-square'></i>
+                                    </a>
+
+                                    {% if servicecategory_objs %} 
+                                    <button type="button"  id="delServicecategory" class="btn btn-icon btn-outline-danger waves-effect"  data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete Records">
+                                        <i data-feather='trash-2'></i>
+                                    </button>
+                                    {% endif %}
+                                </div>                                
+                                {% if servicecategory_objs %} 
+                                <div>
+                                    <div class="input-group input-group-merge me-25">
+                                        <span class="input-group-text" id="basic-addon-search2"><i data-feather="search"></i></span>
+                                        <input type="text" id="searchInputServicecategory" class="form-control" aria-label="Search..." aria-describedby="basic-addon-search2" oninput="searchTable('searchInputServicecategory', 'tableServicecategory')"/>
+                                    </div>
+                                </div>  
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                {% if servicecategory_objs %} 
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-sm table-striped table-hover" id="tableServicecategory">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="text-nowrap form-check-success">
+                                                    <input class="form-check-input me-1" type="checkbox" id="selectAllCheckbox" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select All Records"> 
+                                                    Name
+                                                </th>                                                
+                                                <th scope="col" class="text-nowrap">Status</th>
+                                                <th scope="col" class="text-nowrap">Display</th>
+                                                <th scope="col" class="text-nowrap">City</th>
+                                                <th scope="col" class="text-nowrap">Updated At</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for servicecategory_obj in servicecategory_objs %}
+                                            <tr>
+                                                <td class="text-nowrap d-flex">
+                                                    <form method="post" class="form-check-success">
+                                                        {% csrf_token %}
+                                                        <input  class="form-check-input me-1" type="checkbox" name="checkedServicecategory" value="{{servicecategory_obj.id}}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Select Record">  
+                                                    </form> 
+                                                    {% if servicecategory_obj.image_path %}
+                                                    <img class="me-25" src="../../../{{servicecategory_obj.image_path}}" height="20" width="20" alt="service category image">
+                                                    {% endif %}
+                                                    <a href="{% url 'u-accounts-servicecategory' servicecategory_obj.id %}">{{servicecategory_obj.name}}</a>                                            
+                                                </td> 
+                                                <td class="text-nowrap">
+                                                    {% if servicecategory_obj.status == 'active' %}
+                                                        <span class="badge badge-light-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge badge-light-danger">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-nowrap">
+                                                    {% with first_relation=servicecategory_obj.rel_city_servicecategory.first %}
+                                                        {% if first_relation %}
+                                                            {% if first_relation.display %}
+                                                                <span class="badge badge-light-success">Displayed</span>
+                                                            {% else %}
+                                                                <span class="badge badge-light-danger">Hidden</span>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="text-muted">-</span>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                </td>
+                                                <td class="text-nowrap">
+                                                    {% with cities=servicecategory_obj.rel_city_servicecategory.all %}
+                                                        {% if cities %}
+                                                            {% for rel in cities %}
+                                                                {{ rel.city.name }}{% if not forloop.last %}, {% endif %}
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            <span class="text-muted">No cities</span>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                </td>
+                                                <td class="text-nowrap">{{servicecategory_obj.updated_at}}</td>
+                                            </tr>                                 
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    <div class="card-header">
+                                        <div>                                    
+                                            Showing {{ servicecategory_objs.start_index }} to {{ servicecategory_objs.end_index }} of {{ servicecategory_objs.paginator.count }} entries
+                                        </div>
+                                        <div> 
+                                            {% if servicecategory_objs.has_other_pages %}
+                                                <nav aria-label="Page navigation">
+                                                    <ul class="pagination pagination-success">  
+    
+                                                        <!-- First Page Link -->
+                                                        {% if servicecategory_objs.number > 1 %}
+                                                        <li class="page-item first">
+                                                            <a href="?page=1" class="page-link">First</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item first disabled">
+                                                            <span class="page-link">First</span>
+                                                        </li>
+                                                        {% endif %}   
+    
+                                                        <!-- Previous Page Link -->
+                                                        {% if servicecategory_objs.has_previous %}
+                                                        <li class="page-item prev">
+                                                            <a href="?page={{ servicecategory_objs.previous_page_number }}" class="page-link" aria-label="Previous"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item prev disabled">
+                                                            <span class="page-link" aria-label="Previous"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Page Number Links (up to 3 pages around the current page) -->
+                                                        {% for page in servicecategory_objs.paginator.page_range %}
+                                                            {% if page >= servicecategory_objs.number|add:'-1' and page <= servicecategory_objs.number|add:'1' %}
+                                                                {% if page == servicecategory_objs.number %}
+                                                                <li class="page-item active">
+                                                                    <span class="page-link">{{ page }}</span>
+                                                                </li>
+                                                                {% else %}
+                                                                <li class="page-item">
+                                                                    <a href="?page={{ page }}" class="page-link">{{ page }}</a>
+                                                                </li>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% endfor %}
+    
+                                                        <!-- Next Page Link -->
+                                                        {% if servicecategory_objs.has_next %}
+                                                        <li class="page-item next">
+                                                            <a href="?page={{ servicecategory_objs.next_page_number }}" class="page-link" aria-label="Next"></a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item next disabled">
+                                                            <span class="page-link" aria-label="Next"></span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                        <!-- Last Page Link -->
+                                                        {% if servicecategory_objs.number < servicecategory_objs.paginator.num_pages %}
+                                                        <li class="page-item last">
+                                                            <a href="?page={{ servicecategory_objs.paginator.num_pages }}" class="page-link">Last</a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li class="page-item last disabled">
+                                                            <span class="page-link">Last</span>
+                                                        </li>
+                                                        {% endif %}
+    
+                                                    </ul>
+                                                </nav>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="text-center">
+                                    <div class="avatar bg-light-danger avatar-xl">
+                                        <span class="avatar-content"><i data-feather='alert-circle'></i></span>
+                                    </div>
+                                    <p class="card-text fw-bolder">No data available.</p>
+                                    <p class="card-text fw-bold">Click on <i data-feather='plus-square'></i> icon to add servicecategory.</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Responsive tables end -->  
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'custom-assets/js/tableSearch.js' %}"></script>
+<script src="{% static 'custom-assets/js/selectAllCheckbox.js' %}"></script>
+<script src="{% static 'custom-assets/js/deleteConfirmation.js' %}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const delServicecategoryButton = document.getElementById("delServicecategory");
+
+        delServicecategoryButton?.addEventListener("click", function () {
+            let ids = [];
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+            document.querySelectorAll('input[name="checkedServicecategory"]:checked').forEach(function (input) {
+                ids.push(input.value);
+            });
+
+            // Prepare data and URL for the AJAX request
+            const data = {
+                id: ids,
+                csrfmiddlewaretoken: csrfToken
+            };
+            const ajaxUrl = "{% url 'd-accounts-servicecategory' %}";
+
+            
+            deleteConfirmation(data, ajaxUrl);
+        });
+    });
+</script>
+{% endblock %}

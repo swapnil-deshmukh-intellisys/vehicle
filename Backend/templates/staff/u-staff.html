@@ -1,0 +1,298 @@
+{% extends "index.html" %}
+
+{% block title %}Update Staff{% endblock %}
+
+{% block style %}
+<style>
+    .section-divider {
+        border-top: 1px solid #ebe9f1;
+        margin: 1.5rem 0;
+        position: relative;
+    }
+    .section-divider span {
+        position: absolute;
+        top: -12px;
+        left: 10px;
+        background: white;
+        padding: 0 10px;
+        color: #7367f0;
+        font-weight: 600;
+    }
+    .form-section {
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+
+{% block content %}
+<div class="app-content content">
+    <div class="content-overlay"></div>
+    <div class="header-navbar-shadow"></div>
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+            <div class="content-header-left col-md-9 col-12 mb-2">
+                <div class="row breadcrumbs-top">
+                    <div class="col-12">
+                        <h2 class="content-header-title float-start mb-0">Staff</h2>
+                            <div class="breadcrumb-wrapper">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="{% url 'r-staff' %}">List Staff</a>
+                                    </li>
+                                    <li class="breadcrumb-item active">Update Staff
+                                    </li>
+                                </ol>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="content-body">
+            <section id="u-staff">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-9">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Update Staff</h4>
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'u-staff' staff_obj.id %}" enctype="multipart/form-data">
+                                    {% csrf_token %}
+                                    
+                                    <!-- Personal Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Personal Information</span></div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="firstname">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        First Name<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="firstname" name="firstname" value="{{ staff_obj.firstname }}" 
+                                                           placeholder="First name" required/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="middlename">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        Middle Name
+                                                    </label>
+                                                    <input type="text" class="form-control" id="middlename" name="middlename" value="{{ staff_obj.middlename }}"
+                                                           placeholder="Middle name" />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-4">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="lastname">
+                                                        <i data-feather="user" class="font-medium-3 me-50"></i>
+                                                        Last Name<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="lastname" name="lastname" value="{{ staff_obj.lastname }}" 
+                                                           placeholder="Last name" required/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Contact Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Contact Information</span></div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="phone">
+                                                        <i data-feather="phone" class="font-medium-3 me-50"></i>
+                                                        Phone Number<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="phone" name="phone" value="{{ staff_obj.phone }}"
+                                                           placeholder="Phone number" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required readonly/>                                                           
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="email">
+                                                        <i data-feather="mail" class="font-medium-3 me-50"></i>
+                                                        Email Address
+                                                    </label>
+                                                    <input type="email" class="form-control" id="email" name="email" value="{{ staff_obj.email }}"
+                                                           placeholder="Email address" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Aadhaar Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Aadhaar Information</span></div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="aadhar">
+                                                        <i data-feather="credit-card" class="font-medium-3 me-50"></i>
+                                                        Aadhaar<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="aadhar" name="aadhar" value="{{ staff_obj.aadhar }}"
+                                                           placeholder="Aadhaar number" pattern="^[2-9]{1}[0-9]{3}\s?[0-9]{4}\s?[0-9]{4}$" 
+                                                           title="Please enter a valid 12-digit Aadhaar number" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="attachment">
+                                                        <i data-feather="upload" class="font-medium-3 me-50"></i>
+                                                        Attachment
+                                                        {% if staff_obj.attachment %}<a href="../../../{{ staff_obj.attachment }}" download data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Download Attachment"><i data-feather="download" class="font-medium-3 ms-50"></i></a>{% endif %}
+                                                    </label>
+                                                    <input type="file" class="form-control" id="attachment" name="attachment" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Role & Status Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Role & Status</span></div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="role">
+                                                        <i data-feather="briefcase" class="font-medium-3 me-50"></i>
+                                                        Role(s)<span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="select2 form-select" id="role" name="role" multiple required>
+                                                        <option value="crew" {% if 'crew' in staff_obj.roles %}selected{% endif %}>Crew</option>
+                                                        <option value="mechanic" {% if 'mechanic' in staff_obj.roles %}selected{% endif %}>Mechanic</option>
+                                                        <option value="supervisor" {% if 'supervisor' in staff_obj.roles %}selected{% endif %}>Supervisor</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="status">
+                                                        <i data-feather="user-check" class="font-medium-3 me-50"></i>
+                                                        Status<span class="text-danger">*</span>
+                                                    </label>
+                                                    <select class="form-select" id="status" name="status" required>
+                                                        <option value="active" {% if staff_obj.status == 'active' %}selected{% endif %}>Active</option>
+                                                        <option value="inactive" {% if staff_obj.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label d-block">
+                                                        <i data-feather="clock" class="font-medium-3 me-50"></i>
+                                                        Availability
+                                                    </label>
+                                                    <div class="form-check form-switch">
+                                                        <input type="checkbox" class="form-check-input" id="availability" name="availability" {% if staff_obj.availability %}checked{% endif %}/>
+                                                        <label class="form-check-label" for="availability">
+                                                            Currently Available
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Experience & Specialization Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Experience & Specialization</span></div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="year_of_experience">
+                                                        <i data-feather="award" class="font-medium-3 me-50"></i>
+                                                        Years of Experience<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="number" class="form-control" id="year_of_experience" name="year_of_experience" value="{{ staff_obj.year_of_experience|default:0 }}"
+                                                           min="0" max="50" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="past_experience">
+                                                        <i data-feather="briefcase" class="font-medium-3 me-50"></i>
+                                                        Past Experiences
+                                                    </label>
+                                                    <textarea class="form-control" id="past_experience" name="past_experience" 
+                                                              rows="3" placeholder="Previous work experience details">{{ staff_obj.past_experience }}</textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="specialization">
+                                                        <i data-feather="tool" class="font-medium-3 me-50"></i>
+                                                        Specialization
+                                                    </label>
+                                                    <textarea class="form-control" id="specialization" name="specialization" 
+                                                              rows="2" placeholder="Areas of expertise or special skills">{{ staff_obj.specialization }}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reference Information Section -->
+                                    <div class="form-section">
+                                        <div class="section-divider"><span>Reference Information</span></div>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="reference_by_name">
+                                                        <i data-feather="user-plus" class="font-medium-3 me-50"></i>
+                                                        Reference Name<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="reference_by_name" name="reference_by_name" value="{{ staff_obj.reference_by_name }}"
+                                                           placeholder="Reference person's name" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="reference_by_phone">
+                                                        <i data-feather="phone" class="font-medium-3 me-50"></i>
+                                                        Reference Phone<span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text" class="form-control" id="reference_by_phone" name="reference_by_phone" value="{{ staff_obj.reference_by_phone }}"
+                                                           placeholder="Reference phone number" pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required />
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6">
+                                                <div class="mb-1">
+                                                    <label class="form-label" for="reference_by_email">
+                                                        <i data-feather="mail" class="font-medium-3 me-50"></i>
+                                                        Reference Email
+                                                    </label>
+                                                    <input type="email" class="form-control" id="reference_by_email" name="reference_by_email" value="{{ staff_obj.reference_by_email }}"
+                                                           placeholder="Reference email address" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div> 
+
+                                    <div class="row">
+                                        <div class="col-12 d-flex justify-content-between">
+                                            <a href="{% url 'r-staff' %}" class="btn btn-outline-secondary waves-effect">
+                                                <i data-feather="x" class="me-25"></i>
+                                                <span>Cancel</span>
+                                            </a>
+                                            <button type="submit" class="btn btn-primary waves-effect waves-float waves-light">
+                                                <i data-feather="save" class="me-50"></i>
+                                                <span>Update Staff</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}{% endblock %}

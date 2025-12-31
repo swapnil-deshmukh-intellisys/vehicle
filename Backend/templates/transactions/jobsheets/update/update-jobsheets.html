@@ -1,0 +1,4006 @@
+{% extends "index.html" %}
+
+{% block title %}Update Job Card{% endblock %}
+
+<!--start call summary only -->
+{% block navlink %}
+<li class="nav-item me-2 subsection-group" data-menu="createjobsheet" style="display: none;">
+  <a class="nav-link" href=""
+    style="color: #6c757d; font-weight: 500; display: flex; align-items: center; padding: 8px 12px; border-radius: 6px; transition: all 0.3s ease;"
+    onmouseover="this.style.background='#f8f9fa'; this.style.color='#495057'"
+    onmouseout="this.style.background='transparent'; this.style.color='#6c757d'">
+    <i data-feather="bar-chart-2" style="width: 16px; height: 16px; margin-right: 6px;"></i>
+    <span>Summary</span>
+  </a>
+</li>
+{% endblock %}
+<!--end call summary only -->
+
+{% block style %}
+
+<style>
+  /* Professional Card Styling - Enhanced */
+  .card {
+    background: white !important;
+    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 1rem 1.25rem !important;
+  }
+
+  .card-header h6 {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    margin: 0;
+  }
+
+  .card-body {
+    padding: 1.25rem !important;
+    background: #ffffff !important;
+  }
+
+  /* Enhanced Job Header Section */
+  .card-header.d-flex {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    padding: 1.25rem !important;
+  }
+
+  /* Professional Select2 Styling */
+  .select2-container--default .select2-selection--single {
+    background: white !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    height: 42px !important;
+    padding: 0 12px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .select2-container--default.select2-container--focus .select2-selection--single,
+  .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #1e293b !important;
+    line-height: 38px !important;
+    font-weight: 500 !important;
+  }
+
+  .select2-dropdown {
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    margin-top: 4px !important;
+  }
+
+  /* Enhanced Form Controls */
+  .content-body .form-control,
+  .content-body .form-select {
+    background: white !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.925rem !important;
+    transition: all 0.2s ease !important;
+    color: #1e293b !important;
+  }
+
+  .content-body .form-control:focus,
+  .content-body .form-select:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    background: white !important;
+  }
+
+  .content-body .form-control:hover:not(:focus),
+  .content-body .form-select:hover:not(:focus) {
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Professional Labels */
+  .content-body .form-label {
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0.5rem !important;
+    text-transform: none !important;
+    letter-spacing: 0.3px;
+  }
+
+  .form-label.small {
+    font-size: 0.85rem !important;
+  }
+
+  /* Enhanced Buttons */
+  .btn {
+    border-radius: 10px !important;
+    padding: 0.625rem 1.25rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    border: none !important;
+  }
+
+  .btn-outline-secondary {
+    background: white !important;
+    color: #64748b !important;
+    border: 2px solid #e2e8f0 !important;
+  }
+
+  .btn-outline-secondary:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    color: #475569 !important;
+    border-color: #cbd5e1 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .btn-outline-primary {
+    background: white !important;
+    color: #3b82f6 !important;
+    border: 2px solid #93c5fd !important;
+  }
+
+  .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  /* Enhanced Fuel Slider */
+  .form-range {
+    height: 8px !important;
+    background: linear-gradient(90deg, #fee2e2 0%, #fbbf24 50%, #84cc16 100%) !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+  }
+
+  .form-range::-webkit-slider-thumb {
+    width: 24px !important;
+    height: 24px !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    border: 3px solid white !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .form-range::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5) !important;
+  }
+
+  /* Enhanced Checkboxes */
+  .form-check-input {
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 5px !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  .form-check-input:hover:not(:checked) {
+    border-color: #94a3b8 !important;
+    background-color: #f8fafc !important;
+  }
+
+  .form-check {
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .form-check:hover {
+    background: #f8fafc;
+  }
+
+  .form-check-label {
+    color: #475569 !important;
+    font-weight: 500 !important;
+    cursor: pointer;
+    margin-left: 0.5rem;
+  }
+
+  /* Enhanced Textarea */
+  textarea.form-control {
+    min-height: 80px !important;
+    resize: vertical !important;
+  }
+
+  /* Customer Tabs Enhancement */
+  .nav-tabs {
+    border-bottom: 2px solid #e2e8f0 !important;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .nav-tabs .nav-link {
+    color: #64748b !important;
+    font-weight: 500 !important;
+    padding: 0.75rem 1.25rem !important;
+    border: none !important;
+    background: transparent !important;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+
+  .nav-tabs .nav-link:hover {
+    color: #3b82f6 !important;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border-radius: 8px 8px 0 0 !important;
+  }
+
+  .nav-tabs .nav-link.active {
+    color: #3b82f6 !important;
+    background: white !important;
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 600 !important;
+  }
+
+  .nav-tabs .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 2px;
+  }
+
+  /* Customer Info Cards
+  #selectedCustomerDetails,
+  #selectedCustomerAddress,
+  #selectedCustomerVehicle {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%) !important;
+    border: 2px solid #bfdbfe !important;
+    border-radius: 12px !important;
+    padding: 1.25rem !important;
+  } */
+
+  /* Empty States Enhancement
+  #noCustomerSelected,
+  #noAddressSelected,
+  #noVehicleSelected {
+    padding: 3rem 1.5rem !important;
+    background: linear-gradient(135deg, #fafbfc 0%, #f1f5f9 100%) !important;
+    border-radius: 12px !important;
+    margin: 1rem 0 !important;
+  } */
+
+  /* #noCustomerSelected i,
+  #noAddressSelected i,
+  #noVehicleSelected i {
+    color: #cbd5e1 !important;
+    margin-bottom: 1rem !important;
+  }
+
+  #noCustomerSelected h5,
+  #noAddressSelected h5,
+  #noVehicleSelected h5 {
+    color: #64748b !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+  } */
+
+  /* Cost Estimate Card Enhancement */
+  .cost-estimate-card {
+    background: white !important;
+    border: none !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08) !important;
+    transition: all 0.3s ease;
+  }
+
+  .cost-estimate-card:hover {
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.12) !important;
+    transform: translateY(-2px);
+  }
+
+  .cost-estimate-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    padding: 1.25rem !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cost-section {
+    padding: 1.25rem !important;
+    background: transparent !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+  }
+
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0.5rem !important;
+    font-size: 0.925rem !important;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+  }
+
+  .cost-row:hover {
+    background: #f8fafc !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .section-total {
+    background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%) !important;
+    border: 1px solid #93c5fd !important;
+    border-radius: 10px !important;
+    padding: 0.875rem 1rem !important;
+    margin-top: 0.75rem !important;
+  }
+
+  .grand-total-section {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%) !important;
+    border-radius: 0 0 16px 16px !important;
+    padding: 1.5rem !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .grand-total-value {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Input Groups Enhancement */
+  .content-body .input-group {
+    border-radius: 10px !important;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .content-body .input-group-text {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 2px solid #e2e8f0 !important;
+    border-right: none !important;
+    color: #64748b !important;
+    padding: 0.625rem 0.875rem !important;
+  }
+
+  .content-body .input-group .form-control {
+    border-left: none !important;
+  }
+
+  /* Professional Box Shadows */
+  .shadow-sm {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  /* Loading States */
+  .spinner-border-sm {
+    width: 1rem !important;
+    height: 1rem !important;
+    border-width: 2px !important;
+  }
+
+  /* Smooth Transitions */
+  * {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+</style>
+
+<style>
+  .nav-tabs .nav-link.active {
+    color: #3b82f6;
+  }
+
+  /* Custom modal width
+  .modal-dialog.modal-addnew-customer {
+    max-width: 600px;
+    /* set any width you like */
+  width: 70%;
+  /* optional: responsive */
+  }
+
+  */
+
+  /* Professional Background Styling */
+  .app-content {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    min-height: 100vh;
+  }
+
+  .content-wrapper {
+    background: transparent;
+  }
+
+  .content-body {
+    background: transparent;
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 1rem;
+  }
+
+  .dentmarks-modal-width {
+    max-width: 600px;
+    /* set your desired width */
+    width: 60%;
+    /* optional: make it responsive */
+  }
+
+  .icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    /* icon size */
+  }
+
+  /* 🔴 Custom red range slider */
+  .fuel-range-red::-webkit-slider-thumb {
+    background: red;
+  }
+
+  .heading-color {
+    color: black;
+  }
+
+  @media (max-width: 768px) {
+    .input-group {
+      flex-wrap: nowrap;
+      /* keep icon and input in one line */
+      width: 100%;
+      /* full width */
+    }
+
+    .input-group .form-control {
+      flex: 1;
+      /* input grows to fill remaining space */
+      min-width: 0;
+      /* prevent overflow */
+    }
+
+    .input-group-text {
+      background: #f8f9fa;
+      /* light bg for icon */
+      border-right: 0;
+      /* smooth join with input */
+    }
+  }
+
+  /* Professional Modal Styling */
+  .modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+  }
+
+  .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .modal-header .modal-title {
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+    background: #f8f9fa;
+  }
+
+  /* Service/Part Option Toggle */
+  .service-option-toggle {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.25rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .service-option-toggle label {
+    flex: 1;
+    padding: 0.75rem;
+    text-align: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: transparent;
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .service-option-toggle input[type="radio"] {
+    display: none;
+  }
+
+  .service-option-toggle input[type="radio"]:checked+label {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Form Controls */
+  .modal-body .form-label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .modal-body .form-label .text-danger {
+    color: #ff4757 !important;
+  }
+
+  .modal-body .form-control,
+  .modal-body .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.925rem;
+    transition: all 0.2s ease;
+    background: white;
+  }
+
+  .modal-body .form-control:focus,
+  .modal-body .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    background: white;
+  }
+
+  /* Select2 in Modal */
+  .modal .select2-container--default .select2-selection--single {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    height: 42px;
+    padding: 0.625rem 0.875rem;
+    background: white;
+  }
+
+  .modal .select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+  }
+
+  /* Form Groups */
+  .form-group-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group-row .form-group {
+    flex: 1;
+  }
+
+  /* Modal Footer */
+  .modal-footer {
+    background: white;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .modal-footer .btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .modal-footer .btn-secondary {
+    background: #f1f3f5;
+    border: none;
+    color: #495057;
+  }
+
+  .modal-footer .btn-secondary:hover {
+    background: #e9ecef;
+  }
+
+  .modal-footer .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  .modal-footer .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  /* Info Cards in Modal */
+  .info-card-modal {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+</style>
+
+
+<style>
+  /* Responsive Styles */
+  .divider-text {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .divider-text .btn {
+    margin: 0.2rem 0;
+    white-space: nowrap;
+  }
+
+  .divider-text .fw-bold {
+    white-space: nowrap;
+    margin-right: 0.5rem;
+  }
+
+  /* Responsive Tables */
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+  }
+
+  .table {
+    min-width: 600px;
+    /* Ensures table doesn't get too narrow */
+  }
+
+  .table thead th {
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 1;
+  }
+
+  .table td,
+  .table th {
+    vertical-align: middle;
+  }
+
+  /* Hide default date format placeholder */
+  input[type="date"].empty-date:not(:focus):before {
+    content: attr(placeholder);
+    color: #6e6b7b;
+    width: 100%;
+  }
+
+  input[type="date"].empty-date:not(:focus)::-webkit-datetime-edit {
+    color: transparent;
+  }
+
+  input[type="date"].empty-date:focus::-webkit-datetime-edit {
+    color: #6e6b7b;
+  }
+</style>
+<style>
+  /* Responsive Styles */
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .content-wrapper {
+    padding: 0 0.75rem;
+  }
+
+  @media (max-width: 768px) {
+
+    .add-top-margin {
+      margin-top: 10px !important;
+    }
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 991.98px) {
+    .content-wrapper {
+      padding: 0 0.5rem;
+    }
+
+    /* Make form elements stack on mobile */
+    .row>[class*='col-'] {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+
+    /* Adjust form controls */
+    .form-control,
+    .form-select,
+    .select2-container {
+      width: 100% !important;
+    }
+
+    /* Make buttons full width on mobile */
+    .btn-group {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    .btn-group .btn {
+      flex: 1 0 auto;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  /* Ensure flex items wrap properly */
+  .d-flex {
+    flex-wrap: wrap;
+  }
+
+  /**/
+  .info-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(10px);
+  }
+
+  .info-card:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    /*background: linear-gradient(to bottom, #4361ee, #3a56d4);*/
+    background-color: #3b82f6;
+    border-radius: 4px 0 0 4px;
+  }
+
+  .info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .info-card:last-child {
+    margin-bottom: 0;
+  }
+
+  .info-card p {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    color: #5e6e82;
+    font-size: 0.95rem;
+  }
+
+  .info-card .row.g-2>[class*='col-'] {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  /* Dent Markers Styles */
+  .dent-marker {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 107, 107, 0.9);
+    border: 2px solid #fff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: move;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .dent-marker .marker-icon {
+    width: 18px;
+    height: 18px;
+    color: white;
+    stroke-width: 2.5px;
+  }
+
+  .dent-marker .marker-number {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: #ff2e2e;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .dent-marker.active {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.5);
+    z-index: 20;
+  }
+
+  .dent-marker:hover {
+    transform: translate(-50%, -50%) scale(1.15);
+    z-index: 30;
+  }
+
+  .vehicle-diagram {
+    position: relative;
+    background-color: #f8f9fa;
+    min-height: 200px;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: crosshair;
+    overflow: hidden;
+    border: 2px dashed #e0e0e0;
+    border-radius: 8px;
+    transition: border-color 0.3s ease;
+    margin: 0 auto;
+    width: 100%;
+    height: 300px;
+    /* Fixed height for better control */
+  }
+
+  @media (min-width: 768px) {
+    .vehicle-diagram {
+      height: 400px;
+      /* Slightly taller on larger screens */
+    }
+  }
+
+  .vehicle-diagram:hover {
+    border-color: #bdbdbd;
+  }
+
+  .vehicle-diagram img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .dent-markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .dent-markers>* {
+    pointer-events: auto;
+  }
+
+  .vehicle-diagram {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Dent Marker */
+  .vehicle-diagram {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dent-markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .dent-marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .dent-marker i {
+    filter: drop-shadow(0px 0px 2px white);
+  }
+
+  /* Photo preview */
+  .photo-item {
+    transition: all 0.2s ease;
+  }
+
+  .photo-item:hover {
+    transform: scale(1.05);
+  }
+
+  /* Vehicle Type Selector */
+  .vehicle-type-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .vehicle-detail-height {
+    height: 900px !important;
+  }
+
+  .work-notes-height {
+    height: 220px !important;
+  }
+
+  /* .customer-card-height {
+    height: 370px !important;
+  } */
+
+  @media (max-width: 768px) {
+    .vehicle-detail-height {
+      height: auto !important;
+    }
+
+    .work-notes-height {
+      height: auto !important;
+    }
+
+    /* .customer-card-height {
+      height: auto !important;
+    } */
+  }
+
+  @media (max-width: 991.98px) {
+    .vehicle-type-option {
+      width: calc(33.333% - 0.5rem) !important;
+      margin: 0.25rem;
+      padding: 0.75rem 0.5rem !important;
+      flex: 1 0 auto;
+      min-width: 100px;
+      box-sizing: border-box;
+    }
+
+    .vehicle-icon-wrapper {
+      width: 40px !important;
+      height: 40px !important;
+    }
+
+    /* Responsive form groups */
+    .form-group {
+      margin-bottom: 0.75rem;
+    }
+
+    /* Adjust card padding on mobile */
+    .card-body {
+      padding: 1rem;
+    }
+
+    /* Make sure input groups stack properly */
+    .input-group {
+      flex-wrap: wrap;
+    }
+
+    .input-group>.form-control,
+    .input-group>.form-select,
+    .input-group>.btn {
+      width: 100%;
+      margin-bottom: 0.25rem;
+    }
+  }
+
+  .vehicle-type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+    width: 80px;
+    height: 90px;
+    margin-bottom: 0.5rem;
+  }
+
+  .vehicle-type-option.selected {
+    /*border-color: #7367f0; */
+    border-color: #3b82f6;
+    background-color: rgba(115, 103, 240, 0.08);
+    box-shadow: 0 4px 10px rgba(115, 103, 240, 0.2);
+  }
+
+  .vehicle-icon-wrapper {
+    background-color: #f8f8f8;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+  }
+
+  .vehicle-type-option.selected .vehicle-icon-wrapper {
+    /* background-color: #7367f0;*/
+    background-color: #3b82f6
+  }
+
+  .vehicle-type-option.selected .vehicle-icon {
+    color: white;
+  }
+
+  .vehicle-type-label {
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  /* Fuel Gauge */
+  .fuel-markers {
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+
+  .fuel-dot {
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .fuel-dot.active {
+    /*background-color: #7367f0;*/
+    background-color: #3b82f6;
+
+    transform: scale(1.2);
+  }
+
+  /* Service Checklist */
+  .service-checklist .form-check-input:checked {
+    background-color: #ff9f43;
+    border-color: #ff9f43;
+  }
+
+  /* Style for Select2 with Add New */
+  .select2-add-new-dropdown .select2-results__option {
+    padding: 0.5rem 1rem;
+  }
+
+  .select2-add-new-option-container {
+    border-top: 1px solid #e9ecef;
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+  }
+
+  .select2-add-new-option {
+    color: #7367f0;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+  }
+
+  .select2-add-new-option:hover {
+    background-color: #f8f9fa;
+    color: #5d52d8;
+  }
+
+  .select2-add-new-option i {
+    margin-right: 0.5rem;
+  }
+
+  /* Style for the Add New buttons */
+  .btn-add-new {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .btn-add-new i {
+    margin-right: 0.25rem;
+  }
+
+  /* Make sure the select2 dropdowns are full width */
+  .select2-container {
+    width: 100% !important;
+  }
+
+  /* Style for the modal forms */
+  .modal-content {
+    border: none;
+    border-radius: 0.5rem;
+  }
+
+  .modal-header {
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+  }
+
+  .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Professional Search Interface Styles */
+  .search-container {
+    position: relative;
+  }
+
+  .search-container .input-group {
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .search-container .input-group:focus-within {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .search-container .form-control {
+    border: 2px solid transparent;
+    background: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .search-container .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background: #fff;
+  }
+
+  .search-container .input-group-text {
+    background: #fff;
+    border: 2px solid transparent;
+    padding: 0.75rem 1rem;
+  }
+
+  /* .customer-result-item:hover {
+    background: linear-gradient(45deg, #f8f9ff, #f0f4ff);
+    transform: translateX(5px);
+    border-left: 4px solid #667eea;
+  } */
+
+  /* .customer-result-item .bg-primary {
+    transition: all 0.3s ease;
+  } */
+
+  /* .customer-result-item:hover .bg-primary {
+    background: #667eea !important;
+    transform: scale(1.1);
+  }
+
+  .customer-result-item:hover .text-primary {
+    color: #fff !important;
+  } */
+
+  .search-suggestions .badge {
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .search-suggestions .badge:hover {
+    background: #667eea !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  /* Enhanced customer info display
+  .customer-info-enhanced {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    border: 1px solid #e3e8ff;
+    border-radius: 1rem;
+    position: relative;
+    overflow: hidden;
+  } */
+
+  /* .customer-info-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+  }
+
+  .customer-avatar {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  } */
+
+  .info-badge {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* Loading animation */
+  .search-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Responsive enhancements */
+  @media (max-width: 768px) {
+    .search-container .input-group {
+      border-radius: 0.5rem;
+    }
+
+    /* .customer-result-item {
+      padding: 1rem !important;
+    }
+
+    .customer-avatar {
+      width: 45px;
+      height: 45px;
+      font-size: 1.2rem;
+    } */
+  }
+  }
+</style>
+
+<style>
+  /* When Select2 shows the placeholder */
+  #vehicleModel+.select2-container .select2-selection__placeholder {
+    color: #999 !important;
+    /* light gray */
+    font-style: italic;
+    /* optional */
+  }
+</style>
+<style>
+  /* Service & Parts Cards Enhancement */
+  .service-charges-card,
+  .parts-materials-card,
+  .payment-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+  }
+
+  .service-charges-card {
+    border-left: 4px solid #667eea;
+  }
+
+  .parts-materials-card {
+    border-left: 4px solid #ef4444;
+  }
+
+  .payment-card {
+    border-left: 4px solid #22c55d;
+  }
+
+
+  /* Header Section with Count */
+  /* Fix card header layout to prevent button overflow */
+  .card-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f3f5;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .card-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+    /* Allow shrinking */
+    flex-wrap: wrap;
+  }
+
+  .card-header-section .btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    /* Prevent button from shrinking */
+  }
+
+
+
+
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card-title i {
+    font-size: 1.1rem;
+  }
+
+  /* Count & Total Badges */
+  .count-badge {
+    background: #f8f9fa;
+    color: #495057;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .total-badge {
+    background: linear-gradient(135deg, #667eea15, #764ba215);
+    color: #667eea;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .parts-total-badge {
+    background: linear-gradient(135deg, #ef444415, #dc262615);
+    color: #ef4444;
+  }
+
+  /* Service/Part Item Enhancement */
+  .service-item,
+  .part-item {
+    background: #fafbfc;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .service-item:hover,
+  .part-item:hover {
+    background: #f8f9ff;
+    border-color: #667eea;
+    transform: translateX(4px);
+  }
+
+  .item-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 0.5rem;
+  }
+
+  .item-name {
+    font-weight: 500;
+    color: #2c3e50;
+    font-size: 0.95rem;
+  }
+
+  .item-price {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+
+  .item-details {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+
+  .quantity-info {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  /* Cost Estimate Card Enhancement */
+  .cost-estimate-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.1);
+  }
+
+  .cost-estimate-header {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    margin: -1.25rem -1.25rem 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+  }
+
+  .summary-row.section-total {
+    background: white;
+    margin: 0.5rem -0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .summary-row.grand-total {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    margin: 1rem -0.5rem -0.5rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .summary-label {
+    color: #6c757d;
+  }
+
+  .section-total .summary-label {
+    color: #495057;
+  }
+
+  .grand-total .summary-label {
+    color: white;
+  }
+
+  /* Professional Cost Estimate Card */
+  .cost-estimate-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .cost-estimate-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .cost-estimate-body {
+    padding: 1.25rem;
+    background: #fafbfc;
+  }
+
+  /* Section Dividers */
+  .cost-section {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+  }
+
+  .cost-section:last-child {
+    margin-bottom: 0;
+  }
+
+  .cost-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+  /* Cost Rows */
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+  }
+
+  .cost-row:hover {
+    background: #f8f9fa;
+    margin: 0 -0.5rem;
+    padding: 0.5rem;
+    border-radius: 6px;
+  }
+
+  .cost-label {
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .cost-value {
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  /* Subtotal Rows */
+  .cost-row.subtotal {
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: #f0f4f8;
+    margin: 0.5rem -0.5rem;
+    padding: 0.75rem 0.5rem;
+    border-radius: 8px;
+  }
+
+  .cost-row.subtotal .cost-label {
+    color: #475569;
+  }
+
+  .cost-row.subtotal .cost-value {
+    color: #1e293b;
+  }
+
+  /* Section Totals */
+  .section-total {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #7dd3fc;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .section-total.service {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-color: #93c5fd;
+  }
+
+  .section-total.parts {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border-color: #fca5a5;
+  }
+
+  .section-total .cost-row {
+    padding: 0;
+    margin: 0;
+  }
+
+  .section-total .cost-value {
+    font-size: 1.1rem;
+  }
+
+  /* Grand Total */
+  .grand-total-section {
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+  }
+
+  .grand-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+  }
+
+  .grand-total-label {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* Animation for value changes */
+  .cost-value,
+  .grand-total-value {
+    transition: all 0.3s ease;
+  }
+
+  .cost-value.updating,
+  .grand-total-value.updating {
+    transform: scale(1.05);
+    color: #10b981;
+  }
+
+  /* Remove nested div backgrounds in Cost Estimate */
+  .cost-estimate-card .card-body {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  .cost-estimate-card .card-body>div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Clean Cost Estimate Card */
+  .cost-estimate-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .cost-estimate-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Direct styling for content sections */
+  .cost-section {
+    background: transparent;
+    padding: 1.25rem;
+    margin: 0;
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .cost-section:last-child {
+    border-bottom: none;
+  }
+
+  .cost-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #e2e8f0;
+  }
+
+    /* Enhanced  /* Payment Summary Section */
+  .payment-summary-section {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .payment-summary-section:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+  }
+</style>
+
+<!-- Add this CSS right before the closing </head> tag or in your styles section -->
+<style>
+  /* Ensure Select2 dropdowns appear above modals */
+  .select2-container {
+    z-index: 1060;
+    /* Higher than modal z-index */
+  }
+
+  .modal .select2-container {
+    z-index: 99999;
+    /* Very high z-index to ensure it's on top */
+  }
+
+  /* Update the existing styles */
+  .list-group-item {
+    position: relative;
+    padding: 0.75rem 2.5rem 0.75rem 1rem !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+    margin-bottom: 0.25rem;
+    border-radius: 0.375rem !important;
+    transition: all 0.2s ease;
+  }
+
+  .list-group-item:hover {
+    background-color: #f8f9fa;
+    border-color: #e9ecef !important;
+  }
+
+  .remove-item {
+    position: absolute !important;
+    top: 0.5rem;
+    right: 0.5rem;
+    margin: 0 !important;
+    padding: 0.25rem !important;
+    line-height: 1;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+  }
+
+  .remove-item:hover {
+    opacity: 1;
+    color: #dc3545 !important;
+  }
+
+  /* Service/Part name and price */
+  .list-group-item .service-name {
+    font-weight: 500;
+    color: #3b3f5c;
+    margin-bottom: 0.25rem;
+  }
+
+  .list-group-item .service-price {
+    font-weight: 600;
+    color: #1e1e1e;
+  }
+
+  /* Details row */
+  .service-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .service-details .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+  }
+
+  /* Tax badge */
+  .service-details .tax-badge {
+    background-color: #e3f7ed;
+    color: #1abc9c;
+  }
+
+  /* Discount badge */
+  .service-details .discount-badge {
+    background-color: #fff4e5;
+    color: #ff9f43;
+  }
+
+  /* Quantity and price */
+  .service-details .quantity {
+    color: #6c757d;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Improve spacing and alignment */
+  .flex-grow-1 {
+    padding-right: 1.5rem;
+  }
+
+  /* Add this after line 450, after the existing .service-details styles */
+
+  /* Make service/part items look clickable - EDIT FUNCTIONALITY */
+  .list-group-item[data-service-id],
+  .list-group-item[data-part-id] {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .list-group-item[data-service-id]:hover,
+  .list-group-item[data-part-id]:hover {
+    background-color: #f0f4ff !important;
+  }
+
+  .list-group-item[data-service-id]:active,
+  .list-group-item[data-part-id]:active {
+    background-color: #e8f2ff !important;
+  }
+
+  /* Style for remove button to prevent overlap with clickable area */
+  .list-group-item .remove-item {
+    z-index: 10;
+    position: relative;
+  }
+
+  /* Enhanced Add New Customer Modal Styles */
+  #addNewCustomerModal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+  }
+
+  #addNewCustomerModal .modal-title {
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  #addNewCustomerModal .btn-close-white {
+    filter: brightness(0) invert(1);
+  }
+
+  #addNewCustomerModal .modal-body {
+    padding: 1.25rem;
+    background: #f8f9fa;
+  }
+
+  /* Vehicle Toggle Section Styling */
+  #addNewCustomerModal .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    border-radius: 1rem;
+    background-color: #e9ecef;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  #addNewCustomerModal .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+
+  #addNewCustomerModal .form-check-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  }
+
+  /* Vehicle Toggle Button Styling */
+  #addNewCustomerModal .form-check-label {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Vehicle Section Animation */
+  #vehicleSection {
+    background: transparent;
+    padding: 0;
+    transition: all 0.3s ease;
+  }
+
+  #vehicleSection.show {
+    background: rgba(102, 126, 234, 0.02);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  /* Compact spacing for vehicle fields */
+  #vehicleSection .form-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  #vehicleSection .form-control {
+    margin-bottom: 0.75rem;
+  }
+
+  /* Form Field Icons */
+  #addNewCustomerModal .form-label i {
+    width: 16px;
+    text-align: center;
+  }
+
+  /* Enhanced Input Fields */
+  #addNewCustomerModal .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: white;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Compact form labels */
+  #addNewCustomerModal .form-label {
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  #addNewCustomerModal .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+    background: white;
+  }
+
+  #addNewCustomerModal .form-control::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+  }
+
+  /* Modal Footer Buttons */
+  #addNewCustomerModal .modal-footer {
+    background: white;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+  }
+
+  #addNewCustomerModal .btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  #addNewCustomerModal .btn-secondary {
+    background: #f1f3f5;
+    border: none;
+    color: #495057;
+  }
+
+  #addNewCustomerModal .btn-secondary:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+  }
+
+  #addNewCustomerModal .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+  }
+
+  #addNewCustomerModal .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+  }
+
+  /* Required Field Indicator */
+  #addNewCustomerModal .text-danger {
+    color: #ff4757 !important;
+  }
+
+  /* Responsive adjustments for modal */
+  @media (max-width: 768px) {
+    #addNewCustomerModal .modal-dialog {
+      margin: 0.5rem;
+    }
+    
+    #addNewCustomerModal .modal-body {
+      padding: 1rem;
+    }
+    
+    #addNewCustomerModal .form-check-input {
+      width: 2.5rem;
+      height: 1.25rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% load custom_filters %}
+{% load static %}
+
+
+
+
+{% block content %}
+<div class="app-content content ">
+  <div class="content-overlay"></div>
+  <div class="header-navbar-shadow"></div>
+  <div class="content-wrapper container-xxl p-0">
+    <div class="content-header row">
+      <div class="content-header-left col-md-9 col-12 mb-2">
+        <div class="row breadcrumbs-top">
+          <div class="col-12">
+            <h2 class="content-header-title float-start mb-0">Job Card</h2>
+            <div class="breadcrumb-wrapper">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                  <a href="{% url 'r-txn-job-sheets' %}">List Job Cards</a>
+                </li>
+                <li class="breadcrumb-item">
+                  <a href="{% url 'job-sheets-vehicletype' %}">Select Vehicle Type</a>
+                </li>
+                <li class="breadcrumb-item active">Update Job Card
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+        <div class="mb-1 breadcrumb-right">
+          <!-- Additional header buttons can go here -->
+        </div>
+      </div>
+    </div>
+    <div class="content-body" style="margin-top:-50px;">
+      <section id="c-job-sheets">
+        <form method="post" action="{% url 'u-txn-job-sheets' jobcard_obj.id %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row">
+            <!-- LEFT SIDE: FORM -->
+            <div class="col-12">
+                                <!-- Right side: Update Job Card button -->
+                  <div class="my-1 d-flex gap-25" style="justify-content: flex-end;"> 
+                    <button type="button" class="btn btn-sm btn-warning waves-effect" data-bs-toggle="modal" data-bs-target="#selectToShareModal">
+                      <i data-feather='share-2'></i>
+                      <span>Share</span>
+                    </button>
+                    <a href="{% url 'v-txn-job-sheets-invoice' jobcard_obj.random_uuid %}" target="_blank" class="btn btn-sm btn-dark waves-effect">
+                        <i data-feather="external-link"></i>
+                        Invoice
+                    </a>                                    
+                    <button type="button" class="btn btn-sm btn-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#serviceHistoryModal">
+                      <i data-feather='file-text'></i>
+                      History
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-success">
+                      <i class="fas fa-save me-25"></i>
+                      <span>Update</span>
+                    </button>                    
+                  </div>
+              <div class="card"
+                style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); backdrop-filter: blur(10px);">
+                <div class="card-header d-flex justify-content-between align-items-center px-3 py-2" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 197, 253, 0.05) 100%); 
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5); 
+            border-radius: 20px 20px 0 0;">
+
+                  <!-- Left side: Form fields -->
+                  <div class="d-flex flex-wrap align-items-center gap-3">
+                    <!-- Job Type -->
+                    <div class="d-flex align-items-center">
+                      <label class="small fw-bold mb-0 me-2">Job Type</label>
+                      <select class="form-select form-select-sm select2" id="JobType" name="jobtype" required
+                        style="width: 180px;"></select>
+                    </div>
+
+                    <!-- Jobcard ID -->
+                    <div class="d-flex align-items-center">
+                      <label class="small fw-bold mb-0 me-2">Jobcard ID</label>
+                      <input type="text" name="jobcard_number" class="form-control form-control-sm"
+                        style="width: 120px;" value="{{ jobcard_obj.jobcard_number }}" readonly>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="d-flex align-items-center">
+                      <label class="small fw-bold mb-0 me-2">Date</label>
+                      <input type="text" name="current_date" class="form-control form-control-sm" style="width: 110px;"
+                        value="{% now 'Y-m-d' %}" readonly>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="row match-height">
+                    <!-- Customer Search Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <h6 class="mb-0 fw-bold text-dark">Cutomer</h6>
+                          <div class="w-75">
+                            <select class="form-select form-select-sm select2" id="SelectCustomer" name="customer"
+                              required></select>
+                            <input type="hidden" id="SelectedVehicle" name="vehicle">
+                          </div>
+                        </div>
+                        <div class="card-body p-0">
+                          <!-- TABS -->
+                          <ul class="nav nav-tabs border-bottom-0" id="customerTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                              <button class="nav-link active set-text-color" id="customers-tab" data-bs-toggle="tab"
+                                data-bs-target="#customers" type="button" role="tab">Customers</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                              <button class="nav-link" id="address-tab" data-bs-toggle="tab" data-bs-target="#address"
+                                type="button" role="tab">Address</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                              <button class="nav-link" id="vehicle-tab" data-bs-toggle="tab" data-bs-target="#vehicle"
+                                type="button" role="tab">Vehicle</button>
+                            </li>
+                          </ul>
+                          <!-- TAB CONTENT -->
+                          <div class="tab-content">
+                            <!-- CUSTOMERS TAB -->
+                            <div class="tab-pane fade show active" id="customers" role="tabpanel">
+                              <!-- Selected Customer Details -->
+                              <div id="selectedCustomerDetails" class="border rounded p-1"
+                                style="display: none;background-color:#f8fbff">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <h6 class="mb-0 set-text-color"><i class="fas fa-user me-1"></i>Customer Information</h6>
+                                  <button type="button" class="btn btn-icon btn-primary waves-effect" data-bs-toggle="modal" data-bs-target="#editCustomerModal">              
+                                    <i data-feather="edit"></i>
+                                  </button>
+                                </div>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Full Name:</span>
+                                        <span id="displayCustomerName" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Mobile Number:</span>
+                                        <span id="displayCustomerPhone" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Alternate Mobile:</span>
+                                        <span id="displayCustomerAltPhone" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Email Address:</span>
+                                        <span id="displayCustomerEmail" class="text-muted"></span>
+                                    </li>
+                                </ul>
+                              </div>
+                              <!-- No Customer Selected State -->
+                              <div id="noCustomerSelected" class="text-center py-5">
+                                <div class="mb-4">
+                                  <i class="fas fa-search fa-3x text-muted mb-3 d-block"></i>
+                                  <h5 class="text-muted mb-1">Select a customer</h5>
+                                  <p class="text-muted mb-0">Use the search bar to get started.</p>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- ADDRESS TAB -->
+                            <div class="tab-pane fade" id="address" role="tabpanel">
+                              <div id="selectedCustomerAddress" class="border rounded p-1"
+                                style="display: none;background-color:#f8fbff">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                  <h6 class="mb-0 set-text-color"><i class="fas fa-map-marker-alt me-1"></i>Address Information</h6>
+                                  <button type="button" class="btn btn-icon btn-primary waves-effect" data-bs-toggle="modal" data-bs-target="#editAddressModal">              
+                                    <i data-feather="edit"></i>
+                                  </button>
+                                </div>
+                                <ul class="list-unstyled mb-0">
+                                  <li class="d-flex align-items-center mb-1">
+                                      <span class="fw-medium me-2" style="min-width: 140px;">Address:</span>
+                                      <span id="displayCustomerAddress" class="text-muted"></span>
+                                  </li>
+                                  <li class="d-flex align-items-center">
+                                      <span class="fw-medium me-2" style="min-width: 140px;">Pincode:</span>
+                                      <span id="displayCustomerPincode" class="text-muted"></span>
+                                  </li>
+                                </ul>
+                              </div>
+                              <div id="noAddressSelected" class="text-center py-5">
+                                <i class="fas fa-map-marker-alt fa-3x text-muted mb-3 d-block"></i>
+                                <h5 class="text-muted mb-1">No Address Available</h5>
+                                <p class="text-muted mb-0">Select a customer to view their address information</p>
+                              </div>
+                            </div>
+                            <!-- VEHICLE TAB -->
+                            <div class="tab-pane fade" id="vehicle" role="tabpanel">
+                              <div id="selectedCustomerVehicle" class="border rounded p-1"
+                                style="display: none;background-color:#f8fbff">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                  <h6 class="mb-0 set-text-color"><i class="fas fa-car me-1"></i>Vehicle Selection</h6>
+                                  <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                                      <i class="fas fa-plus me-1"></i>Add Vehicle
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal" id="editVehicleBtn" style="display: none;">
+                                      <i data-feather="edit"></i>Edit
+                                    </button>
+                                  </div>
+                                </div>
+                                
+                                <!-- Vehicle Selection Dropdown -->
+                                <div class="mb-3">
+                                  <label class="form-label fw-medium">Select Vehicle for Job Card:</label>
+                                  <select class="form-select" id="vehicleSelect" name="selected_vehicle">
+                                    <option value="">Choose a vehicle...</option>
+                                  </select>
+                                </div>
+                                
+                                <!-- Selected Vehicle Details -->
+                                <div id="selectedVehicleDetails" style="display: none;">
+                                  <h6 class="mb-2 text-primary"><i class="fas fa-info-circle me-1"></i>Selected Vehicle Details</h6>
+                                  <ul class="list-unstyled mb-0">
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Model:</span>
+                                        <span id="displayVehicleModel" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                      <span class="fw-medium me-2" style="min-width: 140px;">Make:</span>
+                                      <span id="displayVehicleMake" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Vehicle Number:</span>
+                                        <span id="displayVehicleNumber" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Year:</span>
+                                        <span id="displayVehicleYear" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Color:</span>
+                                        <span id="displayVehicleColor" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center mb-1">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Engine Number:</span>
+                                        <span id="displayVehicleEngine" class="text-muted"></span>
+                                    </li>
+                                    <li class="d-flex align-items-center">
+                                        <span class="fw-medium me-2" style="min-width: 140px;">Chassis Number:</span>
+                                        <span id="displayVehicleChassis" class="text-muted"></span>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </div>
+                              
+                              <div id="noVehicleSelected" class="text-center py-5">
+                                <i class="fas fa-car fa-3x text-muted mb-3 d-block"></i>
+                                <h5 class="text-muted mb-2">No Vehicle Information</h5>
+                                <p class="text-muted mb-0">Select a customer to view their vehicle details</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Customer Voice & Other Fields Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <h6 class="mb-0 fw-bold text-dark">Job Details</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12">
+                              <div class="row g-2 align-items-center">
+                                <!-- First Row: Two columns side by side -->
+                                <div class="col-md-7">
+                                  <!-- Customer Voice -->
+                                  <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-0 fw-semibold text-dark">Customers Voice</label>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <button type="button" class="btn btn-outline-secondary btn-sm w-100"
+                                        data-bs-toggle="modal" data-bs-target="#customerVoiceModal">
+                                        <i class="fas fa-comment-alt me-25"></i>Add Voice
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                  <!-- KM Reading -->
+                                  <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                      <label class="form-label small mb-0 fw-semibold text-dark">KM Reading</label>
+                                    </div>
+                                    <div class="col-md-6">
+                                      <input type="number" id="kmReadingInput" name="km_reading"
+                                        class="form-control form-control-sm" min="0" step="1" value="{{jobcard_obj.km_reading|default:0}}">
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-12">
+                              <div class="row align-items-center">
+                                <div class="col-md-4">
+                                  <label class="form-label small mb-0 fw-semibold text-dark">Fuel Level</label>
+                                </div>
+                                <div class="col-md-8">
+                                  <div class="position-relative">
+                                    <input type="range" id="fuelInput" name="fuel_level"
+                                      class="form-range fuel-range-red" min="0" max="100" value="{{jobcard_obj.fuel_level|default:50}}">
+                                    <div class="d-flex justify-content-between small text-muted mt-1">
+                                      <span>E</span>
+                                      <span id="fuelValue">50%</span>
+                                      <span>F</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-12 mb-1">
+                              <label class="form-label small fw-semibold text-dark">Mechanic</label>
+                              <select class="form-select select2" id="mechanic" name="mechanic" multiple></select>
+                            </div>
+                            <div class="col-12 mb-1">
+                              <label class="form-label small fw-semibold text-dark">Supervisor</label>
+                              <select class="form-select select2" id="supervisor" name="supervisor"></select>
+                            </div>                            
+                            <div class="col-12">
+                              <div class="card border-0 shadow-sm">
+                                  <div class="card-body p-0">
+                                      <div id="customerVoiceList">
+                                          <!-- Items will be added here by JavaScript -->
+                                      </div>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Vehicle Issue Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <h6 class="mb-0 fw-bold text-dark">Vehicle Issue</h6>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12 mb-1">
+                              <label class="form-label small fw-semibold text-dark">Vehicle Issue</label>
+                              <select class="form-select select2" id="vehicleIssue" name="vehicle_issue" multiple></select>
+                            </div>
+                            <div class="col-12">
+                              <label class="form-label small mb-2 fw-bold text-dark">Vehicle Issue Description</label>
+                              <textarea class="form-control" rows="3" name="vehicle_issue_description" placeholder="Describe the vehicle issue in detail...">{{jobcard_obj.vehicle_issue_description|default:""}}</textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Damage Details Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <h6 class="mb-0 fw-bold text-dark">Damage Details</h6>
+                          <div class="d-flex align-items-center gap-1">
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                              data-bs-target="#dentMarksModal">
+                              <i class="fas fa-car-crash me-25"></i> Mark Damage
+                            </button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                              data-bs-target="#viewDiagramModal" id="viewDiagramModalBtn" style="display: none;">
+                                <i class="fas fa-eye me-25"></i> View
+                            </button>
+                          </div>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12 mb-1">
+                              <label class="form-label small fw-semibold text-dark">Vehicle Damage</label>
+                              <select class="form-select select2" id="vehicleDamage" name="vehicle_damage" multiple></select>
+                            </div>
+                            <div class="col-12">
+                              <label class="form-label small mb-2 fw-bold text-dark">Vehicle damage Description</label>
+                              <textarea class="form-control" rows="3" name="vehicle_damage_description" placeholder="Describe the vehicle damage in detail...">{{jobcard_obj.vehicle_damage_description|default:""}}</textarea>
+                            </div>
+                            <div class="col-12 mt-1">
+                              <div class="card border">
+                                  <div class="card-body p-2">
+                                      <p class="mb-1 text-muted small"><i class="fas fa-image me-1"></i>Damage Photos<span class="badge bg-light-primary text-primary ms-1" id="photoCount">0/10</span></p> 
+
+                                      <div class="upload-area border rounded p-3 text-center mb-2" id="uploadArea" style="cursor: pointer; border-style: dashed !important;">
+                                          <div class="d-flex flex-column align-items-center">
+                                              <i data-feather="plus" class="text-primary" style="width: 24px; height: 24px;"></i>
+                                              <p class="mb-0 small">Click to upload or drag & drop</p>
+                                              <p class="text-muted extra-small mb-0">JPG, PNG (max 5MB)</p>
+                                          </div>
+                                      </div>
+                                      
+                                      <input type="file" class="d-none" id="damagePhotos" multiple accept="image/*" name="damagephotos"/>
+                                      
+                                      <div class="photo-preview d-flex flex-wrap gap-2 mt-3" id="photoPreview">
+                                          {% for photo in jobcard_obj.get_damage_photos %}
+                                          <div class="photo-item position-relative" data-photo-path="{{ photo }}">
+                                              <img src="/static/{{ photo }}" class="img-thumbnail rounded" style="width: 70px; height: 70px; object-fit: cover;">
+                                              <div class="photo-remove position-absolute top-0 end-0 m-1" 
+                                                   style="cursor: pointer; background: rgba(255, 255, 255, 0.8); border-radius: 50%; padding: 2px;" 
+                                                   data-photo-path="{{ photo }}">
+                                                  <i data-feather="x" class="text-danger" width="14" height="14"></i>
+                                              </div>
+                                          </div>
+                                          {% endfor %}
+                                      </div>
+                                      <input type="hidden" name="removed_photos" id="removedPhotos" value="[]">
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Vehicle Accessories Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom d-flex justify-content-between align-items-center"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <div class="d-flex align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Vehicle Accessories</h6>
+                          </div>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12 mb-1">
+                              <label class="form-label small fw-semibold text-dark">Vehicle Accessory</label>
+                              <select class="form-select select2" id="vehicleAccessory" name="vehicle_accessory" multiple></select>
+                            </div>
+                            <div class="col-12">
+                              <label class="form-label small mb-2 fw-bold text-dark">Vehicle accessory Description</label>
+                              <textarea class="form-control" rows="3" name="vehicle_accessory_description" placeholder="Describe the vehicle accessory in detail...">{{jobcard_obj.vehicle_accessory_description|default:""}}</textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Work Note Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom d-flex justify-content-between align-items-center"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <div class="d-flex align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Work Note</h6>
+                          </div>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12">
+                              <textarea class="form-control" rows="3" name="work_note" placeholder="Describe the work note in detail...">{{jobcard_obj.work_note|default:""}}</textarea>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row match-height">
+                    <div class="col-lg-8">
+                      <!-- Service & Parts Input Section -->
+                      <div class="row">
+                        <!-- Service Charges Section -->
+                        <div class="col-md-6">
+                          <div class="service-charges-card">
+                            <div class="card-header-section">
+                              <div class="card-title-wrapper">
+                                <h6 class="card-title">
+                                  <i class="fas fa-tools text-primary"></i>
+                                  Service Charges
+                                </h6>
+                                <span class="count-badge">
+                                  <span id="serviceCount">0</span> items
+                                </span>
+                                <span class="total-badge">
+                                  ₹<span id="serviceTotalAmount">0.00</span>
+                                </span>
+                              </div>
+                              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#serviceChargesModal">
+                                <i class="fas fa-plus"></i> Add Services
+                              </button>
+                            </div>
+                            <div id="selectedServicesList">
+                              <div class="text-center text-muted py-3">
+                                <i class="fas fa-tools fa-2x mb-2 d-block opacity-50"></i>
+                                <p class="mb-0 small">No services selected</p>
+                                <p class="mb-0 extra-small text-muted">Click "Add Services" to get started</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Parts & Materials Section -->
+                        <div class="col-md-6">
+                          <div class="parts-materials-card">
+                            <div class="card-header-section">
+                              <div class="card-title-wrapper">
+                                <h6 class="card-title">
+                                  <i class="fas fa-cog text-danger"></i>
+                                  Parts & Materials
+                                </h6>
+                                <span class="count-badge">
+                                  <span id="partsCount">0</span> items
+                                </span>
+                                <span class="total-badge parts-total-badge">
+                                  ₹<span id="partsTotalAmount">0.00</span>
+                                </span>
+                              </div>
+                              <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#partsChargesModal">
+                                <i class="fas fa-plus"></i> Add Parts
+                              </button>
+                            </div>
+                            <div id="selectedPartsList">
+                              <div class="text-center text-muted py-3">
+                                <i class="fas fa-cog fa-2x mb-2 d-block opacity-50"></i>
+                                <p class="mb-0 small">No parts selected</p>
+                                <p class="mb-0 extra-small text-muted">Click "Add Parts" to get started</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Payment Section -->
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="payment-card">
+                            <div class="card-header-section">
+                                <div class="card-title-wrapper">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-rupee-sign text-primary"></i>
+                                        Payment
+                                    </h6>
+                                </div>
+                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#paymentModal">
+                                    <i class="fas fa-plus"></i> Add Payment
+                                </button>
+                            </div>
+                            <div id="paymentDetails">
+                                <!-- This will show when no payments exist -->
+                                <div id="noPaymentsMessage" class="text-center text-muted py-3"></div>
+                                <!-- This is where payments will be listed -->
+                                <div id="paymentsList" class="list-group list-group-flush" style="display: none;"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Cost Estimate Card -->
+                    <div class="col-lg-4">
+                      <div class="cost-estimate-card">
+                        <div class="cost-estimate-header">
+                          <i class="fas fa-calculator"></i>
+                          Cost Estimate
+                        </div>
+
+                        <!-- Direct sections without nested divs -->
+                        <div class="cost-section">
+                          <div class="cost-section-title">Services</div>
+                          <div class="cost-row">
+                            <span class="cost-label">Subtotal</span>
+                            <span class="cost-value" id="serviceSubtotal">₹0.00</span>
+                          </div>
+                          <div class="cost-row">
+                            <span class="cost-label">Tax</span>
+                            <span class="cost-value" id="serviceTaxAmount">₹0.00</span>
+                          </div>
+                          <div class="cost-row">
+                            <span class="cost-label">Discount</span>
+                            <span class="cost-value text-danger" id="serviceDiscountAmount">₹0.00</span>
+                          </div>
+                          <div class="section-total service">
+                            <div class="cost-row subtotal">
+                              <span class="cost-label">Service Total</span>
+                              <span class="cost-value" id="serviceTotal">₹0.00</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="cost-section">
+                          <div class="cost-section-title">Parts & Materials</div>
+                          <div class="cost-row">
+                            <span class="cost-label">Subtotal</span>
+                            <span class="cost-value" id="partsSubtotal">₹0.00</span>
+                          </div>
+                          <div class="cost-row">
+                            <span class="cost-label">Tax</span>
+                            <span class="cost-value" id="partsTaxAmount">₹0.00</span>
+                          </div>
+                          <div class="cost-row">
+                            <span class="cost-label">Discount</span>
+                            <span class="cost-value text-danger" id="partsDiscountAmount">₹0.00</span>
+                          </div>
+                          <div class="section-total parts">
+                            <div class="cost-row subtotal">
+                              <span class="cost-label">Parts Total</span>
+                              <span class="cost-value" id="partsTotal">₹0.00</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="grand-total-section">
+                          <div class="grand-total-row">
+                            <span class="grand-total-label">TOTAL</span>
+                            <span class="grand-total-value" id="grandTotal">₹0.00</span>
+                          </div>
+                        </div>
+
+                        <!-- Payment Summary Section -->
+                        <div class="payment-summary-section">
+                          <div class="cost-section-title">Payment Summary</div>
+                          <div class="cost-row">
+                            <span class="cost-label">Total Paid</span>
+                            <span class="cost-value text-success" id="totalPaidAmount">₹0.00</span>
+                          </div>
+                          <div class="cost-row">
+                            <span class="cost-label" id="balanceLabel">BALANCE DUE</span>
+                            <span class="cost-value" id="balanceAmount">₹0.00</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row match-height mt-1">
+                    <!-- Reminder Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom d-flex justify-content-between align-items-center"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <div class="d-flex align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Reminder</h6>
+                          </div>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12 col-md-6">                              
+                              <label class="form-label small mb-0 fw-semibold text-dark">Duration (in days)</label>
+                              <input type="number" name="reminder_duration" class="form-control form-control-sm" min="0" step="1" value="{{jobcard_obj.reminder_duration|default:0}}">              
+                            </div>
+                            <div class="col-12 col-md-6">                              
+                              <label class="form-label small mb-0 fw-semibold text-dark">KM (Kilometer)</label>
+                              <input type="number" name="reminder_km" class="form-control form-control-sm" min="0" step="1" value="{{jobcard_obj.reminder_km|default:0}}">                   
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Delivery Timeline Section -->
+                    <div class="col-12 col-md-6">
+                      <div class="card shadow-sm h-100"
+                        style="background: rgba(255, 255, 255, 0.95); border-radius: 16px; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); backdrop-filter: blur(10px);">
+                        <div class="card-header border-bottom d-flex justify-content-between align-items-center"
+                          style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(147, 197, 253, 0.03) 100%); border-bottom: 1px solid rgba(226, 232, 240, 0.5); border-radius: 16px 16px 0 0;">
+                          <div class="d-flex align-items-center">
+                            <h6 class="mb-0 fw-bold text-dark">Delivery Timeline</h6>
+                          </div>
+                        </div>
+                        <div class="card-body">
+                          <div class="row">
+                            <div class="col-12">
+                              <input type="datetime-local" class="form-control" name="delivery_timeline" value="{{jobcard_obj.delivery_timeline|date:'Y-m-d\\TH:i'}}">                              
+                            </div>                            
+                          </div>
+                        </div>
+                      </div>
+                    </div>                    
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- Service History Modal -->
+<div class="modal fade" id="serviceHistoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color:#3b82f6;">
+        <h5 class="modal-title fw-bold" style="color: white;">
+          <i class="fas fa-file me-2"></i> Service History
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Service history table will be loaded here -->
+        <div id="serviceHistoryList">
+            <div class="alert alert-secondary text-center mb-0">
+                <i class="fas fa-info-circle me-1"></i> Please select a customer to view service history
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Voice Modal -->
+<div class="modal fade" id="customerVoiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header" style="background-color:#3b82f6;">
+        <h5 class="modal-title fw-bold" style="color: white;">
+          <i class="fas fa-user me-2"></i> Customer Voice
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="customerVoiceForm">
+        <div class="modal-body">
+          <div class="mb-1">
+            <input type="text" class="form-control" id="customerVoiceInputField" placeholder="Enter customer voice" required>
+            <div class="invalid-feedback">Please enter a customer voice</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="customerVoiceAddBtn">
+            <i class="fas fa-plus me-25"></i>Add
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Dent Marks Modal -->
+<div class="modal fade" id="dentMarksModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <!-- Header -->
+      <div class="modal-header" style="background-color:#3b82f6;">
+        <h5 class="modal-title fw-bold" style="color: white;">
+          <i class="fas fa-user me-2"></i> Mark New Damage
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="dentMarksForm">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-12 mb-1">
+              <div class="vehicle-diagram-container border rounded p-25">
+                  <div class="position-relative" style="width: 100%; height: 300px;">
+                      <div id="canvasLoading" class="d-none w-100 h-100 position-absolute d-flex justify-content-center align-items-center bg-light" style="z-index: 10;">
+                          <div class="spinner-border text-primary" role="status">
+                              <span class="visually-hidden">Loading...</span>
+                          </div>
+                      </div>
+                      <canvas id="vehicleCanvas" class="w-100 h-100"></canvas>
+                      <input type="hidden" name="dent_positions" id="dentPositions" value="">
+                      <input type="hidden" name="diagram_image" id="diagramImageData" value="">
+                  </div>
+                  <div class="d-flex flex-column justify-content-center align-items-center">
+                      <small class="text-muted">Click on the diagram to mark dents or damage</small>
+                      <div class="btn-group">
+                          <button type="button" id="undoDent" class="btn btn-sm btn-outline-secondary me-25" disabled>
+                              <i class="fas fa-undo"></i> Undo
+                          </button>
+                          <button type="button" id="clearAllDents" class="btn btn-sm btn-outline-danger" disabled>
+                              <i class="fas fa-trash-alt"></i> Clear All
+                          </button>
+                      </div>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveDentMarksBtn">
+            <i class="fas fa-save me-25"></i>Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- View Diagram Modal -->
+<div class="modal fade" id="viewDiagramModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header" style="background-color: #3b82f6;">
+              <h5 class="modal-title text-white">
+                  <i class="fas fa-car-crash me-2"></i> Damage Diagram
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body text-center">
+              <img id="diagramViewer" src="" alt="Damage Diagram" class="img-fluid" style="max-height: 70vh;">
+          </div>
+          <div class="modal-footer">
+              <a id="downloadDiagram" href="#" class="btn btn-primary" download>
+                  <i class="fas fa-download me-2"></i>Download
+              </a>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Vehicle Issue Modal -->
+<div class="modal fade" id="vehicleIssueModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Add New Vehicle Issue</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="vehicleIssueForm">
+              <div class="modal-body">
+                  <div class="mb-1">
+                      <input type="text" 
+                             class="form-control" 
+                             id="vehicleIssueName" 
+                             name="vehicle_issue" 
+                             placeholder="Enter issue name"
+                             required>
+                      <div class="invalid-feedback">Please provide an issue name.</div>
+                  </div>
+              </div>
+              <div class="modal-footer">                
+                <button type="submit" id="saveVehicleIssueBtn" class="btn set-background-color text-white">Save</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- Vehicle Damage Modal -->
+<div class="modal fade" id="vehicleDamageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Add New Vehicle Damage</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="vehicleDamageForm">
+              <div class="modal-body">
+                  <div class="mb-1">
+                      <input type="text" 
+                             class="form-control" 
+                             id="vehicleDamageName" 
+                             name="vehicle_damage" 
+                             placeholder="Enter damage name"
+                             required>
+                      <div class="invalid-feedback">Please provide an damage name.</div>
+                  </div>
+              </div>
+              <div class="modal-footer">                
+                <button type="submit" id="saveVehicleDamageBtn" class="btn set-background-color text-white">Save</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- Vehicle Accessory Modal -->
+<div class="modal fade" id="vehicleAccessoryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title">Add New Vehicle Accessory</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="vehicleAccessoryForm">
+              <div class="modal-body">
+                  <div class="mb-1">
+                      <input type="text" 
+                             class="form-control" 
+                             id="vehicleAccessoryName" 
+                             name="vehicle_accessory" 
+                             placeholder="Enter accessory name"
+                             required>
+                      <div class="invalid-feedback">Please provide an accessory name.</div>
+                  </div>
+              </div>
+              <div class="modal-footer">                
+                <button type="submit" id="saveVehicleAccessoryBtn" class="btn set-background-color text-white">Save</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="addNewChecklistModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Checklist Item</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-1">
+          <label for="newChecklistItemName" class="form-label">Checklist Item</label>
+          <input type="text" class="form-control" id="newChecklistItemName" placeholder="Enter checklist item">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveNewChecklistBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add New Brand Modal -->
+<div class="modal fade" id="addNewBrandModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Brand</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-1">
+          <label for="newBrandName" class="form-label">Brand Name</label>
+          <input type="text" class="form-control" id="newBrandName" placeholder="Enter brand name">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveNewBrandBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add New Model Modal -->
+<div class="modal fade" id="addNewModelModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Model</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-1">
+          <label for="newModelName" class="form-label">Model Name</label>
+          <input type="text" class="form-control" id="newModelName" placeholder="Enter model name">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveNewModelBtn">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add New Job Type -->
+<div class="modal fade" id="jobtypemodal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Job Type</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="jobtypeForm">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="newjobtype" class="form-label">Job Type Name</label>
+            <input type="text" class="form-control" id="newjobtype" required>
+            <div class="invalid-feedback">Please enter a job type name</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="savejobtypebtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Service Charges Modal -->
+<div class="modal fade" id="serviceChargesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-tools"></i>
+          <span>Add Service</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="serviceForm" class="needs-validation" novalidate>
+          <!-- Service Type Toggle -->
+          <div class="service-option-toggle">
+            <input class="service-option" type="radio" name="serviceOption" id="existingService" value="existing"
+              checked>
+            <label for="existingService">
+              <i class="fas fa-list"></i> Select Existing Service
+            </label>
+            <input class="service-option" type="radio" name="serviceOption" id="newService" value="new">
+            <label for="newService">
+              <i class="fas fa-plus"></i> Add New Service
+            </label>
+          </div>
+
+          <div id="existingServiceSection">
+            <div class="info-card-modal">
+              <div class="form-group-row">
+                <label for="serviceSelect" class="form-label">
+                  Select Service <span class="text-danger">*</span>
+                </label>
+                <select class="form-select select2" id="serviceSelect" name="fromdb_servicename" required>
+                  <option value="" selected disabled>Choose a service...</option>
+                </select>
+                <div class="invalid-feedback">Please select a service</div>
+              </div>
+
+              {% include 'transactions/jobsheets/includes/price-qty-tax-fields.html' with base='fromdb_service' %}
+            </div>
+          </div>
+
+          <div id="newServiceSection" style="display: none;">
+            <div class="info-card-modal">
+              <div class="form-group-row">
+                <label for="serviceName" class="form-label">
+                  Service Name <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="serviceName" name="fromuser_servicename"
+                  placeholder="Enter service name" required>
+                <div class="invalid-feedback">Please enter a service name</div>
+              </div>
+
+              {% include 'transactions/jobsheets/includes/price-qty-tax-fields.html' with base='fromuser_service' %}
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="saveServiceBtn">
+          <i class="fas fa-check"></i> Save Service
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Parts Charges Modal -->
+<div class="modal fade" id="partsChargesModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-box"></i>
+          <span>Add Part</span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="partForm" class="needs-validation" novalidate>
+          <!-- Part Type Toggle -->
+          <div class="service-option-toggle">
+            <input class="part-option" type="radio" name="partOption" id="existingPart" value="existing" checked>
+            <label for="existingPart">
+              <i class="fas fa-list"></i> Select Existing Part
+            </label>
+            <input class="part-option" type="radio" name="partOption" id="newPart" value="new">
+            <label for="newPart">
+              <i class="fas fa-plus"></i> Add New Part
+            </label>
+          </div>
+
+          <div id="existingPartSection">
+            <div class="info-card-modal">
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label for="partSelect" class="form-label">
+                    Select Part <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select select2" id="partSelect" name="fromdb_partname" required>
+                    <option value="" selected disabled>Choose a part...</option>
+                  </select>
+                  <div class="invalid-feedback">Please select a part</div>
+                </div>
+              </div>
+
+              {% include 'transactions/jobsheets/includes/price-qty-tax-fields.html' with base='fromdb_part' %}
+            </div>
+          </div>
+
+          <div id="newPartSection" style="display: none;">
+            <div class="info-card-modal">
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label for="partName" class="form-label">
+                    Part Name <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="partName" name="fromuser_partname"
+                    placeholder="Enter part name" required>
+                  <div class="invalid-feedback">Please enter a part name</div>
+                </div>
+              </div>
+
+              <div class="form-group-row">
+                <div class="form-group">
+                  <label class="form-label">HSN Code</label>
+                  <input type="text" class="form-control" name="fromuser_parthsn"
+                    placeholder="Enter HSN code">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Part Number</label>
+                  <input type="text" class="form-control" name="fromuser_partnumber"
+                    placeholder="Enter part number">
+                </div>
+              </div>
+
+              {% include 'transactions/jobsheets/includes/price-qty-tax-fields.html' with base='fromuser_part' %}
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-primary" id="savePartBtn">
+          <i class="fas fa-check"></i> Save Part
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add New mechanic Modal -->
+<div class="modal fade" id="addNewMechanicModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Add New Mechanic</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <!-- Personal Information -->
+          <div class="form-section">
+            <div class="section-divider"><span>Personal Information</span></div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="mechanicfirstname">
+                    <i data-feather="user" class="font-medium-3 me-50"></i>
+                    First Name<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="mechanicfirstname" name="mechanicfirstname" placeholder="First name"
+                    required />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="mechaniclastname">
+                    <i data-feather="user" class="font-medium-3 me-50"></i>
+                    Last Name<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="mechaniclastname" name="mechaniclastname" placeholder="Last name"
+                    required />
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Contact, Aadhaar & Experience in One Row -->
+          <div class="form-section">
+            <div class="section-divider"><span>Contact & Experience</span></div>
+            <div class="row">
+              <!-- Phone -->
+              <div class="col-md-4">
+                <div class="mb-1">
+                  <label class="form-label" for="mechanicphone">
+                    <i data-feather="phone" class="font-medium-3 me-50"></i>
+                    Phone Number<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="mechanicphone" name="mechanicphone" placeholder="Phone number"
+                    pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required />
+                </div>
+              </div>
+
+              <!-- Aadhaar -->
+              <div class="col-md-4">
+                <div class="mb-1">
+                  <label class="form-label" for="mechanicaadhar">
+                    <i data-feather="credit-card" class="font-medium-3 me-50"></i>
+                    Aadhaar<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="mechanicaadhar" name="mechanicaadhar" placeholder="Aadhaar number"
+                    pattern="^[2-9]{1}[0-9]{3}\s?[0-9]{4}\s?[0-9]{4}$"
+                    title="Please enter a valid 12-digit Aadhaar number" required />
+                </div>
+              </div>
+
+              <!-- Years of Experience -->
+              <div class="col-md-4">
+                <div class="mb-1">
+                  <label class="form-label" for="mechanicyear_of_experience">
+                    <i data-feather="award" class="font-medium-3 me-50"></i>
+                    Years of Experience<span class="text-danger">*</span>
+                  </label>
+                  <input type="number" class="form-control" id="mechanicyear_of_experience" name="mechanicyear_of_experience" min="0"
+                    max="50" required />
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Reference Information -->
+          <div class="form-section">
+            <div class="section-divider"><span>Reference Information</span></div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="mechanicreference_by_name">
+                    <i data-feather="user-plus" class="font-medium-3 me-50"></i>
+                    Reference Name<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="mechanicreference_by_name" name="mechanicreference_by_name"
+                    placeholder="Reference person's name" required />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="mechanicreference_by_phone">
+                    <i data-feather="phone" class="font-medium-3 me-50"></i>
+                    Reference Phone<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="mechanicreference_by_phone" name="mechanicreference_by_phone"
+                    placeholder="Reference phone number" pattern="[0-9]{10}"
+                    title="Please enter a 10-digit mobile number" required />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button> -->
+          <button type="submit" id="saveNewMechanicBtn" class="btn set-background-color text-white">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add New SuperVisor Modal -->
+<div class="modal fade" id="addNewSupervisorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Add New Supervisor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <!-- Personal Information -->
+          <div class="form-section">
+            <div class="section-divider"><span>Personal Information</span></div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisorfirstname">
+                    <i data-feather="user" class="font-medium-3 me-50"></i>
+                    First Name<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="supervisorfirstname" name="supervisorfirstname" placeholder="First name"
+                    required />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisorlastname">
+                    <i data-feather="user" class="font-medium-3 me-50"></i>
+                    Last Name<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="supervisorlastname" name="supervisorlastname" placeholder="Last name"
+                    required />
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Contact, Aadhaar & Experience in One Row -->
+          <div class="form-section">
+            <div class="section-divider"><span>Contact & Experience</span></div>
+            <div class="row">
+              <!-- Phone -->
+              <div class="col-md-4">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisorphone">
+                    <i data-feather="phone" class="font-medium-3 me-50"></i>
+                    Phone Number<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="supervisorphone" name="supervisorphone" placeholder="Phone number"
+                    pattern="[0-9]{10}" title="Please enter a 10-digit mobile number" required />
+                </div>
+              </div>
+
+              <!-- Aadhaar -->
+              <div class="col-md-4">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisoraadhar">
+                    <i data-feather="credit-card" class="font-medium-3 me-50"></i>
+                    Aadhaar<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="supervisoraadhar" name="supervisoraadhar" placeholder="Aadhaar number"
+                    pattern="^[2-9]{1}[0-9]{3}\s?[0-9]{4}\s?[0-9]{4}$"
+                    title="Please enter a valid 12-digit Aadhaar number" required />
+                </div>
+              </div>
+
+              <!-- Years of Experience -->
+              <div class="col-md-4">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisoryear_of_experience">
+                    <i data-feather="award" class="font-medium-3 me-50"></i>
+                    Years of Experience<span class="text-danger">*</span>
+                  </label>
+                  <input type="number" class="form-control" id="supervisoryear_of_experience" name="supervisoryear_of_experience" min="0"
+                    max="50" required />
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Reference Information -->
+          <div class="form-section">
+            <div class="section-divider"><span>Reference Information</span></div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisorreference_by_name">
+                    <i data-feather="user-plus" class="font-medium-3 me-50"></i>
+                    Reference Name<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="supervisorreference_by_name" name="supervisorreference_by_name"
+                    placeholder="Reference person's name" required />
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-1">
+                  <label class="form-label" for="supervisorreference_by_phone">
+                    <i data-feather="phone" class="font-medium-3 me-50"></i>
+                    Reference Phone<span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="supervisorreference_by_phone" name="supervisorreference_by_phone"
+                    placeholder="Reference phone number" pattern="[0-9]{10}"
+                    title="Please enter a 10-digit mobile number" required />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <!-- <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button> -->
+          <button type="submit" id="saveNewSupervisorBtn" class="btn set-background-color text-white">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Add New Customer Modal -->
+<div class="modal fade" id="addNewCustomerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-user-plus me-2"></i>Add New Customer
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="addNewCustomerForm">
+          <!-- Customer Information Section -->
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-user me-1 text-muted"></i>Name <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="newCustomerName" name="name" 
+                     placeholder="" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-phone me-1 text-muted"></i>Mobile Number <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="newCustomerPhone" name="phone" 
+                     maxlength="10" placeholder="" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-phone-alt me-1 text-muted"></i>Alternate Number
+              </label>
+              <input type="text" class="form-control" id="newCustomerAltPhone" name="alt_phone" 
+                     maxlength="10" placeholder="Enter alternate mobile number">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="fas fa-envelope me-1 text-muted"></i>Email
+              </label>
+              <input type="email" class="form-control" id="newCustomerEmail" name="email" 
+                     placeholder="Enter email address">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">
+                <i class="fas fa-map-pin me-1 text-muted"></i>Pincode
+              </label>
+              <input type="text" class="form-control" id="newCustomerPincode" name="pincode" 
+                     maxlength="6" placeholder="Enter pincode">
+            </div>
+            <div class="col-12">
+              <label class="form-label">
+                <i class="fas fa-map-marker-alt me-1 text-muted"></i>Address
+              </label>
+              <textarea class="form-control" id="newCustomerAddress" name="address" 
+                        rows="3" placeholder="Enter full address"></textarea>
+            </div>
+          </div>
+
+          <!-- Add Vehicle Toggle Section -->
+          <div class="row mt-2">
+            <div class="col-12">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="addVehicleToggle">
+                <label class="form-check-label fw-semibold" for="addVehicleToggle">
+                  <i class="fas fa-car me-2 text-primary"></i>Add Vehicle
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vehicle Information Section (Initially Hidden) -->
+          <div id="vehicleSection" class="row g-2 mt-2" style="display: none;">
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Model <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="newVehicleModel" name="model"/>
+            </div>
+            <div class="col-md-4">                                                                
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Make
+              </label>
+                <input type="text" class="form-control" id="newVehicleMake" name="make">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Vehicle Number
+              </label>
+              <input type="text" class="form-control" id="newVehicleNumber" name="license_plate_no">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-calendar me-1 text-muted"></i>Year
+              </label>
+              <input type="text" class="form-control" id="newVehicleYear" name="year_of_manufacture" placeholder="e.g. 2025" pattern="^(19\\d{2}|20[0-1]\\d|202[0-5])$" title="Enter a valid 4-digit year between 1900 and 2025" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-palette me-1 text-muted"></i>Color
+              </label>
+              <input type="text" class="form-control" id="newVehicleColor" name="color">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-cog me-1 text-muted"></i>Engine Number
+              </label>
+              <input type="text" class="form-control" id="newVehicleEngine" name="engine_no">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-barcode me-1 text-muted"></i>Chassis Number
+              </label>
+              <input type="text" class="form-control" id="newVehicleChassis" name="chassis_no">
+            </div>
+          </div>
+
+          <div class="modal-footer mt-4 px-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              <i class="fas fa-times me-1"></i>Cancel
+            </button>
+            <button type="submit" class="btn btn-primary" id="saveNewCustomerBtn">
+              <i class="fas fa-save me-1"></i>Save
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT CUSTOMER MODAL -->
+<div class="modal fade" id="editCustomerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Edit Customer</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editCustomerForm">
+          <input type="hidden" id="editCustomerId">
+          <!-- Customer Information Section -->
+          <div class="row g-2">
+            <div class="col-12 col-md-6">
+              <label class="form-label">
+                <i class="fas fa-user me-1 text-muted"></i>Name <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="editCustomerName" name="name" 
+                     placeholder="" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">
+                <i class="fas fa-phone me-1 text-muted"></i>Mobile Number <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="editCustomerPhone" name="phone" 
+                     maxlength="10" placeholder="" required>
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">
+                <i class="fas fa-phone-alt me-1 text-muted"></i>Alternate Number
+              </label>
+              <input type="text" class="form-control" id="editCustomerAltPhone" name="alt_phone" 
+                     maxlength="10" placeholder="Enter alternate mobile number">
+            </div>
+            <div class="col-12 col-md-6">
+              <label class="form-label">
+                <i class="fas fa-envelope me-1 text-muted"></i>Email
+              </label>
+              <input type="email" class="form-control" id="editCustomerEmail" name="email" 
+                     placeholder="Enter email address">
+            </div>
+          </div>
+          <div class="modal-footer mt-1">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn set-background-color text-white" id="saveEditCustomerBtn">Save
+              Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ADDRESS MODAL -->
+<div class="modal fade" id="editAddressModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Edit Address</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editAddressForm">
+          <input type="hidden" id="editAddressCustomerId">
+          <div class="row g-2">
+            <div class="col-12">
+              <label class="form-label">
+                <i class="fas fa-map-pin me-1 text-muted"></i>Pincode
+              </label>
+              <input type="text" class="form-control" id="editCustomerPincode" name="pincode" 
+                     maxlength="6" placeholder="Enter pincode">
+            </div>
+            <div class="col-12">
+              <label class="form-label">
+                <i class="fas fa-map-marker-alt me-1 text-muted"></i>Address
+              </label>
+              <textarea class="form-control" id="editCustomerAddress" name="address" 
+                        rows="3" placeholder="Enter full address"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer mt-1">
+            <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn set-background-color text-white" id="saveEditAddressBtn">Save
+              Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Vehicle Modal -->
+<div class="modal fade" id="addVehicleModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Add New Vehicle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="addVehicleForm">
+          <input type="hidden" id="addVehicleCustomerId">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Model <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="addVehicleModel" required/>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Make
+              </label>
+              <input type="text" class="form-control" id="addVehicleMake">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Vehicle Number
+              </label>
+              <input type="text" class="form-control" id="addVehicleNumber">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-calendar me-1 text-muted"></i>Year
+              </label>
+              <input type="text" class="form-control" id="addVehicleYear" placeholder="e.g. 2025" pattern="^(19\d{2}|20[0-1]\d|202[0-5])$" title="Enter a valid 4-digit year between 1900 and 2025" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-palette me-1 text-muted"></i>Color
+              </label>
+              <input type="text" class="form-control" id="addVehicleColor">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-cog me-1 text-muted"></i>Engine Number
+              </label>
+              <input type="text" class="form-control" id="addVehicleEngine">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-barcode me-1 text-muted"></i>Chassis Number
+              </label>
+              <input type="text" class="form-control" id="addVehicleChassis">
+            </div>
+          </div>
+          <div class="modal-footer mt-1">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="saveAddVehicleBtn">Add Vehicle</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Vehicle Modal -->
+<div class="modal fade" id="editVehicleModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Edit Vehicle Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editVehicleForm">
+          <input type="hidden" id="editVehicleId">
+          <div class="row g-2">
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Model <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control" id="editVehicleModel" required/>
+            </div>
+            <div class="col-md-4">                                                                
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Make
+              </label>
+                <input type="text" class="form-control" id="editVehicleMake">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-id-card me-1 text-muted"></i>Vehicle Number
+              </label>
+              <input type="text" class="form-control" id="editVehicleNumber">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-calendar me-1 text-muted"></i>Year
+              </label>
+              <input type="text" class="form-control" id="editVehicleYear" placeholder="e.g. 2025" pattern="^(19\\d{2}|20[0-1]\\d|202[0-5])$" title="Enter a valid 4-digit year between 1900 and 2025" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,4);">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-palette me-1 text-muted"></i>Color
+              </label>
+              <input type="text" class="form-control" id="editVehicleColor">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-cog me-1 text-muted"></i>Engine Number
+              </label>
+              <input type="text" class="form-control" id="editVehicleEngine">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="fas fa-barcode me-1 text-muted"></i>Chassis Number
+              </label>
+              <input type="text" class="form-control" id="editVehicleChassis">
+            </div>
+          </div>
+          <div class="modal-footer mt-1">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="saveEditVehicleBtn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Details Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header set-background-color">
+        <h5 class="modal-title text-white">Add Payment Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="paymentModalForm">
+          <div class="row mb-1">
+            <div class="col-md-12">
+              <label class="form-label">Payment Date <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="paymentDate" name="payment_date" required>
+            </div>
+          </div>
+          
+          <div class="row mb-1">
+            <div class="col-md-12">
+              <label class="form-label">Payment Mode <span class="text-danger">*</span></label>
+              <div class="form-check">
+                <input class="form-check-input payment-mode" type="radio" name="payment_mode" id="cashMode" value="cash" checked>
+                <label class="form-check-label" for="cashMode">
+                  Cash
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input payment-mode" type="radio" name="payment_mode" id="checkMode" value="check">
+                <label class="form-check-label" for="checkMode">
+                  Check
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input payment-mode" type="radio" name="payment_mode" id="upiMode" value="upi">
+                <label class="form-check-label" for="upiMode">
+                  UPI
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input payment-mode" type="radio" name="payment_mode" id="bankTransferMode" value="bank_transfer">
+                <label class="form-check-label" for="bankTransferMode">
+                  Bank Transfer
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Fields -->
+          <div id="checkDetails" class="payment-details" style="display: none;">
+            <div class="row mb-1">
+              <div class="col-12 col-md-6">
+                <label for="checkNumber" class="form-label">Check Number</label>
+                <input type="text" class="form-control" id="checkNumber" name="check_number">
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="checkDate" class="form-label">Check Date</label>
+                <input type="date" class="form-control" id="checkDate" name="check_date">
+              </div>
+              <div class="col-12 mt-1">
+                <label for="bankName" class="form-label">Bank Name</label>
+                <input type="text" class="form-control" id="bankName" name="bank_name">
+              </div>
+            </div>
+          </div>
+
+          <div id="upiDetails" class="payment-details" style="display: none;">
+            <div class="row mb-1">
+              <div class="col-12 col-md-6">
+                <label for="upiId" class="form-label">UPI ID</label>
+                <input type="text" class="form-control" id="upiId" name="upi_id" placeholder="example@upi">
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="transactionId" class="form-label">Transaction ID</label>
+                <input type="text" class="form-control" id="transactionId" name="transaction_id">
+              </div>
+            </div>
+          </div>
+
+          <div id="bankTransferDetails" class="payment-details" style="display: none;">
+            <div class="row mb-1">
+              <div class="col-12 col-md-6">
+                <label for="accountNumber" class="form-label">Account Number</label>
+                <input type="text" class="form-control" id="accountNumber" name="account_number">
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="accountHolderName" class="form-label">Account Holder Name</label>
+                <input type="text" class="form-control" id="accountHolderName" name="account_holder_name">
+              </div>
+              <div class="col-12 col-md-6 mt-1">
+                <label for="ifscCode" class="form-label">IFSC Code</label>
+                <input type="text" class="form-control" id="ifscCode" name="ifsc_code">
+              </div>
+              <div class="col-12 col-md-6 mt-1">
+                <label for="transactionReference" class="form-label">Transaction Reference</label>
+                <input type="text" class="form-control" id="transactionReference" name="transaction_reference">
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-1">
+            <div class="col-md-12">
+              <label for="amount" class="form-label">Amount (₹) <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-1">
+            <div class="col-md-12">
+              <label for="notes" class="form-label">Notes</label>
+              <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="paymentModalSaveBtn">Save Payment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Red Modal -->
+<div class="modal fade" id="selectToShareModal" tabindex="-1" aria-labelledby="selectToShareModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="selectToShareModalLabel">Select to share</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex justify-content-center gap-4">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="userType" id="customerRadio" value="customer">
+            <label class="form-check-label" for="customerRadio">
+              Customer
+            </label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="userType" id="mechanicRadio" value="mechanic">
+            <label class="form-check-label" for="mechanicRadio">
+              Mechanic
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+{% include 'transactions/jobsheets/update/js-service-part-payment-estimate.html' %}
+{% include 'transactions/jobsheets/update/js-jobtype.html' %}
+{% include 'transactions/jobsheets/update/js-customer-vehicle.html' %}
+{% include 'transactions/jobsheets/update/js-fuellevel.html' %}
+{% include 'transactions/jobsheets/update/js-supervisor.html' %}
+{% include 'transactions/jobsheets/update/js-mechanics.html' %}
+{% include 'transactions/jobsheets/update/js-customer-voice.html' %}
+{% include 'transactions/jobsheets/update/js-vehicle-issue.html' %}
+{% include 'transactions/jobsheets/update/js-vehicle-damage.html' %}
+{% include 'transactions/jobsheets/update/js-vehicle-accessories.html' %}
+{% include 'transactions/jobsheets/update/js-upload-damage-img.html' %}
+{% include 'transactions/jobsheets/update/js-mark-damage-img.html' %}
+{% include 'transactions/jobsheets/update/js-select-to-share.html' %}
+{% endblock %}

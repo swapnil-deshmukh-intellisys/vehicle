@@ -1,0 +1,29 @@
+<svg width="400" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Car body -->
+  <rect x="100" y="80" width="200" height="40" rx="10" fill="none" stroke="#333" stroke-width="2"/>
+  
+  <!-- Car top -->
+  <rect x="140" y="50" width="120" height="30" rx="10" fill="none" stroke="#333" stroke-width="2"/>
+  
+  <!-- Connect body to top -->
+  <line x1="140" y1="80" x2="140" y2="50" stroke="#333" stroke-width="2"/>
+  <line x1="260" y1="80" x2="260" y2="50" stroke="#333" stroke-width="2"/>
+  
+  <!-- Wheels -->
+  <circle cx="130" cy="120" r="20" fill="none" stroke="#333" stroke-width="2"/>
+  <circle cx="270" cy="120" r="20" fill="none" stroke="#333" stroke-width="2"/>
+  
+  <!-- Windows -->
+  <line x1="160" y1="50" x2="160" y2="80" stroke="#333" stroke-width="1"/>
+  <line x1="200" y1="50" x2="200" y2="80" stroke="#333" stroke-width="1"/>
+  <line x1="240" y1="50" x2="240" y2="80" stroke="#333" stroke-width="1"/>
+  
+  <!-- Headlights and taillights -->
+  <rect x="100" y="85" width="10" height="10" rx="2" fill="none" stroke="#333" stroke-width="1"/>
+  <rect x="290" y="85" width="10" height="10" rx="2" fill="none" stroke="#333" stroke-width="1"/>
+  
+  <!-- Text labels -->
+  <text x="200" y="25" font-family="Arial" font-size="14" text-anchor="middle" fill="#333">Front View</text>
+  <text x="100" y="170" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Left</text>
+  <text x="300" y="170" font-family="Arial" font-size="12" text-anchor="middle" fill="#333">Right</text>
+</svg>

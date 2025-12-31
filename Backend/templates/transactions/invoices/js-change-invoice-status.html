@@ -1,0 +1,98 @@
+<script>
+document.addEventListener("DOMContentLoaded", function () {        
+    // Handle status update click
+    document.querySelectorAll('.status-update').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const invoiceId = this.getAttribute('data-invoice-id');
+            const newStatus = this.getAttribute('data-status');
+            const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Update Status',
+                text: `Are you sure you want to change the status to "${newStatus}"?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, update it!',
+                cancelButtonText: 'No, cancel',
+                customClass: {
+                    confirmButton: 'btn btn-primary',
+                    cancelButton: 'btn btn-outline-danger ms-1'
+                },
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    // Send AJAX request to update status
+                    fetch("{% url 'u-txn-invoices-status' %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': csrfToken
+                        },
+                        body: `invoice_id=${invoiceId}&status=${newStatus}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update the UI without reloading
+                            const statusBadge = document.querySelector(`#dropdownMenuButton${invoiceId}`);
+                            if (statusBadge) {
+                                // Remove all existing status classes
+                                statusBadge.classList.forEach(className => {
+                                    if (className.startsWith('status-badge-') || 
+                                        ['created', 'dispatched'].some(status => 
+                                            className === status || className === status.replace(' ', '-')
+                                        )
+                                    ) {
+                                        statusBadge.classList.remove(className);
+                                    }
+                                });
+                                
+                                // Add the new status class
+                                statusBadge.classList.add(newStatus.replace(' ', '-'));
+                                
+                                // Update the text content
+                                statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+                            }                                
+                            // Show success message
+                            toastr['success']('Invoice status has been updated.', 'SUCCESS', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                progressBar: true,
+                                showMethod: 'fadeIn',
+                                hideMethod: 'fadeOut',
+                                timeOut: 1000,
+                                onHidden: function() {
+                                    location.reload();
+                                }
+                            });
+                        } else {
+                            // Show error message
+                            toastr['error']('Failed to update status', 'ERROR', {
+                                closeButton: true,
+                                tapToDismiss: false,
+                                progressBar: true,
+                                showMethod: 'fadeIn',
+                                hideMethod: 'fadeOut',
+                                timeOut: 2000
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        toastr['error']('An error occurred while updating the status.', 'ERROR', {
+                            closeButton: true,
+                            tapToDismiss: false,
+                            progressBar: true,
+                            showMethod: 'fadeIn',
+                            hideMethod: 'fadeOut',
+                            timeOut: 2000
+                        });
+                    });
+                }
+            });
+        });
+    });
+});
+</script>
