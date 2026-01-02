@@ -54,7 +54,7 @@ jobs:
 
   backend-test:
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('Backend/package.json') != '' }}
+    if: ${{ hashFiles('Backend/package.json') }}
 
     steps:
     - name: Checkout code

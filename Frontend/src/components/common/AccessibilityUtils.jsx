@@ -56,7 +56,7 @@ export const useFocusTrap = (isActive = true) => {
 export const useScreenReader = () => {
   const [announcement, setAnnouncement] = useState('');
 
-  const announce = (message, priority = 'polite') => {
+  const announce = (message) => {
     setAnnouncement(message);
     
     // Clear the announcement after it's been read
@@ -208,30 +208,35 @@ export const AccessibleAccordion = ({ items = [] }) => {
   const handleKeyDown = (e, index) => {
     switch (e.key) {
       case 'Enter':
-      case ' ':
+      case ' ': {
         e.preventDefault();
         toggleItem(index);
         break;
-      case 'ArrowDown':
+      }
+      case 'ArrowDown': {
         e.preventDefault();
         const nextButton = document.querySelector(`[data-accordion-button="${index + 1}"]`);
         nextButton?.focus();
         break;
-      case 'ArrowUp':
+      }
+      case 'ArrowUp': {
         e.preventDefault();
         const prevButton = document.querySelector(`[data-accordion-button="${index - 1}"]`);
         prevButton?.focus();
         break;
-      case 'Home':
+      }
+      case 'Home': {
         e.preventDefault();
         const firstButton = document.querySelector('[data-accordion-button="0"]');
         firstButton?.focus();
         break;
-      case 'End':
+      }
+      case 'End': {
         e.preventDefault();
         const lastButton = document.querySelector(`[data-accordion-button="${items.length - 1}"]`);
         lastButton?.focus();
         break;
+      }
     }
   };
 
@@ -293,24 +298,28 @@ export const AccessibleTabs = ({ tabs = [], defaultTab = 0 }) => {
 
   const handleKeyDown = (e, index) => {
     switch (e.key) {
-      case 'ArrowLeft':
+      case 'ArrowLeft': {
         e.preventDefault();
         const prevIndex = (index - 1 + tabs.length) % tabs.length;
         handleTabChange(prevIndex);
         break;
-      case 'ArrowRight':
+      }
+      case 'ArrowRight': {
         e.preventDefault();
         const nextIndex = (index + 1) % tabs.length;
         handleTabChange(nextIndex);
         break;
-      case 'Home':
+      }
+      case 'Home': {
         e.preventDefault();
         handleTabChange(0);
         break;
-      case 'End':
+      }
+      case 'End': {
         e.preventDefault();
         handleTabChange(tabs.length - 1);
         break;
+      }
     }
   };
 
@@ -360,29 +369,33 @@ export const useKeyboardNavigation = (items, onSelect, options = {}) => {
 
   const handleKeyDown = (e) => {
     switch (e.key) {
-      case 'ArrowDown':
+      case 'ArrowDown': {
         e.preventDefault();
         const nextIndex = (activeIndex + 1) % items.length;
         setActiveIndex(nextIndex);
         break;
-      case 'ArrowUp':
+      }
+      case 'ArrowUp': {
         e.preventDefault();
         const prevIndex = (activeIndex - 1 + items.length) % items.length;
         setActiveIndex(prevIndex);
         break;
+      }
       case 'Enter':
-      case ' ':
+      case ' ': {
         e.preventDefault();
         if (items[activeIndex]) {
           onSelect(items[activeIndex], activeIndex);
         }
         break;
-      case 'Escape':
+      }
+      case 'Escape': {
         if (options.onEscape) {
           e.preventDefault();
           options.onEscape();
         }
         break;
+      }
     }
   };
 
@@ -412,7 +425,7 @@ export const AccessibleForm = ({ children, onSubmit, errors = {} }) => {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} noValidate>
-      {React.Children.map(children, (child, index) => {
+      {React.Children.map(children, (child) => {
         if (React.isValidElement(child) && child.props.name) {
           const error = errors[child.props.name];
           return React.cloneElement(child, {

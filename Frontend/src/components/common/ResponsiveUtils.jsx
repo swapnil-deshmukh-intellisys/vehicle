@@ -243,6 +243,7 @@ export const Container = ({
 
 // Spacer component for responsive spacing
 export const Spacer = ({ 
+  children,
   size = 'md', 
   direction = 'vertical',
   className = '',
