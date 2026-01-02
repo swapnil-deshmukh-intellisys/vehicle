@@ -18,15 +18,14 @@ import { useTheme } from '../context/ThemeContext';
 const EnhancedNavbar = ({ 
   selectedCity, 
   onCityChange, 
-  isDetectingLocation = false 
+  isDetectingLocation 
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const { theme, toggleTheme } = useTheme();
