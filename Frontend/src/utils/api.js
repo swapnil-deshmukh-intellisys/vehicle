@@ -73,7 +73,7 @@ export const apiRequest = async (endpoint, options = {}) => {
             console.error(`🔍 Field "${field}" error:`, errorData.errors[field]);
           });
         }
-      } catch (jsonError) {
+      } catch {
         console.error('🔍 Could not parse error response as JSON');
       }
       
