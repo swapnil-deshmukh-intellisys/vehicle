@@ -27,7 +27,6 @@ const WashingDetailingPage = () => {
   const [filteredGarages, setFilteredGarages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [locationReady, setLocationReady] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [sortBy, setSortBy] = useState('distance');
   const [rating, setRating] = useState('all');
   const [distance, setDistance] = useState('all');
@@ -35,7 +34,6 @@ const WashingDetailingPage = () => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
   const [washingServiceCategoryId, setWashingServiceCategoryId] = useState(null);
-  const [error, setError] = useState(null);
 
   // Get vehicle type from URL params
   useEffect(() => {
@@ -54,7 +52,7 @@ const WashingDetailingPage = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      // Mobile check removed
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -117,7 +115,6 @@ const WashingDetailingPage = () => {
 
     const fetchWashingGarages = async () => {
       setLoading(true);
-      setError(null);
       
       try {
         const { latitude, longitude } = getStoredLocationData();
@@ -152,7 +149,6 @@ const WashingDetailingPage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch Washing & Detailing garages:", error);
-        setError('Failed to load Washing & Detailing service garages');
         setWashingGarages([]);
         setFilteredGarages([]);
       } finally {
@@ -446,7 +442,7 @@ const WashingDetailingPage = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredGarages.map((garage, index) => (
+                  {filteredGarages.map((garage) => (
                     <div key={garage.id}>
                       <GarageCard
                         garage={garage}
