@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faKey } from '@fortawesome/free-solid-svg-icons';
 import VehicleTypeSelector from '../components/common/VehicleTypeSelector';
 import { useTheme } from '../components/context/ThemeContext';
 import { BackgroundGradients } from '../constants/designSystem';
@@ -11,14 +10,6 @@ const RentPage = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [selectedCity, setSelectedCity] = useState(() => {
-    const city = sessionStorage.getItem("selectedCity") || "Pune";
-    if (city === "Mulshi" || city === "Hinjewadi" || city === "Wakad" || city === "Baner") {
-      sessionStorage.setItem("selectedCity", "Pune");
-      return "Pune";
-    }
-    return city;
-  });
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
   const [sortBy, setSortBy] = useState('price');
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -680,7 +671,7 @@ const RentPage = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {sortedListings.map((vehicle, index) => (
+                  {sortedListings.map((vehicle) => (
                     <div
                       key={vehicle.id}
                       onClick={() => handleVehicleClick(vehicle)}

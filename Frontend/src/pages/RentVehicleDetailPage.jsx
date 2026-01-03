@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -11,22 +11,17 @@ import {
 } from '@heroicons/react/24/outline';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faMapPin, 
-  faCalendar,
   faCheck,
-  faShieldAlt,
   faStar
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '../components/context/ThemeContext';
 
 const RentVehicleDetailPage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
   // Get vehicle data from location state if available (from navigation)
   const vehicle = location.state?.vehicle;
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedRentalType, setSelectedRentalType] = useState(vehicle?.rentalType || 'Daily');
   const [selectedStartDate, setSelectedStartDate] = useState('');
   const [selectedEndDate, setSelectedEndDate] = useState('');

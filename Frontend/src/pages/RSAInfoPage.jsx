@@ -18,12 +18,10 @@ import {
   faTools, 
   faStar, 
   faMapPin, 
-  faPhone, 
   faClock,
   faCheck,
   faShieldAlt,
-  faWrench,
-  faCog
+  faWrench
 } from '@fortawesome/free-solid-svg-icons';
 import { fetchGarageById } from '../services/garageDetailService';
 import { useTheme } from '../components/context/ThemeContext';
@@ -207,17 +205,6 @@ const RSAInfoPage = () => {
     const rawPhone = garageData?.phone || garageFromState?.phone;
     if (!rawPhone) return '';
     return String(rawPhone).replace(/[^+\d]/g, '');
-  };
-
-  const handleCallClick = () => {
-    const sanitized = getSanitizedPhone();
-    if (!sanitized || sanitized.replace(/\D/g, '').length === 0) return;
-    // Open modal on laptop/desktop screens, dial directly on mobile
-    if (window.innerWidth >= 1024) {
-      setIsCallModalOpen(true);
-    } else {
-      window.location.href = `tel:${sanitized}`;
-    }
   };
 
   // Show loading state
