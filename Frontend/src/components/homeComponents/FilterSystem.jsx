@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDownIcon, ChevronUpIcon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '../context/ThemeContext';
 
-const FilterSystem = ({ filterData, onApplyFilters, isMobile, onSortChange, onClearAll }) => {
+const FilterSystem = ({ onApplyFilters, onClearAll }) => {
   const { theme } = useTheme();
   const [brandSearch, setBrandSearch] = useState('');
   const [isBrandDropdownOpen, setIsBrandDropdownOpen] = useState(false);
@@ -85,17 +85,6 @@ const FilterSystem = ({ filterData, onApplyFilters, isMobile, onSortChange, onCl
         ? prev.services.filter(s => s !== service)
         : [...prev.services, service]
     }));
-  };
-
-  // Handle sort change
-  const handleSortChange = (sortValue) => {
-    setFilters(prev => ({
-      ...prev,
-      sort: sortValue
-    }));
-    if (onSortChange) {
-      onSortChange(sortValue);
-    }
   };
 
   // Toggle service category

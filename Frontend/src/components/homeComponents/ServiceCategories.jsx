@@ -126,7 +126,7 @@ const ServiceCategories = forwardRef(({ onServiceClick }, ref) => {
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {serviceCategories.map((category, index) => (
+          {serviceCategories.map((category) => (
             <div 
               key={category.id} 
               className="relative group flex"

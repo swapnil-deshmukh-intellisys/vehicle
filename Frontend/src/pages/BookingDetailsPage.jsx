@@ -144,7 +144,6 @@ const BookingDetailsPage = () => {
     });
   };
 
-  const status = booking.current_status?.status || '';
   const statusDisplay = booking.current_status?.displayname || 'Work Completed';
   const timeline = booking.timeline || [];
 

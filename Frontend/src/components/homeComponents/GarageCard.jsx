@@ -2,12 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StarIcon, MapPinIcon, PhoneIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faShieldAlt } from '@fortawesome/free-solid-svg-icons';
+import { faShieldAlt } from '@fortawesome/free-solid-svg-icons';
 import { isAuthenticated } from '../../services/authService';
 import { useTheme } from '../context/ThemeContext';
 import { useLoginPopup } from '../context/LoginPopupContext';
 
-const GarageCard = ({ garage, onClick, isExpanded = false, setCurrentPage }) => {
+const GarageCard = ({ garage, onClick, isExpanded = false }) => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { showLogin } = useLoginPopup();

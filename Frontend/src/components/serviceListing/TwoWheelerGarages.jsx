@@ -401,7 +401,7 @@ const TwoWheelerGarages = ({ selectedCity, filterData, onVehicleTypeChange }) =>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-                      {filteredGarages.map((garage, index) => (
+                      {filteredGarages.map((garage) => (
                         <div key={garage.id}>
                           <GarageCard
                             garage={garage}
