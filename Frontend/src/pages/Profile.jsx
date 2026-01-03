@@ -18,7 +18,7 @@ import {
   ClockIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
-import { fetchUserVehicles, fetchUserAddresses, createAddress, deleteUserVehicle, fetchCities, fetchSubscriberProfile, updateSubscriberProfile, fetchUserBookings, cancelBooking } from '../services/bookingService';
+import { fetchUserVehicles, fetchUserAddresses, deleteUserVehicle, fetchCities, fetchSubscriberProfile, updateSubscriberProfile, fetchUserBookings, cancelBooking } from '../services/bookingService';
 import { getSubscriberId, getBusinessId } from '../services/authService';
 import { fetchLandingPageData } from '../services/landingpage';
 import AddVehicleModal from '../components/profileComponents/AddVehicleModal';
@@ -84,7 +84,6 @@ const Profile = () => {
       setLoading(true);
       try {
         const subscriberId = getSubscriberId();
-        const businessId = getBusinessId();
         
         if (!subscriberId) {
           setError('User not authenticated');
@@ -288,7 +287,7 @@ const Profile = () => {
           try {
             const parsed = JSON.parse(errorMessage);
             errorMessage = Array.isArray(parsed) ? parsed[0] : parsed;
-          } catch (e) {
+          } catch {
             // If parsing fails, try to extract message from string
             errorMessage = errorMessage.replace(/[\[\]']/g, '');
           }
@@ -309,7 +308,7 @@ const Profile = () => {
           try {
             const parsed = JSON.parse(msg);
             msg = Array.isArray(parsed) ? parsed[0] : parsed;
-          } catch (e) {
+          } catch {
             msg = msg.replace(/[\[\]']/g, '');
           }
         }
@@ -323,19 +322,7 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteAddress = async (addressId) => {
-    try {
-      // Note: The old website doesn't have delete address functionality
-      // This would need to be implemented in the backend
-      setAddresses(prev => prev.filter(address => address.id !== addressId));
-      setError('');
-    } catch (err) {
-      console.error('Error deleting address:', err);
-      setError('Failed to delete address');
-    }
-  };
-
-  const handleCancelBooking = async (bookingId) => {
+  const handleDeleteAddress = async (bookingId) => {
     try {
       const subscriberId = getSubscriberId();
       if (!subscriberId) {
@@ -368,7 +355,7 @@ const Profile = () => {
     }
   };
 
-  const handleAddVehicleSuccess = async (newVehicle) => {
+  const handleAddVehicleSuccess = async () => {
     // Refresh vehicles list from API (like old website)
     try {
       const subscriberId = getSubscriberId();
@@ -391,7 +378,7 @@ const Profile = () => {
     setIsAddVehicleModalOpen(false);
   };
 
-  const handleAddAddressSuccess = async (newAddress) => {
+  const handleAddAddressSuccess = async () => {
     // Refresh addresses list from API (like old website)
     try {
       const subscriberId = getSubscriberId();
@@ -801,21 +788,6 @@ const Profile = () => {
                         v.id === vehicleDetails?.vehicleid ||
                         v.id === vehicleDetails?.vehicle_id
                       ) || null;
-
-                    // Prefer the real vehicle image used in the booking, with multiple fallbacks
-                    const vehicleImage =
-                      vehicleDetails?.model?.image ||
-                      vehicleDetails?.image ||
-                      vehicleDetails?.model_image ||
-                      vehicleDetails?.vehicle?.image ||
-                      // Common alternative field names from APIs
-                      vehicleDetails?.bike_image ||
-                      vehicleDetails?.bikeimage ||
-                      vehicleDetails?.imageUrl ||
-                      vehicleDetails?.image_url ||
-                      (Array.isArray(vehicleDetails?.images) ? vehicleDetails.images[0] : null) ||
-                      matchedVehicle?.model?.image ||
-                      null;
 
                     const vehicleName =
                       vehicleDetails?.model?.name ||

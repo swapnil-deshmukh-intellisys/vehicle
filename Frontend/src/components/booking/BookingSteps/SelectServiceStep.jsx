@@ -5,7 +5,6 @@ import { ColorPalette } from '../../../constants/designSystem';
 
 const SelectServiceStep = ({ 
   bikeData, 
-  selectedService, 
   setSelectedService, 
   garageId,
   loading, 

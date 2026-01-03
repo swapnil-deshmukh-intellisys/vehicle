@@ -11,14 +11,6 @@ const BuySellPage = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [selectedCity, setSelectedCity] = useState(() => {
-    const city = sessionStorage.getItem("selectedCity") || "Pune";
-    if (city === "Mulshi" || city === "Hinjewadi" || city === "Wakad" || city === "Baner") {
-      sessionStorage.setItem("selectedCity", "Pune");
-      return "Pune";
-    }
-    return city;
-  });
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
   const [sortBy, setSortBy] = useState('price');
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -716,7 +708,7 @@ const BuySellPage = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {sortedListings.map((vehicle, index) => (
+                  {sortedListings.map((vehicle) => (
                     <div
                       key={vehicle.id}
                       className={`rounded-xl overflow-hidden transition-all cursor-pointer ${
@@ -813,10 +805,8 @@ const BuySellPage = () => {
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Handle view details - will be handled by parent component
-                          if (onVehicleClick) {
-                            onVehicleClick(vehicle);
-                          }
+                          // Navigate to vehicle details
+                          navigate(`/buy-sell/${vehicle.id}`, { state: { vehicle } });
                         }}
                       >
                         View Details

@@ -62,21 +62,6 @@ const Home = () => {
     }
   };
 
-  const handleBookNow = () => {
-    if (isAuthenticated()) {
-      navigate('/');
-    } else {
-      showLogin();
-    }
-  };
-
-  const handleScrollToServices = () => {
-    const servicesSection = document.getElementById('services-section');
-    if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   const handleBookNowToGarage = () => {
     // Set vehicle type to two-wheeler in sessionStorage
     sessionStorage.setItem('selectedVehicleType', 'two-wheeler');
