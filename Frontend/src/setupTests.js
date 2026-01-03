@@ -19,11 +19,12 @@ const mockResizeObserver = jest.fn().mockImplementation(() => ({
   disconnect: jest.fn(),
 }));
 
+// Polyfill for TextEncoder and TextDecoder
+const { TextEncoder, TextDecoder } = require('util');
+
 if (typeof global !== 'undefined') {
   global.IntersectionObserver = mockIntersectionObserver;
   global.ResizeObserver = mockResizeObserver;
-  
-  // Polyfill for TextEncoder and TextDecoder
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 }
