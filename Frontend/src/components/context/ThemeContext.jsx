@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext({ theme: 'dark', toggleTheme: () => {} });
@@ -14,7 +15,9 @@ export const ThemeProvider = ({ children }) => {
   useEffect(() => {
     try {
       localStorage.setItem('theme', theme);
-    } catch {}
+    } catch {
+      // Ignore localStorage errors
+    }
     const root = document.documentElement;
     if (theme === 'light') {
       root.classList.remove('dark');
