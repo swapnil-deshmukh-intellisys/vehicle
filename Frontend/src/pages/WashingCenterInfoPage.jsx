@@ -18,12 +18,10 @@ import {
   faTools, 
   faStar, 
   faMapPin, 
-  faPhone, 
   faClock,
   faCheck,
   faShieldAlt,
-  faWrench,
-  faCog
+  faWrench
 } from '@fortawesome/free-solid-svg-icons';
 import { fetchGarageById } from '../services/garageDetailService';
 import { useTheme } from '../components/context/ThemeContext';
@@ -187,16 +185,16 @@ const WashingCenterInfoPage = () => {
   const handleDirectionClick = () => {
     // Prefer API data, then prop fallback
     const apiLoc = garageData?.location;
-    const propLoc = garage?.location;
-    const lat = apiLoc?.latitude || apiLoc?.lat || garageData?.latitude || propLoc?.latitude || propLoc?.lat || garage?.latitude;
-    const lng = apiLoc?.longitude || apiLoc?.lng || garageData?.longitude || propLoc?.longitude || propLoc?.lng || garage?.longitude;
+    const propLoc = garageFromState?.location;
+    const lat = apiLoc?.latitude || apiLoc?.lat || garageData?.latitude || propLoc?.latitude || propLoc?.lat || garageFromState?.latitude;
+    const lng = apiLoc?.longitude || apiLoc?.lng || garageData?.longitude || propLoc?.longitude || propLoc?.lng || garageFromState?.longitude;
     if (lat && lng) {
       const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}`;
       window.open(mapsUrl, '_blank');
       return;
     }
     // Fallback: open by address if available
-    const address = garageData?.address || garage?.address || '';
+    const address = garageData?.address || garageFromState?.address || '';
     if (address) {
       const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
       window.open(mapsUrl, '_blank');
@@ -204,20 +202,9 @@ const WashingCenterInfoPage = () => {
   };
 
   const getSanitizedPhone = () => {
-    const rawPhone = garageData?.phone || garage?.phone;
+    const rawPhone = garageData?.phone || garageFromState?.phone;
     if (!rawPhone) return '';
     return String(rawPhone).replace(/[^+\d]/g, '');
-  };
-
-  const handleCallClick = () => {
-    const sanitized = getSanitizedPhone();
-    if (!sanitized || sanitized.replace(/\D/g, '').length === 0) return;
-    // Open modal on laptop/desktop screens, dial directly on mobile
-    if (window.innerWidth >= 1024) {
-      setIsCallModalOpen(true);
-    } else {
-      window.location.href = `tel:${sanitized}`;
-    }
   };
 
   // Show loading state
@@ -303,7 +290,7 @@ const WashingCenterInfoPage = () => {
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
                     <h1 className={`text-xl md:text-xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{displayGarage?.name}</h1>
-                    {(displayGarage?.is_verified || garage?.is_verified) && (
+                    {(displayGarage?.is_verified || garageFromState?.is_verified) && (
                       <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center">
                         Verified <FontAwesomeIcon icon={faCheck} className="ml-1" />
                       </div>
@@ -644,7 +631,7 @@ const WashingCenterInfoPage = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap mb-1 sm:mb-2">
                       <h3 className={`text-lg sm:text-xl md:text-xl font-bold truncate ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>{displayGarage?.name}</h3>
-                      {(displayGarage?.is_verified || garage?.is_verified) && (
+                      {(displayGarage?.is_verified || garageFromState?.is_verified) && (
                         <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center">
                           Verified <FontAwesomeIcon icon={faCheck} className="ml-1" />
                         </div>
