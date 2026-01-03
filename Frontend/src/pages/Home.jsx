@@ -15,13 +15,10 @@ import {
   faCheck,
   faWrench
 } from '@fortawesome/free-solid-svg-icons';
-import { isAuthenticated } from '../services/authService';
-import { useLoginPopup } from '../components/context/LoginPopupContext';
 
 const Home = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { showLogin } = useLoginPopup();
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const servicesRef = useRef(null);
