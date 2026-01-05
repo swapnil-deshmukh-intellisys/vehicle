@@ -37,7 +37,8 @@ const SlotAndAddressStep = ({
       // Use local date methods to avoid timezone issues
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
-      const formattedDate = `${year}-${month}-${String(date.getDate()).padStart(2, '0')}`; // yyyy-mm-dd in local timezone
+      const day = String(date.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`; // yyyy-mm-dd in local timezone
       return `${formattedDate} (${dayName})`;
     };
 
