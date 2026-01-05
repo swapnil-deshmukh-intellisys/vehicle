@@ -228,6 +228,10 @@ describe('ResponsiveUtils', () => {
     });
 
     test('should hide content for mobile breakpoint on desktop', () => {
+      // Set desktop width
+      window.innerWidth = 1200;
+      window.dispatchEvent(new Event('resize'));
+      
       render(
         <Responsive breakpoint="mobile" hide>
           <span>Mobile Content</span>
@@ -238,7 +242,9 @@ describe('ResponsiveUtils', () => {
     });
 
     test('should show content for mobile breakpoint on mobile', () => {
+      // Set mobile width
       window.innerWidth = 375;
+      window.dispatchEvent(new Event('resize'));
       
       render(
         <Responsive breakpoint="mobile">
@@ -281,7 +287,7 @@ describe('ResponsiveUtils', () => {
       window.innerWidth = 500;
 
       window.matchMedia = jest.fn().mockImplementation(query => ({
-        matches: query === '(min-width: 768px)',
+        matches: false, // Always return false for this test
         media: query,
         onchange: null,
         addEventListener: jest.fn(),

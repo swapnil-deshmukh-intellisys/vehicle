@@ -14,7 +14,7 @@ jest.mock('../../context/ThemeContext', () => ({
 }));
 
 // Mock utils
-jest.mock('../../utils/geolocation', () => ({
+jest.mock('../../../utils/geolocation', () => ({
   getCurrentLocation: jest.fn(),
   getCityFromCoordinates: jest.fn(),
   storeLocationData: jest.fn(),
