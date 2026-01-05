@@ -36,7 +36,7 @@ const SummaryStep = ({
 
     try {
       window.history.pushState({ bookingSuccess: true }, document.title);
-    } catch (e) {
+    } catch {
       // ignore
     }
 
@@ -199,9 +199,6 @@ const SummaryStep = ({
     setErrors({});
     
     try {
-      const total = calculateTotal();
-      const promoData = applyPromoCode();
-      
       // Validate and format date - ensure it's in YYYY-MM-DD format
       let formattedDate = '';
       if (slotAndAddress?.date) {
@@ -227,7 +224,7 @@ const SummaryStep = ({
             } else {
               throw new Error('Invalid date format');
             }
-          } catch (e) {
+          } catch {
             setErrors({ booking: 'Invalid date format. Please select a date again.' });
             setLoading(false);
             return;
@@ -357,7 +354,7 @@ const SummaryStep = ({
         month: 'long', 
         day: 'numeric' 
       });
-    } catch (e) {
+    } catch {
       return dateString; // Return original if error
     }
   };
@@ -416,8 +413,6 @@ const SummaryStep = ({
       </div>
     );
   }
-  
-  const promoData = applyPromoCode();
   
   return (
     <div className="space-y-6 overflow-x-hidden w-full">

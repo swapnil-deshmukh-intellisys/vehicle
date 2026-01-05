@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { PlusIcon, MapPinIcon, ClockIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
-import { fetchUserAddresses, createAddress, fetchCities } from '../../../services/bookingService';
+import { fetchUserAddresses, fetchCities } from '../../../services/bookingService';
 import AddAddressModal from './AddAddressModal';
 import { useTheme } from '../../context/ThemeContext';
 import { getSubscriberId } from '../../../services/authService';
@@ -22,8 +22,6 @@ const SlotAndAddressStep = ({
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedEstimateOption, setSelectedEstimateOption] = useState("no");
   const [isAddAddressModalOpen, setIsAddAddressModalOpen] = useState(false);
-  const [hasAddress, setHasAddress] = useState(false);
-  const [isEditing, setIsEditing] = useState(true);
 
   // Generate available slots (matching old website logic)
   const generateAvailableSlots = () => {
@@ -39,14 +37,12 @@ const SlotAndAddressStep = ({
       // Use local date methods to avoid timezone issues
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const formattedDate = `${year}-${month}-${day}`; // yyyy-mm-dd in local timezone
+      const formattedDate = `${year}-${month}-${String(date.getDate()).padStart(2, '0')}`; // yyyy-mm-dd in local timezone
       return `${formattedDate} (${dayName})`;
     };
 
     const generateSlots = (dayIndex) => {
       const today = new Date();
-      const date = addDays(today, dayIndex);
       const slots = [];
 
       let startHour = 10;
@@ -163,7 +159,6 @@ const SlotAndAddressStep = ({
         const defaultAddress = userAddresses.find(addr => addr.is_default);
         if (defaultAddress) {
           setSelectedAddress(defaultAddress);
-          setHasAddress(true);
         }
       } catch (error) {
         console.error('Error fetching addresses:', error);
@@ -221,7 +216,6 @@ const SlotAndAddressStep = ({
   const handleAddAddressSuccess = (newAddress) => {
     setAddresses(prev => [...prev, newAddress]);
     setSelectedAddress(newAddress);
-    setHasAddress(true);
     setIsAddAddressModalOpen(false);
   };
 
