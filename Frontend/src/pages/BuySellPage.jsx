@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,14 +11,6 @@ const BuySellPage = () => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [selectedCity, setSelectedCity] = useState(() => {
-    const city = sessionStorage.getItem("selectedCity") || "Pune";
-    if (city === "Mulshi" || city === "Hinjewadi" || city === "Wakad" || city === "Baner") {
-      sessionStorage.setItem("selectedCity", "Pune");
-      return "Pune";
-    }
-    return city;
-  });
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
   const [sortBy, setSortBy] = useState('price');
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -74,7 +66,7 @@ const BuySellPage = () => {
   };
 
   // Vehicle model image mapping (strictly 9 bikes and 9 four-wheelers)
-  const vehicleImageMap = {
+  const vehicleImageMap = useMemo(() => ({
     // Two-wheelers (9 models only)
     'Honda Activa 6G': 'https://cdn.bikedekho.com/processedimages/honda/activa-6g/source/activa-6g68a6fb7b20bd3.jpg',
     'Hero Splendor Plus': 'https://www.heromotocorp.com/content/dam/hero-aem-website/brand/hero-homepage/bike/motorcycles/splendor-plus-nav.png',
@@ -96,15 +88,15 @@ const BuySellPage = () => {
     'Toyota Fortuner': 'https://images.91wheels.com/assets/b_images/main/models/profile/profile1701778977.jpg?w=840&q=50',
     'Maruti Suzuki Ertiga': 'https://stimg.cardekho.com/images/carexteriorimages/630x420/Maruti/Ertiga/10288/1755776579514/front-left-side-47.jpg?imwidth=420&impolicy=resize',
     'Tata Nexon EV': 'https://stimg.cardekho.com/images/carexteriorimages/930x620/Tata/Nexon-EV/11024/1755845297648/front-left-side-47.jpg',
-  };
+  }), []);
 
   // Helper function to get vehicle image
-  const getVehicleImage = (brand, model) => {
+  const getVehicleImage = useCallback((brand, model) => {
     const key = `${brand} ${model}`;
     return vehicleImageMap[key] || (selectedVehicleType === 'two-wheeler' 
       ? 'https://quickinsure.s3.ap-south-1.amazonaws.com/uploads/static_page/a83d207a-a933-41ac-a446-db9d23682693/Ktm%20Upcoming%20Bikes%20In%20India%202023%20New%20Launches%20And%20Bike%20Insurance.png'
       : 'https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=400');
-  };
+  }, [selectedVehicleType, vehicleImageMap]);
 
   // Generate dummy vehicle listings based on selected vehicle type
   useEffect(() => {
@@ -267,7 +259,7 @@ const BuySellPage = () => {
 
     const listings = generateDummyListings();
     setVehicleListings(listings);
-  }, [selectedVehicleType]);
+  }, [selectedVehicleType, getVehicleImage]);
 
 
   // Apply filters to listings
@@ -716,7 +708,7 @@ const BuySellPage = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {sortedListings.map((vehicle, index) => (
+                  {sortedListings.map((vehicle) => (
                     <div
                       key={vehicle.id}
                       className={`rounded-xl overflow-hidden transition-all cursor-pointer ${
@@ -813,10 +805,8 @@ const BuySellPage = () => {
                         className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Handle view details - will be handled by parent component
-                          if (onVehicleClick) {
-                            onVehicleClick(vehicle);
-                          }
+                          // Navigate to vehicle details
+                          navigate(`/buy-sell/${vehicle.id}`, { state: { vehicle } });
                         }}
                       >
                         View Details

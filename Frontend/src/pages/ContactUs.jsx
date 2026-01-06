@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,12 +7,10 @@ import { ColorPalette, BackgroundGradients } from '../constants/designSystem';
 import {
   faMapMarkerAlt, faPhone, faEnvelope, faClock,
   faCheck, faPaperPlane,
-  faQuestionCircle, faChevronDown, faChevronUp, faAmbulance,
-  faComments
+  faQuestionCircle, faChevronDown, faChevronUp, faAmbulance
 } from '@fortawesome/free-solid-svg-icons';
 
 const ContactUs = () => {
-  const navigate = useNavigate();
   const { theme } = useTheme();
   const [selectedCity, setSelectedCity] = useState(sessionStorage.getItem('selectedCity') || 'Pune');
   const [formData, setFormData] = useState({

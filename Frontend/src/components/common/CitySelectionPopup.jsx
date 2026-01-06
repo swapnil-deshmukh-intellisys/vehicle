@@ -44,7 +44,7 @@ import {
   faTree as faHandHoldingSeedling,
   faMapPin
 } from '@fortawesome/free-solid-svg-icons';
-import { indianCities, getFeaturedCities, searchCities, getCitiesByState } from '../../data/cities';
+import { getFeaturedCities, searchCities, getCitiesByState } from '../../data/cities';
 import { getCurrentLocation, getCityFromCoordinates, storeLocationData } from '../../utils/geolocation';
 import { useTheme } from '../context/ThemeContext';
 

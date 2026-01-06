@@ -52,7 +52,7 @@ const SelectBikeStep = ({
     };
     
     loadVehicles();
-  }, [setBikeData, setLoading, setErrors]);
+  }, [setBikeData, setLoading, setErrors, bikeData]);
   
   const handleBikeSelect = (vehicle) => {
     setSelectedBikeId(vehicle.id);

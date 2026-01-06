@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -12,22 +12,17 @@ import {
 } from '@heroicons/react/24/outline';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faMapPin, 
-  faPhone,
-  faCalendar,
   faCheck,
   faShieldAlt
 } from '@fortawesome/free-solid-svg-icons';
 import { useTheme } from '../components/context/ThemeContext';
 
 const BuySellVehicleDetailPage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { theme } = useTheme();
   // Get vehicle data from location state if available (from navigation)
   const vehicle = location.state?.vehicle;
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   // Generate multiple images for the vehicle (using the same image for now, but can be expanded)
   const vehicleImages = [

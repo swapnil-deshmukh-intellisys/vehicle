@@ -69,7 +69,7 @@ const BookingPage = () => {
       console.error("Error in BookingPage useEffect:", error);
       navigate("/");
     }
-  }, [garageId, navigate, location.state, location.pathname, location.search]);
+  }, [garageId, navigate, location.state, location.pathname, location.search, serviceType]);
   
   // Navigation logic with validation
   const handleNext = () => {

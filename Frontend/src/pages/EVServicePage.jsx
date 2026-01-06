@@ -27,7 +27,6 @@ const EVServicePage = () => {
   const [filteredGarages, setFilteredGarages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [locationReady, setLocationReady] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [sortBy, setSortBy] = useState('distance');
   const [rating, setRating] = useState('all');
   const [distance, setDistance] = useState('all');
@@ -35,7 +34,6 @@ const EVServicePage = () => {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedVehicleType, setSelectedVehicleType] = useState(null);
   const [evServiceCategoryId, setEvServiceCategoryId] = useState(null);
-  const [error, setError] = useState(null);
 
   // Get vehicle type from URL params
   useEffect(() => {
@@ -54,7 +52,7 @@ const EVServicePage = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      // Mobile check removed
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
@@ -116,7 +114,6 @@ const EVServicePage = () => {
 
     const fetchEVGarages = async () => {
       setLoading(true);
-      setError(null);
       
       try {
         const { latitude, longitude } = getStoredLocationData();
@@ -151,7 +148,6 @@ const EVServicePage = () => {
         }
       } catch (error) {
         console.error("Failed to fetch EV garages:", error);
-        setError('Failed to load EV service garages');
         setEvGarages([]);
         setFilteredGarages([]);
       } finally {
@@ -445,7 +441,7 @@ const EVServicePage = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredGarages.map((garage, index) => (
+                  {filteredGarages.map((garage) => (
                     <div key={garage.id}>
                       <GarageCard
                         garage={garage}

@@ -18,12 +18,10 @@ import {
   faTools, 
   faStar, 
   faMapPin, 
-  faPhone, 
   faClock,
   faCheck,
   faShieldAlt,
-  faWrench,
-  faCog
+  faWrench
 } from '@fortawesome/free-solid-svg-icons';
 import { fetchGarageById } from '../services/garageDetailService';
 import { useTheme } from '../components/context/ThemeContext';
@@ -101,7 +99,7 @@ const GarageInfoPage = () => {
   }, [id, garageFromState?.id]);
 
   // Use only real API data for operating hours
-  const operatingHours = garageData?.operatingHours || [];
+  const operatingHours = useMemo(() => garageData?.operatingHours || [], [garageData?.operatingHours]);
 
   // Check if garage is currently open based on operating hours
   const garageIsOpen = useMemo(() => {
@@ -208,17 +206,6 @@ const GarageInfoPage = () => {
     const rawPhone = garageData?.phone || garageFromState?.phone;
     if (!rawPhone) return '';
     return String(rawPhone).replace(/[^+\d]/g, '');
-  };
-
-  const handleCallClick = () => {
-    const sanitized = getSanitizedPhone();
-    if (!sanitized || sanitized.replace(/\D/g, '').length === 0) return;
-    // Open modal on laptop/desktop screens, dial directly on mobile
-    if (window.innerWidth >= 1024) {
-      setIsCallModalOpen(true);
-    } else {
-      window.location.href = `tel:${sanitized}`;
-    }
   };
 
   // Show loading state
@@ -831,7 +818,7 @@ const GarageInfoPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                       {serviceList?.map((item, idx) => (
                         <div
-                          key={service.id || idx}
+                          key={item.id || idx}
                           className={`rounded-lg p-4 sm:p-5 border transition-all duration-300 hover:shadow-lg ${
                             theme === 'light'
                               ? 'bg-transparent border-gray-200 hover:border-red-400 hover:shadow-red-100'
@@ -894,7 +881,7 @@ const GarageInfoPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                           {serviceList?.map((item, idx) => (
                             <div
-                              key={service.id || idx}
+                              key={item.id || idx}
                               className={`rounded-lg p-4 sm:p-5 border transition-all duration-300 hover:shadow-lg ${
                                 theme === 'light'
                                   ? 'bg-transparent border-purple-200 hover:border-purple-400 hover:shadow-purple-100'

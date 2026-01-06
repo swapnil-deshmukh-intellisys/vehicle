@@ -15,13 +15,10 @@ import {
   faCheck,
   faWrench
 } from '@fortawesome/free-solid-svg-icons';
-import { isAuthenticated } from '../services/authService';
-import { useLoginPopup } from '../components/context/LoginPopupContext';
 
 const Home = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { showLogin } = useLoginPopup();
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const servicesRef = useRef(null);
@@ -59,21 +56,6 @@ const Home = () => {
       if (servicesSection) {
         servicesSection.scrollIntoView({ behavior: 'smooth' });
       }
-    }
-  };
-
-  const handleBookNow = () => {
-    if (isAuthenticated()) {
-      navigate('/');
-    } else {
-      showLogin();
-    }
-  };
-
-  const handleScrollToServices = () => {
-    const servicesSection = document.getElementById('services-section');
-    if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 

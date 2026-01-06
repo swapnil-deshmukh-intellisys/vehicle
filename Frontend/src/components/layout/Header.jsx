@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ServXLogo from '../../assets/ServXLogo-removebg-preview.png';
 import { ChevronDownIcon, MagnifyingGlassIcon, UserIcon, MapPinIcon, ArrowRightOnRectangleIcon, ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { getCurrentLocation, getCityFromCoordinates, storeLocationData } from '../../utils/geolocation';
 import { useAuth } from '../context/AuthContext';
 import CitySelectionPopup from '../common/CitySelectionPopup';
 import { useTheme } from '../context/ThemeContext';

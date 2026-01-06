@@ -3,13 +3,6 @@ import { useTheme } from '../context/ThemeContext';
 import { ColorPalette, BackgroundGradients } from '../../constants/designSystem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faStar, 
-  faShieldAlt, 
-  faClock, 
-  faDollarSign, 
-  faMobileAlt, 
-  faCar,
-  faCheckCircle,
   faCheck,
   faRocket,
   faUsers,
@@ -36,64 +29,12 @@ const HomeContent = () => {
     }
   };
 
-  const handleJoinClick = () => {
-    const servicesSection = document.getElementById('services-section');
-    if (servicesSection) {
-      servicesSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const handleGetStartedClick = () => {
     const servicesSection = document.getElementById('services-section');
     if (servicesSection) {
       servicesSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-
-  const benefits = [
-    {
-      title: "Verified Garages",
-      description: "All garages are verified and quality-checked",
-      icon: faShieldAlt,
-      gradient: ColorPalette.benefits.verified.gradient,
-      stats: "500+ Verified"
-    },
-    {
-      title: "Transparent Pricing",
-      description: "No hidden costs, clear service breakdowns",
-      icon: faDollarSign,
-      gradient: ColorPalette.benefits.pricing.gradient,
-      stats: "0 Hidden Fees"
-    },
-    {
-      title: "All Vehicle Types",
-      description: "2 wheelers, 4 wheelers, and commercial vehicles",
-      icon: faCar,
-      gradient: ColorPalette.benefits.vehicleTypes.gradient,
-      stats: "4 Vehicle Types"
-    },
-    {
-      title: "Real-time Updates",
-      description: "Track your service progress live",
-      icon: faClock,
-      gradient: ColorPalette.benefits.updates.gradient,
-      stats: "Live Tracking"
-    },
-    {
-      title: "Customer Reviews",
-      description: "Read genuine reviews from other customers",
-      icon: faStar,
-      gradient: ColorPalette.benefits.reviews.gradient,
-      stats: "10K+ Reviews"
-    },
-    {
-      title: "24/7 Support",
-      description: "Round-the-clock customer assistance",
-      icon: faMobileAlt,
-      gradient: ColorPalette.benefits.support.gradient,
-      stats: "24/7 Available"
-    }
-  ];
 
   const features = [
     "Verified garage network for all vehicle types",

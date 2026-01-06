@@ -10,7 +10,7 @@ const Login = () => {
   const location = useLocation();
   const { theme } = useTheme();
   const [selectedCity, setSelectedCity] = useState(sessionStorage.getItem('selectedCity') || 'Pune');
-  const [showLoginPopup, setShowLoginPopup] = useState(true);
+  const [showLoginPopup] = useState(true);
   
   // Get returnTo path from location state or default to profile
   const returnTo = location.state?.returnTo || '/profile';

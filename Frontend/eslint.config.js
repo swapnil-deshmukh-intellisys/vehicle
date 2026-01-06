@@ -24,6 +24,35 @@ export default defineConfig([
     },
     rules: {
       'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-useless-escape': 'warn',
+    },
+  },
+  {
+    files: ['src/components/common/*.{js,jsx}', 'src/utils/*.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        process: 'readonly',
+      },
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-useless-escape': 'warn',
+    },
+  },
+  {
+    files: ['**/*.{test,spec}.{js,jsx}', '**/__tests__/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+        ...globals.node,
+        global: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': 'off',
+      'no-useless-escape': 'warn',
     },
   },
 ])

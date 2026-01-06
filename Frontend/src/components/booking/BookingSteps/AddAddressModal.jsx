@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import { createAddress, fetchCities } from '../../../services/bookingService';
+import { createAddress } from '../../../services/bookingService';
 import { getSubscriberId, getBusinessId } from '../../../services/authService';
 
 const AddAddressModal = ({ isOpen, onClose, onSuccess, cities = [] }) => {

@@ -20,7 +20,6 @@ import {
   faMedal,
   faRocket,
   faHeart,
-  faAward,
   faCheckCircle
 } from '@fortawesome/free-solid-svg-icons';
 
