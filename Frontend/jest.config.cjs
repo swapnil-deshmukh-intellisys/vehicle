@@ -29,4 +29,7 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))',
   ],
+  babelConfig: {
+    configFile: './babel.config.cjs',
+  },
 };
