@@ -145,7 +145,7 @@ const SummaryStep = ({
     
     // Return the mapped service types (empty array if none found)
     return serviceTypes;
-  }, [garageInfo?.service_provided]);
+  }, [garageInfo]);
   
   const calculateTotal = () => {
     if (!selectedService) return 0;

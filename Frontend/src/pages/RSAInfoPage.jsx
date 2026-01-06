@@ -98,7 +98,7 @@ const RSAInfoPage = () => {
   }, [id, garageFromState?.id]);
 
   // Use only real API data for operating hours
-  const operatingHours = garageData?.operatingHours || [];
+  const operatingHours = useMemo(() => garageData?.operatingHours || [], [garageData?.operatingHours]);
 
   // Check if garage is currently open based on operating hours
   const garageIsOpen = useMemo(() => {

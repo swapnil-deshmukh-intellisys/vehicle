@@ -197,7 +197,7 @@ const SelectServiceStep = ({
                       } else if (typeof includesData === 'string' && includesData.trim()) {
                         // Split by multiple bullet point formats and clean up
                         includesList = includesData
-                          .split(/[•·\-\*]/) // Split by bullet, middle dot, dash, or asterisk
+                          .split(/[•·\-*]/) // Split by bullet, middle dot, dash, or asterisk
                           .map(item => item.trim())
                           .filter(item => item.length > 0 && item !== '');
                         

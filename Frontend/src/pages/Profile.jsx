@@ -289,7 +289,7 @@ const Profile = () => {
             errorMessage = Array.isArray(parsed) ? parsed[0] : parsed;
           } catch {
             // If parsing fails, try to extract message from string
-            errorMessage = errorMessage.replace(/[\[\]']/g, '');
+            errorMessage = errorMessage.replace(/[[\]']/g, '');
           }
         }
         // Replace specific error message with user-friendly one
@@ -309,7 +309,7 @@ const Profile = () => {
             const parsed = JSON.parse(msg);
             msg = Array.isArray(parsed) ? parsed[0] : parsed;
           } catch {
-            msg = msg.replace(/[\[\]']/g, '');
+            msg = msg.replace(/[[\]']/g, '');
           }
         }
         // Replace specific error message with user-friendly one

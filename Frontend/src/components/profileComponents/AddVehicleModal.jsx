@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { fetchBikeBrands, fetchBikeModels, createUserVehicle } from '../../services/bookingService';
 import { getSubscriberId, getBusinessId } from '../../services/authService';
@@ -17,7 +17,7 @@ const AddVehicleModal = ({ isOpen, onClose, onSuccess }) => {
     if (isOpen) {
       loadBrands();
     }
-  }, [isOpen]);
+  }, [isOpen, loadBrands]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -55,7 +55,7 @@ const AddVehicleModal = ({ isOpen, onClose, onSuccess }) => {
     });
   };
 
-  const loadBrands = async () => {
+  const loadBrands = useCallback(async () => {
     setLoading(true);
     try {
       const brandsData = await fetchBikeBrands();
@@ -68,7 +68,7 @@ const AddVehicleModal = ({ isOpen, onClose, onSuccess }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const handleBrandSelect = async (brand) => {
     setSelectedBrand(brand);
