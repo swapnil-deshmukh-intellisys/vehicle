@@ -41,16 +41,17 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
-    - name: Install dependencies (Frontend)
+    - name: Install dependencies
+      run: pnpm install
+
+    - name: Install Frontend dependencies
       working-directory: ./Frontend
       run: pnpm install
 
-    - name: Run linting (Frontend)
-      working-directory: ./Frontend
+    - name: Run linting
       run: pnpm run lint
 
-    - name: Run tests (Frontend)
-      working-directory: ./Frontend
+    - name: Run tests
       run: pnpm run test:coverage
 
     - name: Build project (Frontend)
@@ -60,7 +61,7 @@ jobs:
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
-        file: ./Frontend/coverage/lcov.info
+        file: ./coverage/lcov.info
         flags: frontend
         name: frontend-coverage
 

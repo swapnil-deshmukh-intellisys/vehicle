@@ -1,0 +1,84 @@
+{
+  "name": "bikedoot",
+  "private": true,
+  "version": "0.0.0",
+  
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint --config eslint.config.cjs . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview",
+    "test": "jest --watchAll=false",
+    "test:watch": "jest",
+    "test:coverage": "jest --coverage --watchAll=false"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/Frontend/src/setupTests.js"],
+    "testMatch": [
+      "<rootDir>/tests/**/*.test.(js|jsx)",
+      "<rootDir>/test.js"
+    ],
+    "collectCoverageFrom": [
+      "Frontend/src/**/*.(js|jsx)",
+      "!Frontend/src/index.js",
+      "!Frontend/src/main.jsx",
+      "!Frontend/src/reportWebVitals.js",
+      "!Frontend/src/**/*.test.js",
+      "!Frontend/src/**/*.test.jsx",
+      "!Frontend/src/**/__tests__/**"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+    },
+    "transform": {
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(.*\\.mjs$))"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/Frontend/package.json"
+    ]
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.0.0",
+    "@fortawesome/free-brands-svg-icons": "^7.0.1",
+    "@fortawesome/free-regular-svg-icons": "^7.0.1",
+    "@fortawesome/free-solid-svg-icons": "^7.0.0",
+    "@fortawesome/react-fontawesome": "^3.0.1",
+    "@headlessui/react": "^2.2.7",
+    "@heroicons/react": "^2.2.0",
+    "axios": "^1.11.0",
+    "lucide-react": "^0.542.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-icons": "^5.5.0",
+    "react-router-dom": "^7.8.2",
+    "swiper": "^11.2.10"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-react": "^7.28.5",
+    "@eslint/js": "^9.33.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.21",
+    "babel-jest": "^30.2.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "vite": "^7.1.2"
+  },
+  "packageManager": "pnpm@10.26.2+sha512.0e308ff2005fc7410366f154f625f6631ab2b16b1d2e70238444dd6ae9d630a8482d92a451144debc492416896ed16f7b114a86ec68b8404b2443869e68ffda6"
+}
