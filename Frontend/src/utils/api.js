@@ -19,6 +19,36 @@ if (import.meta.env.DEV) {
   console.log('🔍 API Base URL:', API_BASE_URL);
 }
 
+// Retry mechanism for failed requests
+const RETRY_REQUEST = async (fn, retries = 3, delay = 1000) => {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries > 0) {
+      console.warn(`Retrying request... (${retries} attempts left)`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      return RETRY_REQUEST(fn, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+};
+
+// Enhanced error handling
+const HANDLE_API_ERROR = (error, customMessage = 'API request failed') => {
+  console.error(`${customMessage}:`, error);
+  
+  if (error.response) {
+    // Server responded with error status
+    throw new Error(`Server error: ${error.response.status} - ${error.response.statusText}`);
+  } else if (error.request) {
+    // Network error
+    throw new Error('Network error: Unable to connect to server');
+  } else {
+    // Other error
+    throw new Error(`Request error: ${error.message}`);
+  }
+};
+
 
 // Generic API request function
 export const apiRequest = async (endpoint, options = {}) => {
