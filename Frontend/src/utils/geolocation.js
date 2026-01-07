@@ -1,27 +1,140 @@
-// Geolocation utility functions - Simplified approach based on old website
-export const getCurrentLocation = () => {
+// Geolocation utility functions - Enhanced with caching and error handling
+import { getCacheWithTTL, setCacheWithTTL } from './cacheUtils.js';
+
+// Location cache key
+const LOCATION_CACHE_KEY = 'user_location';
+const LOCATION_CACHE_TTL = 300000; // 5 minutes
+
+// Enhanced error messages
+const GEOLOCATION_ERRORS = {
+  PERMISSION_DENIED: 'Location access denied. Please enable location services.',
+  POSITION_UNAVAILABLE: 'Location information is unavailable.',
+  TIMEOUT: 'Location request timed out. Please try again.',
+  NOT_SUPPORTED: 'Geolocation is not supported by this browser.',
+  NETWORK_ERROR: 'Network error occurred while getting location.'
+};
+
+// Get cached location
+export const getCachedLocation = () => {
+  return getCacheWithTTL(LOCATION_CACHE_KEY);
+};
+
+// Set cached location
+export const setCachedLocation = (location) => {
+  setCacheWithTTL(LOCATION_CACHE_KEY, location, LOCATION_CACHE_TTL);
+};
+
+// Enhanced getCurrentLocation with caching and better error handling
+export const getCurrentLocation = (options = {}) => {
   return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by this browser'));
+    // Check cache first
+    const cachedLocation = getCachedLocation();
+    if (cachedLocation && !options.forceRefresh) {
+      resolve(cachedLocation);
       return;
     }
 
+    if (!navigator.geolocation) {
+      reject(new Error(GEOLOCATION_ERRORS.NOT_SUPPORTED));
+      return;
+    }
+
+    const defaultOptions = {
+      enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 60000 // 1 minute
+    };
+
+    const finalOptions = { ...defaultOptions, ...options };
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
-        resolve({ latitude, longitude });
+        const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading, speed } = position.coords;
+        const location = { 
+          latitude, 
+          longitude, 
+          accuracy, 
+          altitude, 
+          altitudeAccuracy, 
+          heading, 
+          speed,
+          timestamp: position.timestamp
+        };
+        
+        // Cache the location
+        setCachedLocation(location);
+        
+        resolve(location);
       },
       (error) => {
         console.error('Geolocation error:', error);
-        reject(error);
+        const errorMessage = GEOLOCATION_ERRORS[error.code] || GEOLOCATION_ERRORS.NETWORK_ERROR;
+        reject(new Error(errorMessage));
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 30000,
-        maximumAge: 0, // Don't use cached location
-      }
+      finalOptions
     );
   });
+};
+
+// Watch location changes
+export const watchLocation = (callback, options = {}) => {
+  if (!navigator.geolocation) {
+    throw new Error(GEOLOCATION_ERRORS.NOT_SUPPORTED);
+  }
+
+  const defaultOptions = {
+    enableHighAccuracy: true,
+    timeout: 30000,
+    maximumAge: 5000 // 5 seconds for watching
+  };
+
+  const finalOptions = { ...defaultOptions, ...options };
+
+  return navigator.geolocation.watchPosition(
+    (position) => {
+      const { latitude, longitude, accuracy, altitude, altitudeAccuracy, heading, speed } = position.coords;
+      const location = { 
+        latitude, 
+        longitude, 
+        accuracy, 
+        altitude, 
+        altitudeAccuracy, 
+        heading, 
+        speed,
+        timestamp: position.timestamp
+      };
+      
+      // Cache the latest location
+      setCachedLocation(location);
+      
+      callback(null, location);
+    },
+    (error) => {
+      console.error('Location watch error:', error);
+      const errorMessage = GEOLOCATION_ERRORS[error.code] || GEOLOCATION_ERRORS.NETWORK_ERROR;
+      callback(new Error(errorMessage));
+    },
+    finalOptions
+  );
+};
+
+// Calculate distance between two points (Haversine formula)
+export const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
+// Check if user is within a certain radius
+export const isWithinRadius = (userLat, userLon, targetLat, targetLon, radiusKm) => {
+  const distance = calculateDistance(userLat, userLon, targetLat, targetLon);
+  return distance <= radiusKm;
 };
 
 // Simple city detection using Haversine distance calculation (from old website)
@@ -44,7 +157,7 @@ export const getCityFromCoordinates = async (latitude, longitude) => {
     let minDistance = Infinity;
 
     citiesWithCoords.forEach(city => {
-      const dist = getDistanceFromLatLonInKm(latitude, longitude, city.lat, city.lon);
+      const dist = calculateDistance(latitude, longitude, city.lat, city.lon);
       if (dist < minDistance) {
         minDistance = dist;
         nearestCity = city.name;
@@ -72,7 +185,7 @@ export const getCityFromCoordinates = async (latitude, longitude) => {
 };
 
 // Haversine distance calculation (from old website)
-function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+function GET_DISTANCE_FROM_LAT_LON_IN_KM(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of the earth in km
   const dLat = deg2rad(lat2 - lat1);
   const dLon = deg2rad(lon2 - lon1);
