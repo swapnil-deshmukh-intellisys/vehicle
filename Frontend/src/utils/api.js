@@ -158,6 +158,94 @@ export const apiPatch = (endpoint, data, options = {}) => {
   });
 };
 
+// Form data request (for file uploads)
+export const apiFormData = (endpoint, formData, options = {}) => {
+  return apiRequest(endpoint, {
+    ...options,
+    headers: {
+      ...options.headers,
+      'Content-Type': 'multipart/form-data',
+    },
+    body: formData,
+  });
+};
+
+// Submit form data with validation
+export const submitForm = async (endpoint, formData, validationSchema = null) => {
+  try {
+    // Validate form if schema provided
+    if (validationSchema) {
+      const { validateForm } = await import('./formValidation.js');
+      const validation = validateForm(formData, validationSchema);
+      
+      if (!validation.isValid) {
+        throw new Error('Form validation failed');
+      }
+    }
+    
+    return await apiPost(endpoint, formData);
+  } catch (error) {
+    console.error('Form submission error:', error);
+    throw error;
+  }
+};
+
+// Upload file with progress tracking
+export const uploadFile = (endpoint, file, onProgress = null, options = {}) => {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const xhr = new XMLHttpRequest();
+    
+    // Progress tracking
+    if (onProgress) {
+      xhr.upload.addEventListener('progress', (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100;
+          onProgress(percentComplete);
+        }
+      });
+    }
+    
+    // Load completion
+    xhr.addEventListener('load', () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          resolve(response);
+        } catch {
+          resolve(xhr.responseText);
+        }
+      } else {
+        reject(new Error(`Upload failed with status ${xhr.status}`));
+      }
+    });
+    
+    // Error handling
+    xhr.addEventListener('error', () => {
+      reject(new Error('Upload failed due to network error'));
+    });
+    
+    xhr.addEventListener('timeout', () => {
+      reject(new Error('Upload timed out'));
+    });
+    
+    // Configure and send request
+    xhr.timeout = options.timeout || 30000;
+    xhr.open('POST', `${API_BASE_URL}${endpoint}`);
+    
+    // Add headers
+    if (options.headers) {
+      Object.keys(options.headers).forEach(key => {
+        xhr.setRequestHeader(key, options.headers[key]);
+      });
+    }
+    
+    xhr.send(formData);
+  });
+};
+
 // DELETE request
 export const apiDelete = (endpoint, options = {}) => {
   return apiRequest(endpoint, { ...options, method: 'DELETE' });
