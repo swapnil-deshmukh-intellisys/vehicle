@@ -153,3 +153,40 @@ export const createThemeCSS = (theme = null) => {
     .map(([key, value]) => `  --color-${key}: ${value};`)
     .join('\n');
 };
+
+// Animation support for theme transitions
+export const enableThemeTransitions = (duration = 300) => {
+  const style = document.createElement('style');
+  style.id = 'theme-transitions';
+  style.textContent = `
+    * {
+      transition: color ${duration}ms ease-in-out,
+                  background-color ${duration}ms ease-in-out,
+                  border-color ${duration}ms ease-in-out,
+                  box-shadow ${duration}ms ease-in-out !important;
+    }
+  `;
+  document.head.appendChild(style);
+};
+
+// Disable theme transitions
+export const disableThemeTransitions = () => {
+  const style = document.querySelector('#theme-transitions');
+  if (style) {
+    style.remove();
+  }
+};
+
+// Smooth theme change with transitions
+export const smoothThemeChange = (newTheme, duration = 300) => {
+  // Disable transitions temporarily for instant change
+  disableThemeTransitions();
+  
+  // Apply new theme
+  setTheme(newTheme);
+  
+  // Re-enable transitions after a brief delay
+  setTimeout(() => {
+    enableThemeTransitions(duration);
+  }, 50);
+};
