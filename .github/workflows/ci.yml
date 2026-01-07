@@ -44,6 +44,10 @@ jobs:
     - name: Install dependencies
       run: pnpm install
 
+    - name: Install Frontend dependencies
+      working-directory: ./Frontend
+      run: pnpm install
+
     - name: Run linting
       run: pnpm run lint
 
