@@ -36,6 +36,9 @@
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(.*\\.mjs$))"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/Frontend/package.json"
     ]
   },
   "dependencies": {
