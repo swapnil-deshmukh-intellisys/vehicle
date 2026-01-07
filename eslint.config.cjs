@@ -1,10 +1,10 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
-import { defineConfig, globalIgnores } from 'eslint/config'
+const js = require('@eslint/js');
+const globals = require('globals');
+const reactHooks = require('eslint-plugin-react-hooks');
+const reactRefresh = require('eslint-plugin-react-refresh');
+const { defineConfig, globalIgnores } = require('eslint/config');
 
-export default defineConfig([
+module.exports = defineConfig([
   globalIgnores(['dist', 'coverage', 'node_modules', '**/*.min.js', 'Frontend/dist', 'Backend/**', 'Frontend/coverage/**']),
   {
     files: ['Frontend/**/*.{js,jsx}'],
@@ -64,5 +64,5 @@ export default defineConfig([
       },
     },
   },
-])
+]);
 
