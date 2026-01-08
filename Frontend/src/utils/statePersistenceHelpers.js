@@ -131,7 +131,7 @@ export const migrateData = (oldData, migrationMap) => {
   
   Object.keys(migrationMap).forEach(oldKey => {
     const newKey = migrationMap[oldKey];
-    if (Object.prototype.hasOwnProperty.call(oldData, oldKey)) {
+    if (oldKey in oldData) {
       newData[newKey] = oldData[oldKey];
       delete newData[oldKey];
     }
