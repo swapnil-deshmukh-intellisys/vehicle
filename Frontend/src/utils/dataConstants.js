@@ -38,8 +38,8 @@ export const VALIDATION_RULES = {
 export const VALIDATION_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   URL: /^https?:\/\/.+/,
-  PHONE: /^\+?[\d\s\-\(\)]+$/,
-  CREDIT_CARD: /^[\d\s\-]{13,19}$/,
+  PHONE: /^\+?[\d\s-()]+$/,
+  CREDIT_CARD: /^[\d\s-]{13,19}$/,
   DATE: /^\d{4}-\d{2}-\d{2}$/,
   TIME: /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
   DATETIME: /^\d{4}-\d{2}-\d{2}T([01]?[0-9]|2[0-3]):[0-5][0-9]$/,
