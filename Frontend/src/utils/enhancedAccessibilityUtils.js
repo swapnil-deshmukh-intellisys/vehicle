@@ -51,23 +51,28 @@ export class AccessibilityManager {
   // Setup keyboard navigation
   setupKeyboardNavigation() {
     document.addEventListener('keydown', (e) => {
-      switch (e.key) {
-        case 'Tab':
-          this.handleTabNavigation(e);
-          break;
-        case 'Enter':
-        case ' ':
-          this.handleActivation(e);
-          break;
-        case 'Escape':
-          this.handleEscape(e);
-          break;
-        case 'ArrowUp':
-        case 'ArrowDown':
-        case 'ArrowLeft':
-        case 'ArrowRight':
-          this.handleArrowNavigation(e);
-          break;
+      try {
+        switch (e.key) {
+          case 'Tab':
+            this.handleTabNavigation(e);
+            break;
+          case 'Enter':
+          case ' ':
+            this.handleActivation(e);
+            break;
+          case 'Escape':
+            this.handleEscape(e);
+            break;
+          case 'ArrowUp':
+          case 'ArrowDown':
+          case 'ArrowLeft':
+          case 'ArrowRight':
+            this.handleArrowNavigation(e);
+            break;
+        }
+      } catch {
+        // Handle any errors in keyboard navigation
+        console.error('Keyboard navigation error:', e);
       }
     });
   }
