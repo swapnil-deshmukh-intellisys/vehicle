@@ -362,8 +362,7 @@ export class ComponentEventManager {
     this.isProcessing = false;
   }
 
-  // Process individual event
-  async processEvent(event) {
+  processEvent(event) {
     // Process component listeners
     const componentListeners = this.listeners.get(event.componentId);
     if (componentListeners) {
@@ -373,8 +372,8 @@ export class ComponentEventManager {
           if (!event.stopPropagation) {
             try {
               await handler(event);
-            } catch (error) {
-              console.error('Event handler error:', error);
+            } catch (handlerError) {
+              console.error('Event handler error:', handlerError);
             }
           }
         }
@@ -387,8 +386,8 @@ export class ComponentEventManager {
       for (const handler of globalListeners) {
         try {
           await handler(event);
-        } catch (error) {
-          console.error('Global event handler error:', error);
+        } catch (globalHandlerError) {
+          console.error('Global event handler error:', globalHandlerError);
         }
       }
     }
@@ -486,11 +485,11 @@ export class ComponentLifecycleManager {
   }
 
   // Trigger hook
-  triggerHook(hookName, componentId, component, ...args) {
+  triggerHook(hookName, componentId, componentData, ...args) {
     const hooks = this.hooks.get(hookName) || [];
     hooks.forEach(hook => {
       try {
-        hook(componentId, component, ...args);
+        hook(componentId, componentData, ...args);
       } catch (error) {
         console.error(`Lifecycle hook '${hookName}' error:`, error);
       }
@@ -502,7 +501,7 @@ export class ComponentLifecycleManager {
       const componentHooks = componentInfo.hooks.get(hookName) || [];
       componentHooks.forEach(hook => {
         try {
-          hook(component, ...args);
+          hook(componentData, ...args);
         } catch (error) {
           console.error(`Component hook '${hookName}' error:`, error);
         }

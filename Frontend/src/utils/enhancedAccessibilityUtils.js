@@ -469,7 +469,7 @@ export class AccessibilityManager {
   }
 
   // Create accessible modal
-  createAccessibleModal(title, content, options = {}) {
+  createAccessibleModal(title, content, _options = {}) {
     const modal = document.createElement('div');
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
