@@ -661,7 +661,7 @@ export const componentLifecycleManager = new ComponentLifecycleManager();
 export const componentPerformanceMonitor = new ComponentPerformanceMonitor();
 
 // Initialize component system
-export const initializeComponents = (_options = {}) => {
+export const initializeComponents = () => {
   // Setup default components
   setupDefaultComponents();
 
@@ -778,11 +778,11 @@ function setupDefaultSchemas() {
 
 // Setup default lifecycle hooks
 function setupDefaultHooks() {
-  componentLifecycleManager.addHook('mounted', (componentId, _component) => {
+  componentLifecycleManager.addHook('mounted', (componentId) => {
     console.log(`Component ${componentId} mounted`);
   });
 
-  componentLifecycleManager.addHook('unmounted', (componentId, _component) => {
+  componentLifecycleManager.addHook('unmounted', (componentId) => {
     console.log(`Component ${componentId} unmounted`);
   });
 
