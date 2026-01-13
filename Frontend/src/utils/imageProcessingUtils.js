@@ -466,7 +466,7 @@ export class ImageOptimizer {
   }
 
   // Optimize image for web
-  async optimize(source, _options = {}) {
+  async optimize(source) {
     const processor = new ImageProcessor(this.options);
     const img = await processor.loadImage(source);
     
