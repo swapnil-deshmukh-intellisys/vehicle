@@ -107,7 +107,7 @@ export class AccessibilityManager {
   }
 
   // Handle escape key
-  handleEscape(e) {
+  handleEscape(_e) {
     if (this.trap && this.trap.contains(document.activeElement)) {
       this.releaseFocusTrap();
     }
@@ -474,7 +474,7 @@ export class AccessibilityManager {
   }
 
   // Create accessible modal
-  createAccessibleModal(title, content, _options = {}) {
+  createAccessibleModal(title, content) {
     const modal = document.createElement('div');
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
@@ -587,7 +587,7 @@ export class AccessibilityManager {
           }
           break;
           
-        case 'missing-label':
+        case 'missing-label': {
           const id = this.generateId('label');
           const label = document.createElement('label');
           label.setAttribute('for', id);
@@ -597,6 +597,7 @@ export class AccessibilityManager {
           issue.element.id = issue.element.id || id;
           issue.element.parentNode.insertBefore(label, issue.element);
           break;
+        }
           
         case 'empty-heading':
           issue.element.textContent = 'Section heading';

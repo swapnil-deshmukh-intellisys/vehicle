@@ -371,7 +371,7 @@ export class ComponentEventManager {
         for (const handler of eventListeners) {
           if (!event.stopPropagation) {
             try {
-              await handler(event);
+              handler(event);
             } catch (handlerError) {
               console.error('Event handler error:', handlerError);
             }
@@ -385,7 +385,7 @@ export class ComponentEventManager {
     if (globalListeners && !event.stopPropagation) {
       for (const handler of globalListeners) {
         try {
-          await handler(event);
+          handler(event);
         } catch (globalHandlerError) {
           console.error('Global event handler error:', globalHandlerError);
         }

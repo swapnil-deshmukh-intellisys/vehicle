@@ -705,7 +705,7 @@ export class ModalManager {
 
   // Close all modals
   closeAll() {
-    this.stack.forEach(modal => this.close(mod.id));
+    this.stack.forEach(modal => this.close(modal.id));
   }
 
   // Get active modals
