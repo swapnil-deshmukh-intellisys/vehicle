@@ -351,8 +351,6 @@ export class ImageProcessor {
   // Process image with multiple operations
   async processImage(source, operations = {}) {
     const img = await this.loadImage(source);
-    let currentCanvas = this.canvas;
-    let currentCtx = this.ctx;
     let currentImg = img;
     let result = { width: img.width, height: img.height, canvas: this.canvas };
 
@@ -468,7 +466,7 @@ export class ImageOptimizer {
   }
 
   // Optimize image for web
-  async optimize(source, options = {}) {
+  async optimize(source, _options = {}) {
     const processor = new ImageProcessor(this.options);
     const img = await processor.loadImage(source);
     
