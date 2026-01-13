@@ -107,7 +107,7 @@ export class AccessibilityManager {
   }
 
   // Handle escape key
-  handleEscape(_e) {
+  handleEscape() {
     if (this.trap && this.trap.contains(document.activeElement)) {
       this.releaseFocusTrap();
     }
