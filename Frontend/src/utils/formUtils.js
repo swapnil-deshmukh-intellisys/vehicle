@@ -32,7 +32,7 @@ export class FormValidator {
     const errors = [];
     
     for (const rule of rules) {
-      const error = this.checkRule(value, rule);
+      const error = this.checkRule(value, rule, fieldName);
       if (error) {
         errors.push(error);
       }
@@ -42,7 +42,7 @@ export class FormValidator {
   }
 
   // Check individual rule
-  checkRule(value, rule) {
+  checkRule(value, rule, fieldName) {
     switch (rule.type) {
       case 'required':
         if (!value || value.toString().trim() === '') {
@@ -50,12 +50,13 @@ export class FormValidator {
         }
         break;
         
-      case 'email':
+      case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (value && !emailRegex.test(value)) {
           return rule.message || 'Please enter a valid email address';
         }
         break;
+      }
         
       case 'minLength':
         if (value && value.toString().length < rule.value) {

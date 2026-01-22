@@ -77,7 +77,7 @@ export class DataTransformer {
     const result = { ...obj };
     
     for (const [field, transformerName] of Object.entries(transformers)) {
-      if (result.hasOwnProperty(field)) {
+      if (Object.prototype.hasOwnProperty.call(result, field)) {
         result[field] = this.transform(result[field], transformerName);
       }
     }
@@ -156,7 +156,7 @@ export class DataParser {
     const result = { ...obj };
     
     for (const [field, parserName] of Object.entries(parsers)) {
-      if (result.hasOwnProperty(field)) {
+      if (Object.prototype.hasOwnProperty.call(result, field)) {
         result[field] = this.parse(result[field], parserName);
       }
     }
@@ -335,7 +335,7 @@ export const dataConversionUtils = {
     if (typeof obj === 'object') {
       const cloned = {};
       for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
           cloned[key] = this.deepClone(obj[key]);
         }
       }

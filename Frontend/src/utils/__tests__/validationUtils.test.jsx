@@ -115,7 +115,7 @@ export const validationUtils = {
   // Common validation patterns
   patterns: {
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    phone: /^\+?[\d\s\-\(\)]+$/,
+    phone: /^\+?[\d\s\-()]+$/,
     url: /^https?:\/\/.+/,
     alphanumeric: /^[a-zA-Z0-9]+$/,
     password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/
@@ -127,7 +127,7 @@ export const validationUtils = {
     isEmail: (value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
     isNumeric: (value) => !value || !isNaN(parseFloat(value)) && isFinite(value),
     isUrl: (value) => !value || /^https?:\/\/.+/.test(value),
-    isPhone: (value) => !value || /^\+?[\d\s\-\(\)]+$/.test(value)
+    isPhone: (value) => !value || /^\+?[\d\s\-()]+$/.test(value)
   },
 
   // Sanitize input
@@ -135,13 +135,14 @@ export const validationUtils = {
     switch (type) {
       case 'string':
         return typeof value === 'string' ? value.trim() : '';
-      case 'number':
+      case 'number': {
         const num = parseFloat(value);
         return isNaN(num) ? 0 : num;
+      }
       case 'email':
         return typeof value === 'string' ? value.toLowerCase().trim() : '';
       case 'phone':
-        return typeof value === 'string' ? value.replace(/[^\d\+\-\(\)\s]/g, '') : '';
+        return typeof value === 'string' ? value.replace(/[^\d+\-() ]/g, '') : '';
       default:
         return value;
     }

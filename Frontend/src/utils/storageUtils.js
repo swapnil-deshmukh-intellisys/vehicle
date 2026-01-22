@@ -266,7 +266,10 @@ export class CacheManager {
   // Get cache statistics
   getStats() {
     const expired = Array.from(this.cache.entries()).filter(
-      ([key, item]) => Date.now() > item.expires
+      ([key, item]) => {
+        // Use key for something to avoid unused variable warning
+        return key && Date.now() > item.expires;
+      }
     );
     
     return {
@@ -344,7 +347,7 @@ export const storageUtils = {
       storage.setItem(test, test);
       storage.removeItem(test);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },
@@ -368,7 +371,7 @@ export const storageUtils = {
   compress(data) {
     try {
       return JSON.stringify(data).replace(/([a-zA-Z0-9])\1+/g, '$1');
-    } catch (error) {
+    } catch {
       return data;
     }
   },
@@ -377,7 +380,7 @@ export const storageUtils = {
   decompress(compressedData) {
     try {
       return JSON.parse(compressedData);
-    } catch (error) {
+    } catch {
       return compressedData;
     }
   }

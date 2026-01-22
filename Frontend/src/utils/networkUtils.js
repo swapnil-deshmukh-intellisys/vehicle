@@ -28,24 +28,25 @@ export class HttpClient {
   }
 
   // Make HTTP request with retry logic
-  async request(config) {
-    const finalConfig = {
+  async request(requestConfig) {
+    const baseConfig = {
       method: 'GET',
-      ...config,
-      url: this.baseURL + config.url,
-      headers: { ...this.headers, ...config.headers }
+      ...requestConfig,
+      url: this.baseURL + requestConfig.url,
+      headers: { ...this.headers, ...requestConfig.headers }
     };
 
     // Apply request interceptors
+    let processedConfig = { ...baseConfig };
     for (const interceptor of this.interceptors.request) {
-      finalConfig = interceptor(finalConfig) || finalConfig;
+      processedConfig = interceptor(processedConfig) || processedConfig;
     }
 
     let lastError;
     
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
-        const response = await this.makeRequest(finalConfig);
+        const response = await this.makeRequest(processedConfig);
         
         // Apply response interceptors
         let processedResponse = response;
@@ -72,15 +73,15 @@ export class HttpClient {
   }
 
   // Make actual HTTP request
-  async makeRequest(config) {
+  async makeRequest(requestConfig) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
     
     try {
-      const response = await fetch(config.url, {
-        method: config.method,
-        headers: config.headers,
-        body: config.body,
+      const response = await fetch(requestConfig.url, {
+        method: requestConfig.method,
+        headers: requestConfig.headers,
+        body: requestConfig.body,
         signal: controller.signal
       });
       
@@ -108,8 +109,7 @@ export class HttpClient {
         data,
         status: response.status,
         statusText: response.statusText,
-        headers: response.headers,
-        response
+        headers: response.headers
       };
     } catch (error) {
       clearTimeout(timeoutId);
@@ -310,7 +310,7 @@ export const networkUtils = {
     try {
       new URL(url);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },
@@ -379,7 +379,7 @@ export const networkUtils = {
           try {
             const response = JSON.parse(xhr.responseText);
             resolve(response);
-          } catch (error) {
+          } catch {
             resolve(xhr.responseText);
           }
         } else {
@@ -406,12 +406,12 @@ export const networkUtils = {
   // Check network connectivity
   async checkConnectivity() {
     try {
-      const response = await fetch('https://www.google.com/favicon.ico', {
+      await fetch('https://www.google.com/favicon.ico', {
         method: 'HEAD',
         mode: 'no-cors'
       });
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },

@@ -310,11 +310,12 @@ export class DateCalculator {
         dateObj.setDate(1);
         dateObj.setHours(0, 0, 0, 0);
         break;
-      case 'week':
+      case 'week': {
         const day = dateObj.getDay();
         dateObj.setDate(dateObj.getDate() - day);
         dateObj.setHours(0, 0, 0, 0);
         break;
+      }
       case 'day':
         dateObj.setHours(0, 0, 0, 0);
         break;
@@ -345,11 +346,12 @@ export class DateCalculator {
         dateObj.setMonth(dateObj.getMonth() + 1, 0);
         dateObj.setHours(23, 59, 59, 999);
         break;
-      case 'week':
+      case 'week': {
         const day = dateObj.getDay();
         dateObj.setDate(dateObj.getDate() + (6 - day));
         dateObj.setHours(23, 59, 59, 999);
         break;
+      }
       case 'day':
         dateObj.setHours(23, 59, 59, 999);
         break;

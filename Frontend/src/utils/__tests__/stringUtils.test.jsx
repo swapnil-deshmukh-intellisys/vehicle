@@ -56,10 +56,11 @@ export class StringUtils {
     switch (padType) {
       case 'left':
         return padding + str;
-      case 'both':
+      case 'both': {
         const leftPad = padding.slice(0, Math.ceil(padding.length / 2));
         const rightPad = padding.slice(Math.ceil(padding.length / 2));
         return leftPad + str + rightPad;
+      }
       default:
         return str + padding;
     }
@@ -206,7 +207,7 @@ export class AdvancedStringUtils {
   // Format template string with variables
   static template(str, variables) {
     return str.replace(/\{(\w+)\}/g, (match, key) => {
-      return variables.hasOwnProperty(key) ? variables[key] : match;
+      return Object.prototype.hasOwnProperty.call(variables, key) ? variables[key] : match;
     });
   }
 
