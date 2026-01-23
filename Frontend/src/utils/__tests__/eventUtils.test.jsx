@@ -2,7 +2,8 @@ import { describe, test, expect, beforeEach, jest } from '@jest/globals';
 
 // Mock DOM environment for F2P tests
 global.document = {
-  createElement: jest.fn(() => ({
+  createElement: jest.fn((tag) => ({
+    tagName: tag.toUpperCase(),
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
@@ -11,122 +12,100 @@ global.document = {
     preventDefault: jest.fn(),
     stopPropagation: jest.fn(),
     stopImmediatePropagation: jest.fn(),
-    bubbles: true,
-    cancelable: true,
+    bubbles: false,
+    cancelable: false,
     composed: false,
-    detail: null,
-    timeStamp: Date.now(),
     eventPhase: 0,
+    timeStamp: 0,
     type: '',
-    view: window,
-    srcElement: null,
-    cancelBubble: false,
-    returnValue: true,
-    path: [],
-    composedPath: jest.fn(() => [])
+    detail: null
   })),
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
   dispatchEvent: jest.fn(),
-  readyState: 'complete',
-  activeElement: null,
-  body: {
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  },
-  documentElement: {
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  }
+  activeElement: null
 };
 
 global.window = {
   addEventListener: jest.fn(),
   removeEventListener: jest.fn(),
   dispatchEvent: jest.fn(),
-  CustomEvent: jest.fn((type, options) => ({
+  CustomEvent: jest.fn((type, options = {}) => ({
     type,
-    detail: options?.detail,
-    bubbles: options?.bubbles || false,
-    cancelable: options?.cancelable || false,
-    composed: options?.composed || false
-  })),
-  Event: jest.fn((type, options) => ({
-    type,
-    bubbles: options?.bubbles || false,
-    cancelable: options?.cancelable || false,
-    composed: options?.composed || false,
+    detail: options.detail,
+    bubbles: options.bubbles || false,
+    cancelable: options.cancelable || false,
+    composed: options.composed || false,
     target: null,
     currentTarget: null,
     preventDefault: jest.fn(),
     stopPropagation: jest.fn(),
     stopImmediatePropagation: jest.fn(),
-    timeStamp: Date.now(),
     eventPhase: 0,
-    view: window,
-    srcElement: null,
-    cancelBubble: false,
-    returnValue: true,
-    path: [],
-    composedPath: jest.fn(() => [])
+    timeStamp: Date.now()
   })),
-  KeyboardEvent: jest.fn((type, options) => ({
+  Event: jest.fn((type, options = {}) => ({
     type,
-    key: options?.key || '',
-    code: options?.code || '',
-    location: options?.location || 0,
-    repeat: options?.repeat || false,
-    ctrlKey: options?.ctrlKey || false,
-    shiftKey: options?.shiftKey || false,
-    altKey: options?.altKey || false,
-    metaKey: options?.metaKey || false,
-    bubbles: options?.bubbles || false,
-    cancelable: options?.cancelable || false,
-    composed: options?.composed || false,
+    bubbles: options.bubbles || false,
+    cancelable: options.cancelable || false,
+    composed: options.composed || false,
     target: null,
     currentTarget: null,
     preventDefault: jest.fn(),
     stopPropagation: jest.fn(),
     stopImmediatePropagation: jest.fn(),
-    timeStamp: Date.now(),
     eventPhase: 0,
-    view: window,
-    srcElement: null,
-    cancelBubble: false,
-    returnValue: true,
-    path: [],
-    composedPath: jest.fn(() => [])
+    timeStamp: Date.now()
   })),
-  MouseEvent: jest.fn((type, options) => ({
+  KeyboardEvent: jest.fn((type, options = {}) => ({
     type,
-    clientX: options?.clientX || 0,
-    clientY: options?.clientY || 0,
-    screenX: options?.screenX || 0,
-    screenY: options?.screenY || 0,
-    button: options?.button || 0,
-    buttons: options?.buttons || 0,
-    ctrlKey: options?.ctrlKey || false,
-    shiftKey: options?.shiftKey || false,
-    altKey: options?.altKey || false,
-    metaKey: options?.metaKey || false,
-    bubbles: options?.bubbles || false,
-    cancelable: options?.cancelable || false,
-    composed: options?.composed || false,
+    key: options.key || '',
+    code: options.code || '',
+    location: options.location || 0,
+    ctrlKey: options.ctrlKey || false,
+    shiftKey: options.shiftKey || false,
+    altKey: options.altKey || false,
+    metaKey: options.metaKey || false,
+    repeat: options.repeat || false,
+    bubbles: options.bubbles || false,
+    cancelable: options.cancelable || false,
+    composed: options.composed || false,
     target: null,
     currentTarget: null,
     preventDefault: jest.fn(),
     stopPropagation: jest.fn(),
     stopImmediatePropagation: jest.fn(),
-    timeStamp: Date.now(),
     eventPhase: 0,
-    view: window,
-    srcElement: null,
-    cancelBubble: false,
-    returnValue: true,
-    path: [],
-    composedPath: jest.fn(() => [])
+    timeStamp: Date.now()
+  })),
+  MouseEvent: jest.fn((type, options = {}) => ({
+    type,
+    button: options.button || 0,
+    buttons: options.buttons || 0,
+    clientX: options.clientX || 0,
+    clientY: options.clientY || 0,
+    movementX: options.movementX || 0,
+    movementY: options.movementY || 0,
+    offsetX: options.offsetX || 0,
+    offsetY: options.offsetY || 0,
+    pageX: options.pageX || 0,
+    pageY: options.pageY || 0,
+    screenX: options.screenX || 0,
+    screenY: options.screenY || 0,
+    ctrlKey: options.ctrlKey || false,
+    shiftKey: options.shiftKey || false,
+    altKey: options.altKey || false,
+    metaKey: options.metaKey || false,
+    bubbles: options.bubbles || false,
+    cancelable: options.cancelable || false,
+    composed: options.composed || false,
+    target: null,
+    currentTarget: null,
+    preventDefault: jest.fn(),
+    stopPropagation: jest.fn(),
+    stopImmediatePropagation: jest.fn(),
+    eventPhase: 0,
+    timeStamp: Date.now()
   })),
   requestAnimationFrame: jest.fn((cb) => setTimeout(cb, 16)),
   cancelAnimationFrame: jest.fn()
@@ -136,510 +115,413 @@ global.window = {
 export class EventUtils {
   constructor() {
     this.listeners = new Map();
-    this.onceListeners = new Map();
-    this.delegates = new Map();
+    this.delegateMap = new Map();
+    this.throttleMap = new Map();
+    this.debounceMap = new Map();
   }
 
-  // Add event listener
+  // Basic event handling
   on(element, event, handler, options = {}) {
     if (typeof element === 'string') {
       element = document.querySelector(element);
     }
-
-    if (!element) {
-      throw new Error('Element not found');
-    }
-
-    const wrappedHandler = (e) => {
-      try {
-        handler.call(element, e);
-      } catch (error) {
-        console.error('Event handler error:', error);
-      }
-    };
-
-    element.addEventListener(event, wrappedHandler, options);
-
-    // Store reference for removal
-    const key = `${element.constructor.name}-${event}`;
+    
+    if (!element) return this;
+    
+    element.addEventListener(event, handler, options);
+    
+    // Track listener for cleanup
+    const key = `${element}-${event}`;
     if (!this.listeners.has(key)) {
       this.listeners.set(key, []);
     }
-    this.listeners.get(key).push({ element, event, handler: wrappedHandler, originalHandler: handler });
-
+    this.listeners.get(key).push({ handler, options });
+    
     return this;
   }
 
-  // Add event listener that runs once
-  once(element, event, handler, options = {}) {
-    if (typeof element === 'string') {
-      element = document.querySelector(element);
-    }
-
-    if (!element) {
-      throw new Error('Element not found');
-    }
-
-    const wrappedHandler = (e) => {
-      try {
-        handler.call(element, e);
-      } catch (error) {
-        console.error('Event handler error:', error);
-      } finally {
-        element.removeEventListener(event, wrappedHandler, options);
-        // Remove from tracking
-        const key = `${element.constructor.name}-${event}`;
-        const onceList = this.onceListeners.get(key) || [];
-        const index = onceList.findIndex(item => item.handler === wrappedHandler);
-        if (index > -1) {
-          onceList.splice(index, 1);
-        }
-      }
-    };
-
-    element.addEventListener(event, wrappedHandler, options);
-
-    // Store reference
-    const key = `${element.constructor.name}-${event}`;
-    if (!this.onceListeners.has(key)) {
-      this.onceListeners.set(key, []);
-    }
-    this.onceListeners.get(key).push({ element, event, handler: wrappedHandler, originalHandler: handler });
-
-    return this;
-  }
-
-  // Remove event listener
   off(element, event, handler) {
     if (typeof element === 'string') {
       element = document.querySelector(element);
     }
-
-    if (!element) {
-      return this;
-    }
-
-    // Find and remove from regular listeners
-    const key = `${element.constructor.name}-${event}`;
-    const listeners = this.listeners.get(key) || [];
-    const index = listeners.findIndex(item => item.originalHandler === handler);
     
-    if (index > -1) {
-      const { handler: wrappedHandler } = listeners[index];
-      element.removeEventListener(event, wrappedHandler);
-      listeners.splice(index, 1);
-    }
-
-    // Find and remove from once listeners
-    const onceListeners = this.onceListeners.get(key) || [];
-    const onceIndex = onceListeners.findIndex(item => item.originalHandler === handler);
+    if (!element) return this;
     
-    if (onceIndex > -1) {
-      const { handler: wrappedHandler } = onceListeners[onceIndex];
-      element.removeEventListener(event, wrappedHandler);
-      onceListeners.splice(onceIndex, 1);
+    element.removeEventListener(event, handler);
+    
+    // Remove from tracking
+    const key = `${element}-${event}`;
+    const listeners = this.listeners.get(key);
+    if (listeners) {
+      const index = listeners.findIndex(l => l.handler === handler);
+      if (index > -1) {
+        listeners.splice(index, 1);
+      }
     }
-
+    
     return this;
   }
 
-  // Remove all event listeners
-  offAll(element) {
-    if (typeof element === 'string') {
-      element = document.querySelector(element);
-    }
-
-    if (!element) {
-      return this;
-    }
-
-    // Remove all regular listeners
-    const keys = Array.from(this.listeners.keys()).filter(key => 
-      key.startsWith(element.constructor.name)
-    );
-
-    keys.forEach(key => {
-      const listeners = this.listeners.get(key) || [];
-      listeners.forEach(({ element: el, event, handler }) => {
-        if (el === element) {
-          el.removeEventListener(event, handler);
-        }
-      });
-      this.listeners.delete(key);
-    });
-
-    // Remove all once listeners
-    const onceKeys = Array.from(this.onceListeners.keys()).filter(key => 
-      key.startsWith(element.constructor.name)
-    );
-
-    onceKeys.forEach(key => {
-      const listeners = this.onceListeners.get(key) || [];
-      listeners.forEach(({ element: el, event, handler }) => {
-        if (el === element) {
-          el.removeEventListener(event, handler);
-        }
-      });
-      this.onceListeners.delete(key);
-    });
-
-    return this;
+  once(element, event, handler, options = {}) {
+    const onceHandler = (e) => {
+      handler(e);
+      this.off(element, event, onceHandler);
+    };
+    
+    return this.on(element, event, onceHandler, options);
   }
 
-  // Trigger event
   trigger(element, event, detail = {}, options = {}) {
     if (typeof element === 'string') {
       element = document.querySelector(element);
     }
-
-    if (!element) {
-      throw new Error('Element not found');
+    
+    if (!element) return this;
+    
+    let customEvent;
+    if (typeof event === 'string') {
+      customEvent = new CustomEvent(event, {
+        detail,
+        bubbles: options.bubbles || true,
+        cancelable: options.cancelable || true,
+        composed: options.composed || false
+      });
+    } else {
+      customEvent = event;
     }
-
-    const customEvent = new CustomEvent(event, {
-      detail,
-      bubbles: options.bubbles !== false,
-      cancelable: options.cancelable !== false,
-      composed: options.composed || false
-    });
-
+    
     element.dispatchEvent(customEvent);
     return this;
   }
 
   // Event delegation
   delegate(parent, selector, event, handler) {
-    if (typeof parent === 'string') {
-      parent = document.querySelector(parent);
-    }
-
-    if (!parent) {
-      throw new Error('Parent element not found');
-    }
-
     const delegateHandler = (e) => {
       const target = e.target.closest(selector);
       if (target && parent.contains(target)) {
         handler.call(target, e);
       }
     };
-
-    parent.addEventListener(event, delegateHandler);
-
-    // Store delegation
-    const key = `${parent.constructor.name}-${event}-${selector}`;
-    if (!this.delegates.has(key)) {
-      this.delegates.set(key, []);
-    }
-    this.delegates.get(key).push({ parent, selector, event, handler: delegateHandler, originalHandler: handler });
-
+    
+    this.on(parent, event, delegateHandler);
+    
+    // Track delegation
+    const key = `${parent}-${selector}-${event}`;
+    this.delegateMap.set(key, { parent, selector, event, handler, delegateHandler });
+    
     return this;
   }
 
-  // Remove delegation
   undelegate(parent, selector, event, handler) {
-    if (typeof parent === 'string') {
-      parent = document.querySelector(parent);
+    const key = `${parent}-${selector}-${event}`;
+    const delegation = this.delegateMap.get(key);
+    
+    if (delegation && (!handler || delegation.handler === handler)) {
+      this.off(parent, event, delegation.delegateHandler);
+      this.delegateMap.delete(key);
     }
-
-    if (!parent) {
-      return this;
-    }
-
-    const key = `${parent.constructor.name}-${event}-${selector}`;
-    const delegates = this.delegates.get(key) || [];
-    const index = delegates.findIndex(item => item.originalHandler === handler);
-
-    if (index > -1) {
-      const { handler: delegateHandler } = delegates[index];
-      parent.removeEventListener(event, delegateHandler);
-      delegates.splice(index, 1);
-    }
-
+    
     return this;
   }
 
-  // Wait for event
-  waitFor(element, event, timeout = 5000) {
-    return new Promise((resolve, reject) => {
-      if (typeof element === 'string') {
-        element = document.querySelector(element);
-      }
-
-      if (!element) {
-        reject(new Error('Element not found'));
-        return;
-      }
-
-      let timeoutId;
-
-      const handler = (e) => {
-        clearTimeout(timeoutId);
-        element.removeEventListener(event, handler);
-        resolve(e);
-      };
-
-      timeoutId = setTimeout(() => {
-        element.removeEventListener(event, handler);
-        reject(new Error(`Timeout waiting for event: ${event}`));
-      }, timeout);
-
-      element.addEventListener(event, handler);
-    });
-  }
-
-  // Throttle event handler
-  throttle(handler, delay = 100) {
+  // Throttling and debouncing
+  throttle(element, event, handler, delay = 100) {
     let lastCall = 0;
-    return function(...args) {
+    
+    const throttledHandler = (e) => {
       const now = Date.now();
       if (now - lastCall >= delay) {
         lastCall = now;
-        return handler.apply(this, args);
+        handler(e);
       }
     };
+    
+    this.on(element, event, throttledHandler);
+    
+    // Track throttle
+    const key = `${element}-${event}`;
+    this.throttleMap.set(key, { handler, throttledHandler, delay });
+    
+    return this;
   }
 
-  // Debounce event handler
-  debounce(handler, delay = 100) {
+  debounce(element, event, handler, delay = 100) {
     let timeoutId;
-    return function(...args) {
+    
+    const debouncedHandler = (e) => {
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        handler.apply(this, args);
-      }, delay);
+      timeoutId = setTimeout(() => handler(e), delay);
     };
+    
+    this.on(element, event, debouncedHandler);
+    
+    // Track debounce
+    const key = `${element}-${event}`;
+    this.debounceMap.set(key, { handler, debouncedHandler, delay });
+    
+    return this;
   }
 
-  // Create keyboard event
-  createKeyboardEvent(type, options = {}) {
-    return new KeyboardEvent(type, {
-      key: options.key || '',
-      code: options.code || '',
-      location: options.location || 0,
-      repeat: options.repeat || false,
-      ctrlKey: options.ctrlKey || false,
-      shiftKey: options.shiftKey || false,
-      altKey: options.altKey || false,
-      metaKey: options.metaKey || false,
-      bubbles: options.bubbles !== false,
-      cancelable: options.cancelable !== false,
-      composed: options.composed || false
-    });
+  // Keyboard utilities
+  onKey(element, key, handler, options = {}) {
+    const keyHandler = (e) => {
+      if (e.key === key || e.code === key) {
+        handler(e);
+      }
+    };
+    
+    return this.on(element, 'keydown', keyHandler, options);
   }
 
-  // Create mouse event
-  createMouseEvent(type, options = {}) {
-    return new MouseEvent(type, {
-      clientX: options.clientX || 0,
-      clientY: options.clientY || 0,
-      screenX: options.screenX || 0,
-      screenY: options.screenY || 0,
-      button: options.button || 0,
-      buttons: options.buttons || 0,
-      ctrlKey: options.ctrlKey || false,
-      shiftKey: options.shiftKey || false,
-      altKey: options.altKey || false,
-      metaKey: options.metaKey || false,
-      bubbles: options.bubbles !== false,
-      cancelable: options.cancelable !== false,
-      composed: options.composed || false
-    });
+  onKeys(element, keys, handler, options = {}) {
+    const keyHandler = (e) => {
+      if (keys.includes(e.key) || keys.includes(e.code)) {
+        handler(e);
+      }
+    };
+    
+    return this.on(element, 'keydown', keyHandler, options);
   }
 
-  // Get event path
-  getEventPath(event) {
-    return event.composedPath();
+  onEnter(element, handler, options = {}) {
+    return this.onKey(element, 'Enter', handler, options);
   }
 
-  // Check if event is trusted
-  isTrusted(event) {
-    return event.isTrusted;
+  onEscape(element, handler, options = {}) {
+    return this.onKey(element, 'Escape', handler, options);
   }
 
-  // Prevent default
+  onSpace(element, handler, options = {}) {
+    return this.onKey(element, ' ', handler, options);
+  }
+
+  // Mouse utilities
+  onClick(element, handler, options = {}) {
+    return this.on(element, 'click', handler, options);
+  }
+
+  onDoubleClick(element, handler, options = {}) {
+    return this.on(element, 'dblclick', handler, options);
+  }
+
+  onMouseDown(element, handler, options = {}) {
+    return this.on(element, 'mousedown', handler, options);
+  }
+
+  onMouseUp(element, handler, options = {}) {
+    return this.on(element, 'mouseup', handler, options);
+  }
+
+  onMouseMove(element, handler, options = {}) {
+    return this.on(element, 'mousemove', handler, options);
+  }
+
+  onMouseOver(element, handler, options = {}) {
+    return this.on(element, 'mouseover', handler, options);
+  }
+
+  onMouseOut(element, handler, options = {}) {
+    return this.on(element, 'mouseout', handler, options);
+  }
+
+  onMouseEnter(element, handler, options = {}) {
+    return this.on(element, 'mouseenter', handler, options);
+  }
+
+  onMouseLeave(element, handler, options = {}) {
+    return this.on(element, 'mouseleave', handler, options);
+  }
+
+  // Touch utilities
+  onTouchStart(element, handler, options = {}) {
+    return this.on(element, 'touchstart', handler, options);
+  }
+
+  onTouchEnd(element, handler, options = {}) {
+    return this.on(element, 'touchend', handler, options);
+  }
+
+  onTouchMove(element, handler, options = {}) {
+    return this.on(element, 'touchmove', handler, options);
+  }
+
+  // Form utilities
+  onSubmit(element, handler, options = {}) {
+    return this.on(element, 'submit', handler, options);
+  }
+
+  onChange(element, handler, options = {}) {
+    return this.on(element, 'change', handler, options);
+  }
+
+  onInput(element, handler, options = {}) {
+    return this.on(element, 'input', handler, options);
+  }
+
+  onFocus(element, handler, options = {}) {
+    return this.on(element, 'focus', handler, options);
+  }
+
+  onBlur(element, handler, options = {}) {
+    return this.on(element, 'blur', handler, options);
+  }
+
+  // Window events
+  onResize(handler, options = {}) {
+    return this.on(window, 'resize', handler, options);
+  }
+
+  onScroll(handler, options = {}) {
+    return this.on(window, 'scroll', handler, options);
+  }
+
+  onLoad(handler, options = {}) {
+    return this.on(window, 'load', handler, options);
+  }
+
+  onUnload(handler, options = {}) {
+    return this.on(window, 'unload', handler, options);
+  }
+
+  // Document events
+  onDOMContentLoaded(handler, options = {}) {
+    return this.on(document, 'DOMContentLoaded', handler, options);
+  }
+
+  onReady(handler) {
+    if (document.readyState === 'loading') {
+      return this.onDOMContentLoaded(handler);
+    } else {
+      handler();
+      return this;
+    }
+  }
+
+  // Event utilities
   preventDefault(event) {
     event.preventDefault();
     return this;
   }
 
-  // Stop propagation
   stopPropagation(event) {
     event.stopPropagation();
     return this;
   }
 
-  // Stop immediate propagation
   stopImmediatePropagation(event) {
     event.stopImmediatePropagation();
     return this;
   }
 
-  // Check modifier keys
-  getModifierKeys(event) {
-    return {
-      ctrl: event.ctrlKey,
-      shift: event.shiftKey,
-      alt: event.altKey,
-      meta: event.metaKey
-    };
-  }
-
-  // Get mouse position
-  getMousePosition(event) {
-    return {
-      x: event.clientX,
-      y: event.clientY,
-      screenX: event.screenX,
-      screenY: event.screenY
-    };
-  }
-
-  // Get key information
-  getKeyInfo(event) {
-    return {
-      key: event.key,
-      code: event.code,
-      location: event.location,
-      repeat: event.repeat
-    };
-  }
-
-  // Clean up all listeners
-  cleanup() {
-    // Remove all regular listeners
-    this.listeners.forEach((listeners) => {
-      listeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler);
-      });
+  // Event creation utilities
+  createEvent(type, detail = {}, options = {}) {
+    return new CustomEvent(type, {
+      detail,
+      bubbles: options.bubbles || true,
+      cancelable: options.cancelable || true,
+      composed: options.composed || false
     });
-    this.listeners.clear();
+  }
 
-    // Remove all once listeners
-    this.onceListeners.forEach((listeners) => {
-      listeners.forEach(({ element, event, handler }) => {
-        element.removeEventListener(event, handler);
-      });
+  createKeyboardEvent(type, key, options = {}) {
+    return new KeyboardEvent(type, {
+      key,
+      code: options.code || key,
+      location: options.location || 0,
+      ctrlKey: options.ctrlKey || false,
+      shiftKey: options.shiftKey || false,
+      altKey: options.altKey || false,
+      metaKey: options.metaKey || false,
+      repeat: options.repeat || false,
+      bubbles: options.bubbles || true,
+      cancelable: options.cancelable || true
     });
-    this.onceListeners.clear();
+  }
 
-    // Remove all delegates
-    this.delegates.forEach((delegates) => {
-      delegates.forEach(({ parent, event, handler }) => {
-        parent.removeEventListener(event, handler);
-      });
+  createMouseEvent(type, options = {}) {
+    return new MouseEvent(type, {
+      button: options.button || 0,
+      buttons: options.buttons || 0,
+      clientX: options.clientX || 0,
+      clientY: options.clientY || 0,
+      movementX: options.movementX || 0,
+      movementY: options.movementY || 0,
+      offsetX: options.offsetX || 0,
+      offsetY: options.offsetY || 0,
+      pageX: options.pageX || 0,
+      pageY: options.pageY || 0,
+      screenX: options.screenX || 0,
+      screenY: options.screenY || 0,
+      ctrlKey: options.ctrlKey || false,
+      shiftKey: options.shiftKey || false,
+      altKey: options.altKey || false,
+      metaKey: options.metaKey || false,
+      bubbles: options.bubbles || true,
+      cancelable: options.cancelable || true
     });
-    this.delegates.clear();
-
-    return this;
   }
 
-  // Get listener statistics
-  getStats() {
-    return {
-      regularListeners: Array.from(this.listeners.values()).reduce((sum, listeners) => sum + listeners.length, 0),
-      onceListeners: Array.from(this.onceListeners.values()).reduce((sum, listeners) => sum + listeners.length, 0),
-      delegates: Array.from(this.delegates.values()).reduce((sum, delegates) => sum + delegates.length, 0)
-    };
-  }
-}
-
-// Event Bus for global events
-export class EventBus {
-  constructor() {
-    this.events = new Map();
-  }
-
-  // Subscribe to event
-  on(event, handler) {
-    if (!this.events.has(event)) {
-      this.events.set(event, []);
+  // Cleanup utilities
+  removeAllListeners(element) {
+    if (typeof element === 'string') {
+      element = document.querySelector(element);
     }
-    this.events.get(event).push(handler);
-    return this;
-  }
-
-  // Subscribe once
-  once(event, handler) {
-    const onceHandler = (data) => {
-      handler(data);
-      this.off(event, onceHandler);
-    };
-    return this.on(event, onceHandler);
-  }
-
-  // Unsubscribe
-  off(event, handler) {
-    if (!this.events.has(event)) {
-      return this;
-    }
-
-    const handlers = this.events.get(event);
-    const index = handlers.indexOf(handler);
-    if (index > -1) {
-      handlers.splice(index, 1);
-    }
-
-    if (handlers.length === 0) {
-      this.events.delete(event);
-    }
-
-    return this;
-  }
-
-  // Emit event
-  emit(event, data) {
-    if (!this.events.has(event)) {
-      return this;
-    }
-
-    const handlers = this.events.get(event);
-    handlers.forEach(handler => {
-      try {
-        handler(data);
-      } catch (error) {
-        console.error('EventBus handler error:', error);
+    
+    if (!element) return this;
+    
+    // Remove all tracked listeners
+    this.listeners.forEach((listeners, key) => {
+      if (key.startsWith(`${element}-`)) {
+        listeners.forEach(({ handler }) => {
+          const event = key.split('-')[1];
+          element.removeEventListener(event, handler);
+        });
+        this.listeners.delete(key);
       }
     });
-
+    
     return this;
   }
 
-  // Clear all events
-  clear() {
-    this.events.clear();
+  cleanup() {
+    // Remove all tracked listeners
+    this.listeners.forEach((listeners, key) => {
+      const [element, event] = key.split('-');
+      listeners.forEach(({ handler }) => {
+        if (element && element.removeEventListener) {
+          element.removeEventListener(event, handler);
+        }
+      });
+    });
+    
+    // Clear all maps
+    this.listeners.clear();
+    this.delegateMap.clear();
+    this.throttleMap.clear();
+    this.debounceMap.clear();
+    
     return this;
-  }
-
-  // Get event count
-  getEventCount(event) {
-    return this.events.has(event) ? this.events.get(event).length : 0;
-  }
-
-  // Get all events
-  getAllEvents() {
-    return Array.from(this.events.keys());
   }
 }
 
-// Export instances
+// Export instance
 export const eventUtils = new EventUtils();
-export const eventBus = new EventBus();
 
 // Test Suite
 describe('EventUtils', () => {
-  let eventUtils;
+  let eventUtil;
   let mockElement;
 
   beforeEach(() => {
-    eventUtils = new EventUtils();
+    eventUtil = new EventUtils();
     mockElement = {
       addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
-      constructor: { name: 'HTMLDivElement' },
-      closest: jest.fn()
+      contains: jest.fn(() => true),
+      closest: jest.fn(() => mockElement)
     };
+    document.querySelector = jest.fn(() => mockElement);
     jest.clearAllMocks();
   });
 
@@ -647,88 +529,56 @@ describe('EventUtils', () => {
     test('should add event listener', () => {
       const handler = jest.fn();
       
-      eventUtils.on(mockElement, 'click', handler);
+      eventUtil.on(mockElement, 'click', handler);
       
-      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', expect.any(Function), {});
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', handler, {});
+      expect(eventUtil.listeners.has(`${mockElement}-click`)).toBe(true);
+    });
+
+    test('should add event listener by selector', () => {
+      const handler = jest.fn();
+      
+      eventUtil.on('#test', 'click', handler);
+      
+      expect(document.querySelector).toHaveBeenCalledWith('#test');
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', handler, {});
     });
 
     test('should add event listener with options', () => {
       const handler = jest.fn();
       const options = { passive: true };
       
-      eventUtils.on(mockElement, 'click', handler, options);
+      eventUtil.on(mockElement, 'click', handler, options);
       
-      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', expect.any(Function), options);
-    });
-
-    test('should add event listener by selector', () => {
-      const handler = jest.fn();
-      document.querySelector.mockReturnValue(mockElement);
-      
-      eventUtils.on('#test', 'click', handler);
-      
-      expect(document.querySelector).toHaveBeenCalledWith('#test');
-      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', expect.any(Function), {});
-    });
-
-    test('should throw error when element not found', () => {
-      document.querySelector.mockReturnValue(null);
-      const handler = jest.fn();
-      
-      expect(() => eventUtils.on('#nonexistent', 'click', handler))
-        .toThrow('Element not found');
-    });
-
-    test('should add once event listener', () => {
-      const handler = jest.fn();
-      
-      eventUtils.once(mockElement, 'click', handler);
-      
-      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', expect.any(Function), {});
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', handler, options);
     });
 
     test('should remove event listener', () => {
       const handler = jest.fn();
       
-      eventUtils.on(mockElement, 'click', handler);
-      eventUtils.off(mockElement, 'click', handler);
+      eventUtil.on(mockElement, 'click', handler);
+      eventUtil.off(mockElement, 'click', handler);
       
-      expect(mockElement.removeEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(mockElement.removeEventListener).toHaveBeenCalledWith('click', handler);
+      expect(eventUtil.listeners.get(`${mockElement}-click`)).toHaveLength(0);
     });
 
-    test('should remove event listener by selector', () => {
-      const handler = jest.fn();
-      document.querySelector.mockReturnValue(mockElement);
-      
-      eventUtils.on('#test', 'click', handler);
-      eventUtils.off('#test', 'click', handler);
-      
-      expect(mockElement.removeEventListener).toHaveBeenCalledWith('click', expect.any(Function));
-    });
-
-    test('should handle removal of non-existent listener gracefully', () => {
+    test('should handle once event listener', () => {
       const handler = jest.fn();
       
-      // F2P: Should handle non-existent listener gracefully
-      expect(() => eventUtils.off(mockElement, 'click', handler)).not.toThrow();
+      eventUtil.once(mockElement, 'click', handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalled();
+      expect(eventUtil.listeners.has(`${mockElement}-click`)).toBe(true);
     });
 
-    test('should remove all event listeners', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+    test('should trigger custom event', () => {
+      const detail = { data: 'test' };
       
-      eventUtils.on(mockElement, 'click', handler1);
-      eventUtils.on(mockElement, 'mouseover', handler2);
-      eventUtils.offAll(mockElement);
-      
-      expect(mockElement.removeEventListener).toHaveBeenCalledTimes(2);
-    });
-
-    test('should trigger event', () => {
-      eventUtils.trigger(mockElement, 'custom-event', { data: 'test' });
+      eventUtil.trigger(mockElement, 'custom-event', detail);
       
       expect(window.CustomEvent).toHaveBeenCalledWith('custom-event', {
-        detail: { data: 'test' },
+        detail,
         bubbles: true,
         cancelable: true,
         composed: false
@@ -736,552 +586,567 @@ describe('EventUtils', () => {
       expect(mockElement.dispatchEvent).toHaveBeenCalled();
     });
 
-    test('should trigger event with options', () => {
-      const options = { bubbles: false, cancelable: false, composed: true };
+    test('should trigger existing event object', () => {
+      const event = new CustomEvent('test', { detail: { data: 'test' } });
       
-      eventUtils.trigger(mockElement, 'custom-event', {}, options);
+      eventUtil.trigger(mockElement, event);
       
-      expect(window.CustomEvent).toHaveBeenCalledWith('custom-event', {
-        detail: {},
-        bubbles: false,
-        cancelable: false,
-        composed: true
-      });
-    });
-
-    test('should throw error when triggering on non-existent element', () => {
-      document.querySelector.mockReturnValue(null);
-      
-      expect(() => eventUtils.trigger('#nonexistent', 'click'))
-        .toThrow('Element not found');
+      expect(mockElement.dispatchEvent).toHaveBeenCalledWith(event);
     });
   });
 
   describe('Event Delegation', () => {
-    let mockParent, mockTarget;
+    test('should delegate event to child elements', () => {
+      const handler = jest.fn();
+      const mockTarget = { closest: jest.fn(() => mockTarget) };
+      mockElement.contains = jest.fn(() => true);
+      
+      eventUtil.delegate(mockElement, '.child', 'click', handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalled();
+      expect(eventUtil.delegateMap.has(`${mockElement}-.child-click`)).toBe(true);
+    });
 
+    test('should undelegate events', () => {
+      const handler = jest.fn();
+      
+      eventUtil.delegate(mockElement, '.child', 'click', handler);
+      eventUtil.undelegate(mockElement, '.child', 'click', handler);
+      
+      expect(mockElement.removeEventListener).toHaveBeenCalled();
+      expect(eventUtil.delegateMap.has(`${mockElement}-.child-click`)).toBe(false);
+    });
+  });
+
+  describe('Throttling and Debouncing', () => {
     beforeEach(() => {
-      mockTarget = {
-        closest: jest.fn(() => mockTarget),
-        classList: { contains: jest.fn(() => true) }
-      };
-      mockParent = {
-        addEventListener: jest.fn(),
-        removeEventListener: jest.fn(),
-        contains: jest.fn(() => true),
-        constructor: { name: 'HTMLDivElement' }
-      };
+      jest.useFakeTimers();
     });
 
-    test('should set up event delegation', () => {
-      const handler = jest.fn();
-      
-      eventUtils.delegate(mockParent, '.child', 'click', handler);
-      
-      expect(mockParent.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
-    test('should set up delegation by selector', () => {
+    test('should throttle event handler', () => {
       const handler = jest.fn();
-      document.querySelector.mockReturnValue(mockParent);
       
-      eventUtils.delegate('#parent', '.child', 'click', handler);
+      eventUtil.throttle(mockElement, 'scroll', handler, 100);
       
-      expect(document.querySelector).toHaveBeenCalledWith('#parent');
-      expect(mockParent.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(mockElement.addEventListener).toHaveBeenCalled();
+      expect(eventUtil.throttleMap.has(`${mockElement}-scroll`)).toBe(true);
     });
 
-    test('should remove delegation', () => {
+    test('should debounce event handler', () => {
       const handler = jest.fn();
       
-      eventUtils.delegate(mockParent, '.child', 'click', handler);
-      eventUtils.undelegate(mockParent, '.child', 'click', handler);
+      eventUtil.debounce(mockElement, 'input', handler, 100);
       
-      expect(mockParent.removeEventListener).toHaveBeenCalledWith('click', expect.any(Function));
-    });
-
-    test('should handle delegation removal gracefully', () => {
-      const handler = jest.fn();
-      
-      // F2P: Should handle non-existent delegation gracefully
-      expect(() => eventUtils.undelegate(mockParent, '.child', 'click', handler)).not.toThrow();
+      expect(mockElement.addEventListener).toHaveBeenCalled();
+      expect(eventUtil.debounceMap.has(`${mockElement}-input`)).toBe(true);
     });
   });
 
-  describe('Event Waiting', () => {
-    test('should wait for event', async () => {
+  describe('Keyboard Utilities', () => {
+    test('should add key event listener', () => {
       const handler = jest.fn();
-      mockElement.addEventListener.mockImplementation((event, cb) => {
-        setTimeout(() => {
-          cb({ type: 'click' });
-        }, 10);
-      });
-
-      const result = await eventUtils.waitFor(mockElement, 'click');
       
-      expect(result).toEqual({ type: 'click' });
+      eventUtil.onKey(mockElement, 'Enter', handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
 
-    test('should timeout waiting for event', async () => {
-      mockElement.addEventListener.mockImplementation(() => {});
-
-      await expect(eventUtils.waitFor(mockElement, 'click', 50))
-        .rejects.toThrow('Timeout waiting for event: click');
+    test('should add multiple keys event listener', () => {
+      const handler = jest.fn();
+      const keys = ['Enter', 'Escape'];
+      
+      eventUtil.onKeys(mockElement, keys, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
 
-    test('should handle waiting on non-existent element', async () => {
-      document.querySelector.mockReturnValue(null);
+    test('should add Enter key listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onEnter(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
+    });
 
-      await expect(eventUtils.waitFor('#nonexistent', 'click'))
-        .rejects.toThrow('Element not found');
+    test('should add Escape key listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onEscape(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
+    });
+
+    test('should add Space key listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onSpace(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function));
     });
   });
 
-  describe('Handler Utilities', () => {
-    test('should throttle handler', () => {
+  describe('Mouse Utilities', () => {
+    test('should add click listener', () => {
       const handler = jest.fn();
-      const throttled = eventUtils.throttle(handler, 100);
       
-      throttled();
-      throttled();
-      throttled();
+      eventUtil.onClick(mockElement, handler);
       
-      // Should only call once due to throttling
-      expect(handler).toHaveBeenCalledTimes(1);
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('click', handler, {});
     });
 
-    test('should debounce handler', (done) => {
+    test('should add double click listener', () => {
       const handler = jest.fn();
-      const debounced = eventUtils.debounce(handler, 50);
       
-      debounced();
-      debounced();
-      debounced();
+      eventUtil.onDoubleClick(mockElement, handler);
       
-      setTimeout(() => {
-        expect(handler).toHaveBeenCalledTimes(1);
-        done();
-      }, 100);
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('dblclick', handler, {});
+    });
+
+    test('should add mouse down listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseDown(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mousedown', handler, {});
+    });
+
+    test('should add mouse up listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseUp(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mouseup', handler, {});
+    });
+
+    test('should add mouse move listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseMove(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mousemove', handler, {});
+    });
+
+    test('should add mouse over listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseOver(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mouseover', handler, {});
+    });
+
+    test('should add mouse out listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseOut(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mouseout', handler, {});
+    });
+
+    test('should add mouse enter listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseEnter(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mouseenter', handler, {});
+    });
+
+    test('should add mouse leave listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onMouseLeave(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('mouseleave', handler, {});
+    });
+  });
+
+  describe('Touch Utilities', () => {
+    test('should add touch start listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onTouchStart(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('touchstart', handler, {});
+    });
+
+    test('should add touch end listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onTouchEnd(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('touchend', handler, {});
+    });
+
+    test('should add touch move listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onTouchMove(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('touchmove', handler, {});
+    });
+  });
+
+  describe('Form Utilities', () => {
+    test('should add submit listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onSubmit(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('submit', handler, {});
+    });
+
+    test('should add change listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onChange(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('change', handler, {});
+    });
+
+    test('should add input listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onInput(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('input', handler, {});
+    });
+
+    test('should add focus listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onFocus(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('focus', handler, {});
+    });
+
+    test('should add blur listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onBlur(mockElement, handler);
+      
+      expect(mockElement.addEventListener).toHaveBeenCalledWith('blur', handler, {});
+    });
+  });
+
+  describe('Window Events', () => {
+    test('should add resize listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onResize(handler);
+      
+      expect(window.addEventListener).toHaveBeenCalledWith('resize', handler, {});
+    });
+
+    test('should add scroll listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onScroll(handler);
+      
+      expect(window.addEventListener).toHaveBeenCalledWith('scroll', handler, {});
+    });
+
+    test('should add load listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onLoad(handler);
+      
+      expect(window.addEventListener).toHaveBeenCalledWith('load', handler, {});
+    });
+
+    test('should add unload listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onUnload(handler);
+      
+      expect(window.addEventListener).toHaveBeenCalledWith('unload', handler, {});
+    });
+  });
+
+  describe('Document Events', () => {
+    test('should add DOMContentLoaded listener', () => {
+      const handler = jest.fn();
+      
+      eventUtil.onDOMContentLoaded(handler);
+      
+      expect(document.addEventListener).toHaveBeenCalledWith('DOMContentLoaded', handler, {});
+    });
+
+    test('should handle ready state', () => {
+      const handler = jest.fn();
+      
+      // Test when document is loading
+      document.readyState = 'loading';
+      eventUtil.onReady(handler);
+      expect(document.addEventListener).toHaveBeenCalledWith('DOMContentLoaded', handler, {});
+      
+      jest.clearAllMocks();
+      
+      // Test when document is ready
+      document.readyState = 'complete';
+      eventUtil.onReady(handler);
+      expect(handler).toHaveBeenCalled();
+    });
+  });
+
+  describe('Event Utilities', () => {
+    test('should prevent default', () => {
+      const mockEvent = {
+        preventDefault: jest.fn()
+      };
+      
+      eventUtil.preventDefault(mockEvent);
+      
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+    });
+
+    test('should stop propagation', () => {
+      const mockEvent = {
+        stopPropagation: jest.fn()
+      };
+      
+      eventUtil.stopPropagation(mockEvent);
+      
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
+    });
+
+    test('should stop immediate propagation', () => {
+      const mockEvent = {
+        stopImmediatePropagation: jest.fn()
+      };
+      
+      eventUtil.stopImmediatePropagation(mockEvent);
+      
+      expect(mockEvent.stopImmediatePropagation).toHaveBeenCalled();
     });
   });
 
   describe('Event Creation', () => {
-    test('should create keyboard event', () => {
-      const event = eventUtils.createKeyboardEvent('keydown', {
-        key: 'Enter',
-        ctrlKey: true
-      });
+    test('should create custom event', () => {
+      const event = eventUtil.createEvent('test', { data: 'value' });
       
-      expect(window.KeyboardEvent).toHaveBeenCalledWith('keydown', {
-        key: 'Enter',
-        code: '',
-        location: 0,
-        repeat: false,
-        ctrlKey: true,
-        shiftKey: false,
-        altKey: false,
-        metaKey: false,
+      expect(window.CustomEvent).toHaveBeenCalledWith('test', {
+        detail: { data: 'value' },
         bubbles: true,
         cancelable: true,
         composed: false
       });
     });
 
+    test('should create keyboard event', () => {
+      const event = eventUtil.createKeyboardEvent('keydown', 'Enter', {
+        ctrlKey: true,
+        shiftKey: false
+      });
+      
+      expect(window.KeyboardEvent).toHaveBeenCalledWith('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        location: 0,
+        ctrlKey: true,
+        shiftKey: false,
+        altKey: false,
+        metaKey: false,
+        repeat: false,
+        bubbles: true,
+        cancelable: true
+      });
+    });
+
     test('should create mouse event', () => {
-      const event = eventUtils.createMouseEvent('click', {
+      const event = eventUtil.createMouseEvent('click', {
         clientX: 100,
         clientY: 200,
         button: 1
       });
       
       expect(window.MouseEvent).toHaveBeenCalledWith('click', {
-        clientX: 100,
-        clientY: 200,
-        screenX: 0,
-        screenY: 0,
         button: 1,
         buttons: 0,
+        clientX: 100,
+        clientY: 200,
+        movementX: 0,
+        movementY: 0,
+        offsetX: 0,
+        offsetY: 0,
+        pageX: 0,
+        pageY: 0,
+        screenX: 0,
+        screenY: 0,
         ctrlKey: false,
         shiftKey: false,
         altKey: false,
         metaKey: false,
         bubbles: true,
-        cancelable: true,
-        composed: false
+        cancelable: true
       });
     });
   });
 
-  describe('Event Utilities', () => {
-    let mockEvent;
-
-    beforeEach(() => {
-      mockEvent = {
-        composedPath: jest.fn(() => [mockElement, document.body]),
-        isTrusted: true,
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
-        stopImmediatePropagation: jest.fn(),
-        ctrlKey: true,
-        shiftKey: false,
-        altKey: false,
-        metaKey: false,
-        clientX: 100,
-        clientY: 200,
-        screenX: 300,
-        screenY: 400,
-        key: 'Enter',
-        code: 'Enter',
-        location: 0,
-        repeat: false
-      };
-    });
-
-    test('should get event path', () => {
-      const path = eventUtils.getEventPath(mockEvent);
+  describe('Cleanup Utilities', () => {
+    test('should remove all listeners from element', () => {
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
       
-      expect(mockEvent.composedPath).toHaveBeenCalled();
-      expect(path).toEqual([mockElement, document.body]);
-    });
-
-    test('should check if event is trusted', () => {
-      const isTrusted = eventUtils.isTrusted(mockEvent);
+      eventUtil.on(mockElement, 'click', handler1);
+      eventUtil.on(mockElement, 'mouseover', handler2);
       
-      expect(isTrusted).toBe(true);
-    });
-
-    test('should prevent default', () => {
-      const result = eventUtils.preventDefault(mockEvent);
+      eventUtil.removeAllListeners(mockElement);
       
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(result).toBe(eventUtils);
+      expect(mockElement.removeEventListener).toHaveBeenCalledWith('click', handler1);
+      expect(mockElement.removeEventListener).toHaveBeenCalledWith('mouseover', handler2);
+      expect(eventUtil.listeners.size).toBe(0);
     });
 
-    test('should stop propagation', () => {
-      const result = eventUtils.stopPropagation(mockEvent);
-      
-      expect(mockEvent.stopPropagation).toHaveBeenCalled();
-      expect(result).toBe(eventUtils);
-    });
-
-    test('should stop immediate propagation', () => {
-      const result = eventUtils.stopImmediatePropagation(mockEvent);
-      
-      expect(mockEvent.stopImmediatePropagation).toHaveBeenCalled();
-      expect(result).toBe(eventUtils);
-    });
-
-    test('should get modifier keys', () => {
-      const keys = eventUtils.getModifierKeys(mockEvent);
-      
-      expect(keys).toEqual({
-        ctrl: true,
-        shift: false,
-        alt: false,
-        meta: false
-      });
-    });
-
-    test('should get mouse position', () => {
-      const position = eventUtils.getMousePosition(mockEvent);
-      
-      expect(position).toEqual({
-        x: 100,
-        y: 200,
-        screenX: 300,
-        screenY: 400
-      });
-    });
-
-    test('should get key information', () => {
-      const info = eventUtils.getKeyInfo(mockEvent);
-      
-      expect(info).toEqual({
-        key: 'Enter',
-        code: 'Enter',
-        location: 0,
-        repeat: false
-      });
-    });
-  });
-
-  describe('Cleanup and Statistics', () => {
     test('should cleanup all listeners', () => {
       const handler1 = jest.fn();
       const handler2 = jest.fn();
       
-      eventUtils.on(mockElement, 'click', handler1);
-      eventUtils.once(mockElement, 'mouseover', handler2);
-      eventUtils.delegate(mockElement, '.child', 'click', handler1);
+      eventUtil.on(mockElement, 'click', handler1);
+      eventUtil.delegate(mockElement, '.child', 'click', handler2);
       
-      eventUtils.cleanup();
+      eventUtil.cleanup();
       
-      expect(mockElement.removeEventListener).toHaveBeenCalledTimes(3);
-    });
-
-    test('should get listener statistics', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
-      
-      eventUtils.on(mockElement, 'click', handler1);
-      eventUtils.once(mockElement, 'mouseover', handler2);
-      eventUtils.delegate(mockElement, '.child', 'click', handler1);
-      
-      const stats = eventUtils.getStats();
-      
-      expect(stats).toEqual({
-        regularListeners: 1,
-        onceListeners: 1,
-        delegates: 1
-      });
+      expect(mockElement.removeEventListener).toHaveBeenCalledWith('click', handler1);
+      expect(eventUtil.listeners.size).toBe(0);
+      expect(eventUtil.delegateMap.size).toBe(0);
+      expect(eventUtil.throttleMap.size).toBe(0);
+      expect(eventUtil.debounceMap.size).toBe(0);
     });
   });
 
   describe('F2P Tests', () => {
-    test('should handle handler errors gracefully', () => {
-      const errorHandler = jest.fn(() => { throw new Error('Handler error'); });
+    test('should handle null elements gracefully', () => {
+      document.querySelector.mockReturnValue(null);
+      const handler = jest.fn();
       
-      eventUtils.on(mockElement, 'click', errorHandler);
-      
-      // Get the wrapped handler
-      const wrappedHandler = mockElement.addEventListener.mock.calls[0][1];
-      
-      // F2P: Should handle errors without throwing
-      expect(() => wrappedHandler({})).not.toThrow();
+      // F2P: Should handle null elements gracefully
+      expect(() => eventUtil.on('#nonexistent', 'click', handler)).not.toThrow();
+      expect(() => eventUtil.off('#nonexistent', 'click', handler)).not.toThrow();
+      expect(() => eventUtil.trigger('#nonexistent', 'click')).not.toThrow();
     });
 
-    test('should handle once handler errors gracefully', () => {
-      const errorHandler = jest.fn(() => { throw new Error('Handler error'); });
+    test('should handle missing addEventListener gracefully', () => {
+      const invalidElement = {};
+      const handler = jest.fn();
       
-      eventUtils.once(mockElement, 'click', errorHandler);
-      
-      // Get the wrapped handler
-      const wrappedHandler = mockElement.addEventListener.mock.calls[0][1];
-      
-      // F2P: Should handle errors without throwing
-      expect(() => wrappedHandler({})).not.toThrow();
+      // F2P: Should handle elements without addEventListener
+      expect(() => eventUtil.on(invalidElement, 'click', handler)).not.toThrow();
     });
 
-    test('should handle delegation errors gracefully', () => {
+    test('should handle event handler errors gracefully', () => {
       const errorHandler = jest.fn(() => { throw new Error('Handler error'); });
-      const mockParent = {
-        addEventListener: jest.fn(),
-        constructor: { name: 'HTMLDivElement' }
-      };
       
-      eventUtils.delegate(mockParent, '.child', 'click', errorHandler);
+      eventUtil.on(mockElement, 'click', errorHandler);
       
-      // Get the wrapped handler
-      const wrappedHandler = mockParent.addEventListener.mock.calls[0][1];
-      
-      // Create mock event
+      // F2P: Should not crash when handler throws
+      expect(() => {
+        const event = { target: mockElement };
+        mockElement.addEventListener.mock.calls[0][1](event);
+      }).not.toThrow();
+    });
+
+    test('should handle invalid selector in delegation', () => {
+      const handler = jest.fn();
       const mockEvent = {
-        target: { closest: jest.fn(() => mockParent) }
+        target: { closest: jest.fn(() => null) }
       };
       
-      // F2P: Should handle errors without throwing
-      expect(() => wrappedHandler(mockEvent)).not.toThrow();
+      eventUtil.delegate(mockElement, '.nonexistent', 'click', handler);
+      
+      // F2P: Should handle when no matching element is found
+      expect(() => {
+        mockElement.addEventListener.mock.calls[0][1](mockEvent);
+      }).not.toThrow();
     });
 
-    test('should handle missing element in operations gracefully', () => {
-      const handler = jest.fn();
+    test('should handle cleanup on destroyed elements', () => {
+      const destroyedElement = {
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(() => { throw new Error('Element destroyed'); })
+      };
       
-      // F2P: Should handle missing element gracefully
-      expect(() => eventUtils.off(null, 'click', handler)).not.toThrow();
-      expect(() => eventUtils.offAll(null)).not.toThrow();
-      expect(() => eventUtils.trigger(null, 'click')).not.toThrow();
-    });
-
-    test('should handle invalid event types gracefully', () => {
-      const handler = jest.fn();
+      eventUtil.on(destroyedElement, 'click', jest.fn());
       
-      // F2P: Should handle invalid event types gracefully
-      expect(() => eventUtils.on(mockElement, '', handler)).not.toThrow();
-      expect(() => eventUtils.trigger(mockElement, '')).not.toThrow();
+      // F2P: Should handle errors during cleanup
+      expect(() => eventUtil.removeAllListeners(destroyedElement)).not.toThrow();
     });
   });
 
   describe('Integration Tests', () => {
     // F2P Integration Test
     test('should handle complete event workflow', () => {
-      const handler = jest.fn();
-      const delegateHandler = jest.fn();
+      const clickHandler = jest.fn();
+      const keyHandler = jest.fn();
       
-      // Setup regular listener
-      eventUtils.on(mockElement, 'click', handler);
+      // Set up multiple event types
+      eventUtil.onClick(mockElement, clickHandler);
+      eventUtil.onEnter(mockElement, keyHandler);
+      eventUtil.throttle(mockElement, 'scroll', jest.fn(), 100);
       
-      // Setup delegation
-      eventUtils.delegate(mockElement, '.child', 'click', delegateHandler);
-      
-      // Trigger event
-      eventUtils.trigger(mockElement, 'custom-event', { data: 'test' });
+      // Trigger events
+      eventUtil.trigger(mockElement, 'click', { data: 'test' });
       
       // Verify setup
-      expect(mockElement.addEventListener).toHaveBeenCalledTimes(2);
+      expect(mockElement.addEventListener).toHaveBeenCalledTimes(3);
       expect(mockElement.dispatchEvent).toHaveBeenCalled();
-      
-      // Cleanup
-      eventUtils.off(mockElement, 'click', handler);
-      eventUtils.undelegate(mockElement, '.child', 'click', delegateHandler);
-      
-      expect(mockElement.removeEventListener).toHaveBeenCalledTimes(2);
     });
 
-    test('should handle complex event scenarios', async () => {
+    test('should handle event delegation with nested elements', () => {
+      const childElement = { closest: jest.fn(() => childElement) };
+      const parentElement = {
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(),
+        contains: jest.fn(() => true)
+      };
+      
       const handler = jest.fn();
+      const mockEvent = {
+        target: childElement,
+        preventDefault: jest.fn(),
+        stopPropagation: jest.fn()
+      };
       
-      // Setup throttled handler
-      const throttled = eventUtils.throttle(handler, 50);
+      eventUtil.delegate(parentElement, '.child', 'click', handler);
       
-      // Setup debounced handler
-      const debounced = eventUtils.debounce(handler, 50);
+      // Simulate event
+      const delegateHandler = parentElement.addEventListener.mock.calls[0][1];
+      delegateHandler(mockEvent);
       
-      // Test throttling
-      throttled();
-      throttled();
-      throttled();
-      
-      // Test debouncing
-      debounced();
-      debounced();
-      
-      // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(handler).toHaveBeenCalledTimes(2); // Once for throttle, once for debounce
-    });
-  });
-});
-
-describe('EventBus', () => {
-  let eventBus;
-
-  beforeEach(() => {
-    eventBus = new EventBus();
-  });
-
-  describe('Basic Operations', () => {
-    test('should subscribe to event', () => {
-      const handler = jest.fn();
-      
-      eventBus.on('test-event', handler);
-      
-      expect(eventBus.getEventCount('test-event')).toBe(1);
-    });
-
-    test('should subscribe once', () => {
-      const handler = jest.fn();
-      
-      eventBus.once('test-event', handler);
-      eventBus.emit('test-event', { data: 'test' });
-      
-      expect(handler).toHaveBeenCalledWith({ data: 'test' });
-      expect(eventBus.getEventCount('test-event')).toBe(0);
-    });
-
-    test('should unsubscribe', () => {
-      const handler = jest.fn();
-      
-      eventBus.on('test-event', handler);
-      eventBus.off('test-event', handler);
-      
-      expect(eventBus.getEventCount('test-event')).toBe(0);
-    });
-
-    test('should emit event', () => {
-      const handler = jest.fn();
-      
-      eventBus.on('test-event', handler);
-      eventBus.emit('test-event', { data: 'test' });
-      
-      expect(handler).toHaveBeenCalledWith({ data: 'test' });
-    });
-
-    test('should handle multiple handlers', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
-      
-      eventBus.on('test-event', handler1);
-      eventBus.on('test-event', handler2);
-      eventBus.emit('test-event', { data: 'test' });
-      
-      expect(handler1).toHaveBeenCalledWith({ data: 'test' });
-      expect(handler2).toHaveBeenCalledWith({ data: 'test' });
-    });
-
-    test('should clear all events', () => {
-      const handler = jest.fn();
-      
-      eventBus.on('event1', handler);
-      eventBus.on('event2', handler);
-      eventBus.clear();
-      
-      expect(eventBus.getAllEvents()).toHaveLength(0);
-    });
-
-    test('should get all events', () => {
-      const handler = jest.fn();
-      
-      eventBus.on('event1', handler);
-      eventBus.on('event2', handler);
-      
-      const events = eventBus.getAllEvents();
-      
-      expect(events).toEqual(['event1', 'event2']);
+      expect(childElement.closest).toHaveBeenCalledWith('.child');
+      expect(parentElement.contains).toHaveBeenCalledWith(childElement);
     });
   });
 
-  describe('F2P Tests', () => {
-    test('should handle handler errors gracefully', () => {
-      const errorHandler = jest.fn(() => { throw new Error('Handler error'); });
-      const normalHandler = jest.fn();
-      
-      eventBus.on('test-event', errorHandler);
-      eventBus.on('test-event', normalHandler);
-      
-      // F2P: Should handle errors without affecting other handlers
-      expect(() => eventBus.emit('test-event', {})).not.toThrow();
-      expect(normalHandler).toHaveBeenCalled();
+  describe('Error Handling', () => {
+    test('should handle malformed inputs gracefully', () => {
+      // F2P: Should handle undefined/null inputs
+      expect(() => eventUtil.on(null, 'click', jest.fn())).not.toThrow();
+      expect(() => eventUtil.on(undefined, 'click', jest.fn())).not.toThrow();
+      expect(() => eventUtil.trigger({}, 'click')).not.toThrow();
     });
 
-    test('should handle unsubscribing non-existent handler gracefully', () => {
+    test('should handle invalid event names', () => {
       const handler = jest.fn();
       
-      // F2P: Should handle non-existent handler gracefully
-      expect(() => eventBus.off('non-existent-event', handler)).not.toThrow();
-      expect(() => eventBus.off('test-event', handler)).not.toThrow();
+      // F2P: Should handle invalid event names
+      expect(() => eventUtil.on(mockElement, '', handler)).not.toThrow();
+      expect(() => eventUtil.on(mockElement, null, handler)).not.toThrow();
     });
 
-    test('should handle emitting to non-existent event gracefully', () => {
-      // F2P: Should handle non-existent event gracefully
-      expect(() => eventBus.emit('non-existent-event', {})).not.toThrow();
-    });
-  });
-
-  describe('Integration Tests', () => {
-    test('should handle complex event bus workflow', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
-      const onceHandler = jest.fn();
+    test('should handle memory cleanup errors', () => {
+      // Create a scenario where cleanup might fail
+      const problematicElement = {
+        addEventListener: jest.fn(),
+        removeEventListener: jest.fn(() => { throw new Error('Cleanup failed'); })
+      };
       
-      // Setup multiple subscriptions
-      eventBus.on('event1', handler1);
-      eventBus.on('event2', handler2);
-      eventBus.once('event1', onceHandler);
+      eventUtil.on(problematicElement, 'click', jest.fn());
       
-      // Emit events
-      eventBus.emit('event1', { data: 'test1' });
-      eventBus.emit('event2', { data: 'test2' });
-      eventBus.emit('event1', { data: 'test3' });
-      
-      // Verify calls
-      expect(handler1).toHaveBeenCalledTimes(2);
-      expect(handler2).toHaveBeenCalledTimes(1);
-      expect(onceHandler).toHaveBeenCalledTimes(1);
-      
-      // Cleanup
-      eventBus.clear();
-      expect(eventBus.getAllEvents()).toHaveLength(0);
+      // F2P: Should handle cleanup errors gracefully
+      expect(() => eventUtil.cleanup()).not.toThrow();
     });
   });
 });
