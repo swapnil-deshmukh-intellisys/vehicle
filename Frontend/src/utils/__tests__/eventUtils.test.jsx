@@ -1076,7 +1076,6 @@ describe('EventUtils', () => {
       
       // Create mock event
       const mockEvent = {
-        target: { closest: jest.fn(() => ({ classList: { contains: () => true } })) },
         target: { closest: jest.fn(() => mockParent) }
       };
       

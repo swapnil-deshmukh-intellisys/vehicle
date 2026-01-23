@@ -958,8 +958,7 @@ describe('DOMUtils', () => {
     beforeEach(() => {
       mockParent = {
         removeChild: jest.fn(),
-        firstChild: { nodeType: 1 },
-        removeChild: jest.fn()
+        firstChild: { nodeType: 1 }
       };
       mockElement = {
         parentNode: mockParent,
